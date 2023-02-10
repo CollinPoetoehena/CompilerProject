@@ -11,66 +11,28 @@
 #include "ccngen/ast.h"
 
 /**
- * @fn SRstmts
- */
-node_st *SRstmts(node_st *node)
-{
-    return node;
-}
-
-/**
- * @fn SRassign
- */
-node_st *SRassign(node_st *node)
-{
-    return node;
-}
-
-/**
  * @fn SRbinop
  */
 node_st *SRbinop(node_st *node)
 {
+    TRAVchildren(node);
+    // node_st *new = NULL;
+
+    if (BINOP_TYPE(node) == BO_mul) {
+        if (NUM_VAL(BINOP_LEFT(node)) == 2) {
+            // Change left binop to right binop value
+            BINOP_LEFT(node) = TRAVopt(BINOP_RIGHT(node));
+        } else if (NUM_VAL(BINOP_RIGHT(node)) == 2) {
+            // Change right binop to left binop value
+            BINOP_RIGHT(node) = TRAVopt(BINOP_LEFT(node));
+        } else if (NUM_VAL(BINOP_LEFT(node)) == 3) {
+            // TODO: Change k*3 to k+k+k
+            
+        } else if (NUM_VAL(BINOP_RIGHT(node)) == 3) {
+            // TODO: Change k*3 to k+k+k
+
+        }
+    }
+
     return node;
 }
-
-/**
- * @fn SRvarlet
- */
-node_st *SRvarlet(node_st *node)
-{
-    return node;
-}
-
-/**
- * @fn SRvar
- */
-node_st *SRvar(node_st *node)
-{
-    return node;
-}
-
-/**
- * @fn SRnum
- */
-node_st *SRnum(node_st *node)
-{
-    return node;
-}
-
-/**
- * @fn SRfloat
- */
-node_st *SRfloat(node_st *node)
-{
-    return node;
-}
-
-/**
- * @fn SRbool
- */
-node_st *SRbool(node_st *node)
-{
-    return node;
-}
-

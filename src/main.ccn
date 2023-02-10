@@ -14,7 +14,8 @@ traversal Print {
 };
 
 traversal StrengthReduction {
-    uid = SR
+    uid = SR,
+    nodes = {Binop}
 };
 
 phase Demo {
