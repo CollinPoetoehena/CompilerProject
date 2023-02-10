@@ -15,6 +15,7 @@
  */
 node_st *SRbinop(node_st *node)
 {
+    // TODO: what does this do and how do I test this traversal?
     TRAVchildren(node);
     // node_st *new = NULL;
 
