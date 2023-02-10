@@ -5,11 +5,16 @@ start phase EntryPoint {
         pass SPdoScanParse;
         Demo;
         Print;
+        StrengthReduction;
     }
 };
 
 traversal Print {
     uid = PRT
+};
+
+traversal StrengthReduction {
+    uid = SR
 };
 
 phase Demo {
