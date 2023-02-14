@@ -17,7 +17,10 @@
  */
 node_st *PRTmodule(node_st *node)
 {
-    TRAVstatements(node);
+    //TODO: printf for every value of the module, using MODULE_ADD(node)
+    printf("Add count: %d\n", MODULE_ADD(node));
+
+    TRAVnext(node);
     return node;
 }
 

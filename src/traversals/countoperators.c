@@ -18,27 +18,44 @@ void COfini() { return; }
  */
 node_st *COmodule(node_st *node)
 {
-int addCount = 0;
-    int subCount = 0;
-    int mulCount = 0;
-    int divCount = 0;
-    int modCount = 0;
+    // Go through the whole tree and come back to this function
+    TRAVchildren(node);
 
-    //TODO: how can I store this in the module node?
+    // Get travdata from CO traversal
+    struct data_co *data = DATA_CO_GET();
+
+    // Save the travdata variables at the end of the tree cycle (TRAVchildren(node))
+    MODULE_ADD(node) = data->add;
+    MODULE_SUB(node) = data->sub;
+    MODULE_MUL(node) = data->mul;
+    MODULE_DIV(node) = data->div;
+    MODULE_MOD(node) = data->mod;
+
+    return node;
+}
+
+/**
+ * @fn CObinop
+ */
+node_st *CObinop(node_st *node)
+{
+    // Get travdata from CO traversal
+    struct data_co *data = DATA_CO_GET();
+
     if (BINOP_TYPE(node) == BO_add) {
-        addCount++;
+        data->add += 1;
     }
     if (BINOP_TYPE(node) == BO_sub) {
-        subCount++;
+        data->sub += 1;
     }
     if (BINOP_TYPE(node) == BO_mul) {
-        mulCount++;
+        data->mul += 1;
     }
     if (BINOP_TYPE(node) == BO_div) {
-        divCount++;
+        data->div += 1;
     }
     if (BINOP_TYPE(node) == BO_mod) {
-        modCount++;
+        data->mod += 1;
     }
 
     return node;
