@@ -15,26 +15,33 @@
  */
 node_st *SRbinop(node_st *node)
 {
-    // TODO: what does this do and how do I test this traversal?
-    TRAVchildren(node);
     node_st *new = NULL;
+    // node_st is 
 
     if (BINOP_TYPE(node) == BO_mul) {
-        if (NUM_VAL(BINOP_LEFT(node)) == 2) {
-            new = ASTnum(NUM_VAL(BINOP_LEFT(node)) + NUM_VAL(BINOP_RIGHT(node)));
-            // Change left binop to right binop value
-            // BINOP_LEFT(node) = TRAVopt(BINOP_RIGHT(node));
-        } else if (NUM_VAL(BINOP_RIGHT(node)) == 2) {
-            // Change right binop to left binop value
-            BINOP_RIGHT(node) = TRAVopt(BINOP_LEFT(node));
-        } else if (NUM_VAL(BINOP_LEFT(node)) == 3) {
-            // TODO: Change k*3 to k+k+k
-            
-        } else if (NUM_VAL(BINOP_RIGHT(node)) == 3) {
-            // TODO: Change k*3 to k+k+k
+        if (NODE_TYPE(BINOP_LEFT(node)) == NT_NUM || BINOP_RIGHT(node) == NT_NUM) {
+            // Both Binop children need to be a num value
+            node_st *leftNum = BINOP_LEFT(node);
+            node_st *rightNum = BINOP_RIGHT(node);
+            // node_st is altijd pointer (*) 
+            // 2 verschillende stukken data, wijzen naar hetzelfde
+            // segmentation fault is pointers die pointen naar iets dat niet mag, use valgrind and gdb
 
+            if (NUM_VAL(leftNum) == 2) {
+                new = ASTbinop(rightNum, rightNum, BO_add);
+            } else if (NUM_VAL(rightNum) == 2) {
+                new = ASTbinop(leftNum, leftNum, BO_add);
+            } else if (NUM_VAL(leftNum) == 3) {
+                new = ASTbinop(ASTbinop(leftNum, leftNum, BO_add), leftNum, BO_add);
+            } else if (NUM_VAL(leftNum) == 3) {
+                // TODO: Change k*3 to k+k+k add new Binop because 
+                // Expr (child type of Binop) can also be of type Binop
+                // 3 * k -> k+k+k
+                new = ASTbinop(ASTbinop(rightNum, rightNum, BO_add), rightNum, BO_add);
+            }
         }
     }
 
-    return node;
+    // return new Binop
+    return new;
 }

@@ -20,7 +20,7 @@ traversal StrengthReduction {
 
 traversal CountOperators {
     uid = CO,
-    nodes = {Binop},
+    nodes = {Module},
     travdata {
         string information
     }

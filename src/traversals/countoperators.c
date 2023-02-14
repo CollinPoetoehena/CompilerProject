@@ -14,11 +14,11 @@ void COinit() { return; }
 void COfini() { return; }
 
 /**
- * @fn CObinop
+ * @fn COmodule
  */
-node_st *CObinop(node_st *node)
+node_st *COmodule(node_st *node)
 {
-    int addCount = 0;
+int addCount = 0;
     int subCount = 0;
     int mulCount = 0;
     int divCount = 0;
