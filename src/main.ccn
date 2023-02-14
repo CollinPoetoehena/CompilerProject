@@ -18,6 +18,14 @@ traversal StrengthReduction {
     nodes = {Binop}
 };
 
+traversal CountOperators {
+    uid = CO,
+    nodes = {Binop},
+    travdata {
+        string information
+    }
+};
+
 phase Demo {
     actions { 
         traversal RenameIdentifiers {
@@ -64,7 +72,17 @@ nodeset Stmt = {Assign};
 // Nodes you want to be able to link to from your symbol table.
 nodeset Link = Expr | Stmt;
 
-root node Stmts {
+root node Module {
+    children {
+        Stmts statements { constructor }
+    },
+
+    attributes {
+        string information
+    }
+};
+
+node Stmts {
     children {
         Stmt stmt { constructor, mandatory },
         Stmts next { constructor }

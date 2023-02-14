@@ -17,12 +17,13 @@ node_st *SRbinop(node_st *node)
 {
     // TODO: what does this do and how do I test this traversal?
     TRAVchildren(node);
-    // node_st *new = NULL;
+    node_st *new = NULL;
 
     if (BINOP_TYPE(node) == BO_mul) {
         if (NUM_VAL(BINOP_LEFT(node)) == 2) {
+            new = ASTnum(NUM_VAL(BINOP_LEFT(node)) + NUM_VAL(BINOP_RIGHT(node)));
             // Change left binop to right binop value
-            BINOP_LEFT(node) = TRAVopt(BINOP_RIGHT(node));
+            // BINOP_LEFT(node) = TRAVopt(BINOP_RIGHT(node));
         } else if (NUM_VAL(BINOP_RIGHT(node)) == 2) {
             // Change right binop to left binop value
             BINOP_RIGHT(node) = TRAVopt(BINOP_LEFT(node));

@@ -13,6 +13,15 @@
 #include "palm/dbug.h"
 
 /**
+ * @fn PRTmodule
+ */
+node_st *PRTmodule(node_st *node)
+{
+    TRAVstatements(node);
+    return node;
+}
+
+/**
  * @fn PRTstmts
  */
 node_st *PRTstmts(node_st *node)
