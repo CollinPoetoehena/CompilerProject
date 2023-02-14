@@ -16,16 +16,17 @@
 node_st *SRbinop(node_st *node)
 {
     node_st *new = NULL;
-    // node_st is 
 
     if (BINOP_TYPE(node) == BO_mul) {
-        if (NODE_TYPE(BINOP_LEFT(node)) == NT_NUM || BINOP_RIGHT(node) == NT_NUM) {
+        if ((NODE_TYPE(BINOP_LEFT(node)) == NT_NUM || NODE_TYPE(BINOP_RIGHT(node)) == NT_NUM) &&
+            (NODE_TYPE(BINOP_LEFT(node)) == NT_VAR || NODE_TYPE(BINOP_RIGHT(node)) == NT_VAR)) {
             // Both Binop children need to be a num value
             node_st *leftNum = BINOP_LEFT(node);
             node_st *rightNum = BINOP_RIGHT(node);
-            // node_st is altijd pointer (*) 
-            // 2 verschillende stukken data, wijzen naar hetzelfde
-            // segmentation fault is pointers die pointen naar iets dat niet mag, use valgrind and gdb
+
+            if (NODE_TYPE(BINOP_LEFT(node)) == NT_VAR && NODE_TYPE(BINOP_RIGHT(node)) == NT_NUM) {
+
+            }
 
             if (NUM_VAL(leftNum) == 2) {
                 new = ASTbinop(rightNum, rightNum, BO_add);

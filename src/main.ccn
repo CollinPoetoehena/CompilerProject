@@ -77,9 +77,12 @@ root node Module {
         Stmts statements { constructor }
     },
 
-    //TODO: change to hash-table?? hash-table has a key-value pair, how to use a hash-table???
     attributes {
-        string information
+        int add,
+        int sub,
+        int mul,
+        int div,
+        int mod
     }
 };
 
