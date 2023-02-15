@@ -6,6 +6,7 @@ start phase EntryPoint {
         // Demo;
         StrengthReduction;
         CountOperators;
+        CountIdentifiers;
         Print;
     }
 };
@@ -28,6 +29,14 @@ traversal CountOperators {
         int mul,
         int div,
         int mod    
+    }
+};
+
+traversal CountIdentifiers {
+    uid = CI,
+    nodes = { Var, VarLet },
+    travdata {
+        user htable_ptr id_table
     }
 };
 

@@ -48,5 +48,4 @@ node_st *SRbinop(node_st *node)
 
     // Return node if no changes were made
     return node;
-    
 }
