@@ -23,10 +23,6 @@ void CIinit() {
 }
 void CIfini() { return; }
 
-// struct identifierCounter {
-//     int counter;
-// };
-
 /**
  * @fn CIvar
  */
@@ -39,30 +35,19 @@ node_st *CIvar(node_st *node)
     int *value = (int *) HTlookup(data->id_table, VAR_NAME(node));
 
     if (value == NULL) {
-        // Cast to void * because the parameter is of type void *
+        // Allocate new memory for an int in C to create a new memory block
         int *newValue = MEMmalloc(sizeof(int));
-        *newValue = 1;
-        HTinsert(data->id_table, VAR_NAME(node), (void *) newValue); // correct way
-
-        // Save the variable in global memory (TODO: change without global variable, not permitted)
-        // struct identifierCounter *id = MEMmalloc(sizeof(struct identifierCounter));
         
-        // // With pointers you do not use . to access variables but ->
-        // id->counter = 1;
+        // Dereference newValue and make it equal to 1
+        *newValue = 1;
+        
+        // Insert newValue (= type int *)
+        // Cast to void * because the parameter of the HTinsert is of type void *
+        HTinsert(data->id_table, VAR_NAME(node), (void *) newValue);
     } else {
-        // Remove the HT entry and re-add it
-        // HTremove(data->id_table, VAR_NAME(node));
-
-        // dereference value and increment it by 1
+        // Dereference value and increment it by 1
+        // No need to insert a new value because you can directly access that value in the hash table
         *value = *value + 1;
-        // HTinsert(data->id_table, VAR_NAME(node), (void *) (*value)+1);
-
-        // cast void * back to actual type
-        // struct identifierCounter *id = (struct identifierCounter *) value;
-        // id->counter
-
-        // Add the hash table to the travdata
-        // data->id_table = hash_table;
     }
 
     return node;
@@ -73,39 +58,50 @@ node_st *CIvar(node_st *node)
  */
 node_st *CIvarlet(node_st *node)
 {
-    // Get travdata from CI traversal
+    // Get the hash table from the travdata of the CI traversal
     struct data_ci *data = DATA_CI_GET();
 
-    // TODO: update the hash table
+    // Get the value from the identifier from the hash table
+    int *value = (int *) HTlookup(data->id_table, VARLET_NAME(node));
+
+    if (value == NULL) {
+        // Allocate new memory for an int in C to create a new memory block
+        int *newValue = MEMmalloc(sizeof(int));
+        
+        // Dereference newValue and make it equal to 1
+        *newValue = 1;
+        
+        // Insert newValue (= type int *)
+        // Cast to void * because the parameter of the HTinsert is of type void *
+        HTinsert(data->id_table, VARLET_NAME(node), (void *) newValue);
+    } else {
+        // Dereference value and increment it by 1
+        // No need to insert a new value because you can directly access that value in the hash table
+        *value = *value + 1;
+    }
+
 
     return node;
 }
 
 void * printElement(void * key, void * item) {
-    // Dereference int with * operator, char * == string
+    // Dereference int with * operator, char * == type string
     printf("%s %d\n", (char *) key, *(int *) item);
 }
 
 /**
- * @fn CIvarlet
+ * @fn CImodule
  */
 node_st *CImodule(node_st *node)
 {
+    // Go through the whole tree and come back to this function
     TRAVchildren(node);
 
     // Get travdata from CI traversal
     struct data_ci *data = DATA_CI_GET();
 
+    // Print hash table
     HTmapWithKey(data->id_table, printElement);
-
-    // htable_ptr hashTable = data->id_table;
-    // struct htable_entry entry = hashTable->entries;
-    // while (entry) {
-    //   printf("%s %d", (char *) entry->key, (int) entry->value);
-    //   // Create a new entry, at the end the entry will be NULL
-    //   entry = entry->next;
-    // }
 
     return node;
 }
-
