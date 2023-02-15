@@ -11,18 +11,31 @@
 #include "ccngen/ast.h"
 #include "ccngen/trav.h"
 #include "palm/dbug.h"
+#include "palm/hash_table.h"
 
 /**
  * @fn PRTmodule
  */
 node_st *PRTmodule(node_st *node)
 {
-    //TODO: printf for every value of the module, using MODULE_ADD(node)
     printf("Add: %d\n", MODULE_ADD(node));
     printf("Sub: %d\n", MODULE_SUB(node));
     printf("Mul: %d\n", MODULE_MUL(node));
     printf("Div: %d\n", MODULE_DIV(node));
     printf("Mod: %d\n", MODULE_MOD(node));
+
+
+    // Get the hash table from the travdata of the CI traversal
+    struct data_ci *data = DATA_CI_GET();
+
+    //TODO: print at the end 1.6, use while loop tot geen next meer
+    htable_ptr hashTable = data->id_table;
+    struct htable_entry entry = hashTable->entries;
+    while (entry) {
+      printf("%s %d", (char *) entry->key, (int) entry->value);
+      // Create a new entry, at the end the entry will be NULL
+      entry = entry->next;
+    }
 
     TRAVstatements(node);
     return node;
