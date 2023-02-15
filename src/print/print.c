@@ -24,7 +24,7 @@ node_st *PRTmodule(node_st *node)
     printf("Div: %d\n", MODULE_DIV(node));
     printf("Mod: %d\n", MODULE_MOD(node));
 
-    TRAVnext(node);
+    TRAVstatements(node);
     return node;
 }
 

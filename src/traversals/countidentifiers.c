@@ -25,14 +25,15 @@ node_st *CIvar(node_st *node)
     struct data_ci *data = DATA_CI_GET();
 
     // TODO: update the hash table
-    if (data != NULL) {
-        // Insert or update entry
-        // HTinsert();
-    } else {
-        // Create new hash table
-        htable_st *hash_table = HTnew();
-        data->id_table = hash_table;
-    }
+    // if (data != NULL) {
+    //     // Insert or update entry
+    //     // HTinsert();
+    // } else {
+    //     // Create new hash table
+    //     htable_st *hash_table = HTnew();
+    //     // Waardes is met HTLookup();
+    //     data->id_table = hash_table;
+    // }
 
     return node;
 }
