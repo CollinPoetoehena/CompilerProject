@@ -4,7 +4,7 @@ start phase EntryPoint {
     actions {
         pass SPdoScanParse;
         // Demo;
-        // StrengthReduction;
+        StrengthReduction;
         CountOperators;
         Print;
     }
