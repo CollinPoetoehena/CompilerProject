@@ -42,6 +42,7 @@ node_st *CObinop(node_st *node)
     // Get travdata from CO traversal
     struct data_co *data = DATA_CO_GET();
 
+    // Increment data->attribute by 1
     if (BINOP_TYPE(node) == BO_add) {
         data->add += 1;
     }

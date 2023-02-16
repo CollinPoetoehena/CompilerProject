@@ -11,6 +11,7 @@
 #include "ccngen/ast.h"
 #include "palm/hash_table.h"
 #include "palm/memory.h"
+#include <stdio.h>
 
 void CIinit() { 
     // initialize hash table, makes sure there is a hash table
@@ -45,8 +46,8 @@ node_st *CIvar(node_st *node)
         // Cast to void * because the parameter of the HTinsert is of type void *
         HTinsert(data->id_table, VAR_NAME(node), (void *) newValue);
     } else {
-        // Dereference value and increment it by 1
-        // No need to insert a new value because you can directly access that value in the hash table
+        // Dereference value and increment it by 1. No need to insert a new value 
+        // because you can directly access that value in the hash table with the pointer
         *value = *value + 1;
     }
 
@@ -75,8 +76,8 @@ node_st *CIvarlet(node_st *node)
         // Cast to void * because the parameter of the HTinsert is of type void *
         HTinsert(data->id_table, VARLET_NAME(node), (void *) newValue);
     } else {
-        // Dereference value and increment it by 1
-        // No need to insert a new value because you can directly access that value in the hash table
+        // Dereference value and increment it by 1. No need to insert a new value 
+        // because you can directly access that value in the hash table with the pointer
         *value = *value + 1;
     }
 
@@ -86,7 +87,7 @@ node_st *CIvarlet(node_st *node)
 
 void * printElement(void * key, void * item) {
     // Dereference int with * operator, char * == type string
-    printf("%s %d\n", (char *) key, *(int *) item);
+    printf("Identifier: %s, occurrences: %d\n", (char *) key, *(int *) item);
 }
 
 /**

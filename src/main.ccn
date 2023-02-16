@@ -34,7 +34,7 @@ traversal CountOperators {
 
 traversal CountIdentifiers {
     uid = CI,
-    nodes = { Var, VarLet, Module },
+    nodes = {Var, VarLet, Module},
     travdata {
         user htable_ptr id_table
     }

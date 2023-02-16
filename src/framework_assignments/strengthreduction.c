@@ -15,10 +15,11 @@
  */
 node_st *SRbinop(node_st *node)
 {
+    // Create a new node
     node_st *new = NULL;
 
     if (BINOP_TYPE(node) == BO_mul) {
-        //CCNCopy 
+        //CCNCopy to make a deep copy of the element
         node_st *left = CCNcopy(BINOP_LEFT(node));
         node_st *leftTwo = CCNcopy(BINOP_LEFT(node));
         node_st *right = CCNcopy(BINOP_RIGHT(node));
@@ -34,6 +35,8 @@ node_st *SRbinop(node_st *node)
                 new = ASTbinop(right, BINOP_RIGHT(node), BO_add);
         } else if (NODE_TYPE(left) == NT_VAR && 
             (NODE_TYPE(right) == NT_NUM && NUM_VAL(right) == 3)) {
+                // Use two deep copies and one reference because otherwise
+                // you have children who point to the same node_st
                 new = ASTbinop(ASTbinop(left, leftTwo, BO_add), BINOP_LEFT(node), BO_add);
         } else if (NODE_TYPE(right) == NT_VAR && 
             (NODE_TYPE(left) == NT_NUM && NUM_VAL(left) == 3)) {
@@ -41,8 +44,8 @@ node_st *SRbinop(node_st *node)
         } 
     }
 
+    // Return new Binop if changes were made
     if (new != NULL) {
-        // Return new Binop if changes were made
         return new;
     }
 
