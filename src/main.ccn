@@ -3,7 +3,6 @@ start phase EntryPoint {
     
     actions {
         pass SPdoScanParse;
-        Demo;
         Print;
     }
 };
@@ -11,29 +10,6 @@ start phase EntryPoint {
 traversal Print {
     uid = PRT
 };
-
-phase Demo {
-    actions { 
-        traversal RenameIdentifiers {
-            uid = RI,
-            nodes = { Var, VarLet }
-        };
-
-        traversal SumInts {
-            uid = SI,
-            nodes = { Stmts, Num },
-            travdata {
-                int sum
-            }
-        };
-
-        traversal OptSubstraction {
-            uid = OS,
-            nodes = { Binop }
-        };
-    }
-};
-
 
 /*** AST ***/
 
