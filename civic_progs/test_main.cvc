@@ -1,7 +1,7 @@
 #include "civic.h"
 #include "core.h"
-#include "coreio.cvc"
-#include "array.cvc"
+#include "coreio.h"
+#include "array.h"
 
 export int[3] intVec = [1, 2, 3];
 export float[3] floatVec = [1.8, 2.345, 3.2789];

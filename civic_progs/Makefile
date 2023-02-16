@@ -6,7 +6,7 @@
 %.out: %.s
 	civas -o $@ $^
 
-run: main.out seq.out
+run: core.out coreio.out array.out test_main.out
 	civvm $^
 
 clean:
