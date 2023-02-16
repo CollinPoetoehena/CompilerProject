@@ -88,6 +88,9 @@ node_st *CIvarlet(node_st *node)
 void * printElement(void * key, void * item) {
     // Dereference int with * operator, char * == type string
     printf("Identifier: %s, occurrences: %d\n", (char *) key, *(int *) item);
+
+    // Return nothing to avoid warning
+    return 0;
 }
 
 /**
