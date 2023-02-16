@@ -1,0 +1,93 @@
+#include "civic.h"
+#include "core.h"
+#include "coreio.h"
+#include "array.h"
+
+export int[3] intVec = [1, 2, 3];
+export float[3] floatVec = [1.8, 2.345, 3.2789];
+export int[2, 2] intMat = [[1, 2], [3, 4]];
+export float[2, 2] floatMat = [[1.324, 2.45346], [3.356222, 4.747673]];
+export int[3] intVecEmpty;
+export float[3] floatVecEmpty;
+export int[2, 2] intMatEmpty;
+export float[2, 2] floatMatEmpty;
+
+export float[2, 2] floatMultiplyMatA = [[1.0, 0.0], [2.0, 4.0]];
+export float[2, 2] floatMultiplyMatB = [[6.0, 8.0], [4.0, 3.0]];
+export float[2, 2] floatMultiplyMatC;
+
+/*
+    @Author Collin Poetoehena, Premaster Software Engineering, 15062481
+
+    This main function tests all the methods that I made for assignment 1
+    
+    You can simply run this file and it will output all the test results for the
+    given values.
+    However, the scanner tests are commented out because I think it would be 
+    annoying for you to input 4 different arrays at a time, therefore, you can 
+    test the scanner functions by uncommenting the specific scanner test part 
+    (separated by blank lines). Or if you would like to test all of them at once, 
+    uncomment all of them.
+*/
+export int main() {
+    // core.cvc tests
+    int gcdTest =  gcd(100, 20);
+    int facTest = fac(5);
+    int fibTest = fib(10);
+    bool isprimeTest = isprime(97);
+
+    // print test results of core.cvc
+    printInt(gcdTest);
+    printNewlines(1);
+
+    printInt(facTest);
+    printNewlines(1);
+
+    printInt(fibTest);
+    printNewlines(1);
+
+    if (isprimeTest == true) {
+        // is prime number
+        printInt(1);
+    } else {
+        // is not a prime number
+        printInt(0);
+    }
+    printNewlines(3);
+
+
+    // coreio.cvc tests
+    fibs(5);
+    printNewlines(1);
+
+    primes(6);
+    printNewlines(3);
+
+    
+    // array.cvc tests
+    printIntVec(intVec);
+    printNewlines(1);
+    printFloatVec(floatVec);
+    printNewlines(2);
+
+    printIntMat(intMat);
+    printNewlines(1);
+    printFloatMat(floatMat);
+    printNewlines(2);
+
+    //scanIntVec(intVecEmpty);
+    //printNewlines(1);
+
+    //scanFloatVec(floatVecEmpty);
+    //printNewlines(1);
+
+    //scanIntMat(intMatEmpty);
+    //printNewlines(1);
+
+    //scanFloatMat(floatMatEmpty);
+    //printNewlines(2);
+
+    matMul(floatMultiplyMatA, floatMultiplyMatB, floatMultiplyMatC);
+
+    return 0;
+}
