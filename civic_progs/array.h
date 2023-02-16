@@ -1,5 +1,5 @@
-#ifndef CORE_H
-#define CORE_H
+#ifndef ARRAY_H
+#define ARRAY_H
 
 extern void printIntVec(int[n] vec);
 extern void printFloatVec(float[n] vec);
