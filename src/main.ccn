@@ -12,7 +12,6 @@ traversal Print {
 };
 
 /*** AST ***/
-
 enum monop_type {
     prefix = MO,
     values {
@@ -34,13 +33,26 @@ nodeset Stmt = {Assign};
 // Nodes you want to be able to link to from your symbol table.
 nodeset Link = Expr | Stmt;
 
-root node Stmts {
+nodeset Declaration_type = FunDec | FunDef | GlobalDec | GlobalDef;
+
+root node Program {
+    children {
+        Stmts statements { constructor }
+    }
+};
+
+//TODO: ask TA what is language core for AST??????
+node Declaration {
+}
+
+node Stmts {
     children {
         Stmt stmt { constructor, mandatory },
         Stmts next { constructor }
     }
 };
 
+// This is already fine
 node Assign {
     children {
         VarLet let { constructor },
@@ -92,6 +104,7 @@ node Bool {
         bool val { constructor }
     }
 };
+// This also
 
 /* Symbol table entry
  * TODO: fill in.
@@ -99,6 +112,5 @@ node Ste {
 
 }
 */
-
 
 

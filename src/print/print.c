@@ -13,6 +13,16 @@
 #include "palm/dbug.h"
 
 /**
+ * @fn PRTprogram
+ */
+node_st *PRTprogram(node_st *node)
+{
+    TRAVstmt(node);
+    TRAVnext(node);
+    return node;
+}
+
+/**
  * @fn PRTstmts
  */
 node_st *PRTstmts(node_st *node)
@@ -148,4 +158,7 @@ node_st *PRTbool(node_st *node)
     printf("%s", bool_str);
     return node;
 }
+
+
+
 
