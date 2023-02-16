@@ -1,4 +1,4 @@
-int gcd(int a, int b) {
+export int gcd(int a, int b) {
     for(int i = a, 0, -1) {
         if(a % i == 0 && b % i == 0) return i;
     }
@@ -6,17 +6,17 @@ int gcd(int a, int b) {
     return 1;
 }
 
-int fac(int n) {
+export int fac(int n) {
     if (n == 0) return 1;
     return n * fac(n - 1);
 }
 
-int fib(int n) {
+export int fib(int n) {
     if (n <= 1) return n;
     return fib(n - 1) + fib(n - 2);
 }
 
-bool isprime(int n) {
+export bool isprime(int n) {
     if (n <= 1) return false;
 
     for (int i = 2, n) {

@@ -1,7 +1,7 @@
 #include "civic.h"
 #include "core.h"
 
-void fibs(int n) {
+export void fibs(int n) {
     int count = 0;
 
     while (n != count) {
@@ -11,7 +11,7 @@ void fibs(int n) {
     }
 }
 
-void primes(int n) {
+export void primes(int n) {
     int count = 0;
     int i = 0;
     
