@@ -18,11 +18,11 @@
  */
 node_st *PRTmodule(node_st *node)
 {
-    printf("Add: %d\n", MODULE_ADD(node));
-    printf("Sub: %d\n", MODULE_SUB(node));
-    printf("Mul: %d\n", MODULE_MUL(node));
-    printf("Div: %d\n", MODULE_DIV(node));
-    printf("Mod: %d\n", MODULE_MOD(node));
+    printf("Add count: %d\n", MODULE_ADD(node));
+    printf("Sub count: %d\n", MODULE_SUB(node));
+    printf("Mul count: %d\n", MODULE_MUL(node));
+    printf("Div count: %d\n", MODULE_DIV(node));
+    printf("Mod count: %d\n", MODULE_MOD(node));
 
     TRAVstatements(node);
     return node;

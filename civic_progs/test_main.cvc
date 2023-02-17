@@ -76,13 +76,13 @@ export int main() {
     printNewlines(2);
 
     //scanIntVec(intVecEmpty);
-    //printNewlines(1);
+    //printNewlines(2);
 
     //scanFloatVec(floatVecEmpty);
-    //printNewlines(1);
+    //printNewlines(2);
 
     //scanIntMat(intMatEmpty);
-    //printNewlines(1);
+    //printNewlines(2);
 
     //scanFloatMat(floatMatEmpty);
     //printNewlines(2);
