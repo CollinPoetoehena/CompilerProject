@@ -21,13 +21,8 @@ export float[2, 2] floatMultiplyMatC;
 
     This main function tests all the methods that I made for assignment 1
     
-    You can simply run this file and it will output all the test results for the
-    given values.
-    However, the scanner tests are commented out because I think it would be 
-    annoying for you to input 4 different arrays at a time, therefore, you can 
-    test the scanner functions by uncommenting the specific scanner test part 
-    (separated by blank lines). Or if you would like to test all of them at once, 
-    uncomment all of them.
+    You can run 'make' in the civic_progs directory and it will output 
+    all the test results for the given values of this file.
 */
 export int main() {
     // core.cvc tests
@@ -75,17 +70,15 @@ export int main() {
     printFloatMat(floatMat);
     printNewlines(2);
 
-    //scanIntVec(intVecEmpty);
-    //printNewlines(2);
+    scanIntVec(intVecEmpty);
+    printNewlines(1);
+    scanFloatVec(floatVecEmpty);
+    printNewlines(2);
 
-    //scanFloatVec(floatVecEmpty);
-    //printNewlines(2);
-
-    //scanIntMat(intMatEmpty);
-    //printNewlines(2);
-
-    //scanFloatMat(floatMatEmpty);
-    //printNewlines(2);
+    scanIntMat(intMatEmpty);
+    printNewlines(1);
+    scanFloatMat(floatMatEmpty);
+    printNewlines(2);
 
     matMul(floatMultiplyMatA, floatMultiplyMatB, floatMultiplyMatC);
 
