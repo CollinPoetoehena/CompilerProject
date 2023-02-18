@@ -17,8 +17,86 @@
  */
 node_st *PRTprogram(node_st *node)
 {
-    TRAVstmt(node);
-    TRAVnext(node);
+    return node;
+}
+
+/**
+ * @fn PRTdeclarations
+ */
+node_st *PRTdeclarations(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTfundec
+ */
+node_st *PRTfundec(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTfundef
+ */
+node_st *PRTfundef(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTglobaldec
+ */
+node_st *PRTglobaldec(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTglobaldef
+ */
+node_st *PRTglobaldef(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTfunheader
+ */
+node_st *PRTfunheader(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTfunbody
+ */
+node_st *PRTfunbody(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTparams
+ */
+node_st *PRTparams(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTparam
+ */
+node_st *PRTparam(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTvardec
+ */
+node_st *PRTvardec(node_st *node)
+{
     return node;
 }
 

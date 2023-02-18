@@ -27,23 +27,116 @@ enum binop_type {
     }
 };
 
+enum basic_type {
+    prefix = BT,
+    values {
+        bool, int, float
+    }
+};
+
+enum return_type {
+    prefix = RT,
+    values {
+        void, basic_type
+    }
+};
+
 nodeset Expr = {Num, Float, Bool, Binop, Var};
 nodeset Stmt = {Assign};
+nodeset Declaration = {FunDec, FunDef, GlobalDec, GlobalDef};
 
 // Nodes you want to be able to link to from your symbol table.
 nodeset Link = Expr | Stmt;
 
-nodeset Declaration_type = FunDec | FunDef | GlobalDec | GlobalDef;
+// nodeset Declaration_type = FunDec | FunDef | GlobalDec | GlobalDef;
+// nodeset RetType = void_type | basic_type;
+// nodeset Type = basic_type;
 
 root node Program {
     children {
+        Declarations declarations { constructor, mandatory }
+    }
+};
+
+node Declarations {
+    children {
+        Declaration declaration { constructor, mandatory }, 
+        Declarations next { constructor }
+    }
+};
+
+node FunDec {
+    children {
+        FunHeader funHeader { constructor, mandatory }
+    }
+};
+
+node FunDef {
+    children {
+        FunHeader funHeader { constructor, mandatory },
+        FunBody funBody { constructor, mandatory }
+    }
+};
+
+node GlobalDec {
+    attributes {
+        basic_type id { constructor }
+    }
+};
+
+node GlobalDef {
+    children {
+        // Type id { constructor, mandatory },
+        Assign assignment { constructor, mandatory }
+    },
+
+    attributes {
+        basic_type id { constructor }
+    }
+};
+
+node FunHeader {
+    children {
+        // return_type id { constructor, mandatory },
+        Params params { constructor }
+    },
+
+    attributes {
+        return_type id { constructor }
+    }
+};
+
+node FunBody {
+    children {
+        VarDec varDec { constructor },
         Stmts statements { constructor }
     }
 };
 
-//TODO: ask TA what is language core for AST??????
-node Declaration {
-}
+node Params {
+    // Zero or more Params, same implementation as Stmts
+    children {
+        Param param { constructor, mandatory },
+        Params next { constructor }
+    }, 
+};
+
+node Param {
+    attributes {
+        basic_type id { constructor }
+    }
+};
+
+node VarDec {
+    children {
+        // Type id { constructor, mandatory },
+        Assign assignment { constructor }
+    },
+
+    attributes {
+        basic_type id { constructor }
+    }
+};
 
 node Stmts {
     children {
@@ -52,7 +145,6 @@ node Stmts {
     }
 };
 
-// This is already fine
 node Assign {
     children {
         VarLet let { constructor },
@@ -104,7 +196,6 @@ node Bool {
         bool val { constructor }
     }
 };
-// This also
 
 /* Symbol table entry
  * TODO: fill in.
