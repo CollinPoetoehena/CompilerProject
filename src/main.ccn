@@ -48,10 +48,6 @@ nodeset Declaration = {FunDec, FunDef, GlobalDec, GlobalDef};
 // Nodes you want to be able to link to from your symbol table.
 nodeset Link = Expr | Stmt;
 
-// nodeset Declaration_type = FunDec | FunDef | GlobalDec | GlobalDef;
-// nodeset RetType = void_type | basic_type;
-// nodeset Type = basic_type;
-
 root node Program {
     children {
         Declarations declarations { constructor, mandatory }
@@ -59,6 +55,7 @@ root node Program {
 };
 
 node Declarations {
+    // Zero or more Declarations, same implementation as Stmts node
     children {
         Declaration declaration { constructor, mandatory }, 
         Declarations next { constructor }
@@ -86,7 +83,6 @@ node GlobalDec {
 
 node GlobalDef {
     children {
-        // Type id { constructor, mandatory },
         Assign assignment { constructor, mandatory }
     },
 
@@ -97,7 +93,6 @@ node GlobalDef {
 
 node FunHeader {
     children {
-        // return_type id { constructor, mandatory },
         Params params { constructor }
     },
 
@@ -129,7 +124,6 @@ node Param {
 
 node VarDec {
     children {
-        // Type id { constructor, mandatory },
         Assign assignment { constructor }
     },
 
