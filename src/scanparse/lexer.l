@@ -38,14 +38,17 @@ int yycolumn = 1;
   // '\' is used to escape a character, in this case the '.'
 DIGIT            [0-9]
 NONZERO_DIGIT    [1-9]
+LETTER           [a-zA-Z]
 INTEGER          {DIGIT}+
   // FLOAT accepts: '123.456', '.456'
 FLOAT            ({DIGIT}+\.{DIGIT}*)?
-COMMENT_MULTI    "/*" ( [^*] | (\*+[^*/]) )* \*+\/
-COMMENT          "//".*
-LETTER           [a-zA-Z]
+COMMENT_MULTI    \/\*[^*]*\*+([^/*][^*]*\*+)*\/
+COMMENT_ONE      \/\/[^\n]*
+COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 
 %%
+  // Comment on top because that is the first thing you want to evaluate
+{COMMENT}                   { printf("Comment:\n%s\n", yytext); }
 
   // Keywords
 "if"                       { FILTER( IF); }  
@@ -82,13 +85,17 @@ LETTER           [a-zA-Z]
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
 
+  // Scan identifier: letter(letter|number|underscore) 0 or infinite amount of times
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);
                              FILTER( ID);
                            }
 
-[0-9]+                     { yylval.cint=atoi(yytext);
+{DIGIT}+                     { yylval.cint=atoi(yytext);
                              FILTER( NUM);
                            }
+
+  // {INTEGER}                  { printf("Integer:\n%s\n", yytext); }
+  // {FLOAT}                    { printf("Float:\n%s\n", yytext); }
 
 \n.*                       { 
                              yycolumn = 1;

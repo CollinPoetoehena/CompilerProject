@@ -11,17 +11,22 @@
 %option nounput
 %option yylineno
 
+  // regular expressions for common lexemes
+  // '\' is used to escape a character, such as '.' or '/'
+DIGIT            [0-9]
+NONZERO_DIGIT    [1-9]
+LETTER           [a-zA-Z]
+INTEGER          {DIGIT}+
+  // FLOAT accepts: '123.456', '.456'
+FLOAT            ({DIGIT}+\.{DIGIT}*)?
+COMMENT_MULTI    \/\*[^*]*\*+([^/*][^*]*\*+)*\/
+COMMENT_ONE      \/\/[^\n]*
+COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
+
 %%
 
-  // Keywords
-"if"                       { printf("If:\n%s\n", yytext); }  
-"else"                     { printf("Else:\n%s\n", yytext); }       
-"while"                    { printf("While:\n%s\n", yytext); }
-"do"                       { printf("Do:\n%s\n", yytext); }
-"for"                      { printf("For:\n%s\n", yytext); }
-"return"                   { printf("Return:\n%s\n", yytext); }
-"extern"                   { printf("Extern:\n%s\n", yytext); }
-"export"                   { printf("Export:\n%s\n", yytext); }
+{COMMENT}                   { printf("Comment:\n%s\n", yytext); }
+
 
 %%
 
