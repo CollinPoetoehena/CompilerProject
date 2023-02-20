@@ -40,7 +40,7 @@ DIGIT            [0-9]
 NONZERO_DIGIT    [1-9]
 LETTER           [a-zA-Z]
 INTEGER          {DIGIT}+
-  // FLOAT accepts: '123.456', '.456'
+  // This FLOAT accepts: '123.456', '.456'
 FLOAT            ({DIGIT}+\.{DIGIT}*)?
 COMMENT_MULTI    \/\*[^*]*\*+([^/*][^*]*\*+)*\/
 COMMENT_ONE      \/\/[^\n]*
@@ -85,7 +85,7 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
 
-  // Scan identifier: letter(letter|number|underscore) 0 or infinite amount of times
+  // Scan identifier: (letter+(letter|number|underscore)) 0 or infinite amount of times
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);
                              FILTER( ID);
                            }
@@ -93,9 +93,6 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 {DIGIT}+                     { yylval.cint=atoi(yytext);
                              FILTER( NUM);
                            }
-
-  // {INTEGER}                  { printf("Integer:\n%s\n", yytext); }
-  // {FLOAT}                    { printf("Float:\n%s\n", yytext); }
 
 \n.*                       { 
                              yycolumn = 1;
