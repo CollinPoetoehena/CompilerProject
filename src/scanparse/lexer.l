@@ -34,11 +34,12 @@ int yycolumn = 1;
 %option nounput
 %option yylineno
 
+  // regular expressions for common lexemes
+  // '\' is used to escape a character, in this case the '.'
 DIGIT            [0-9]
 NONZERO_DIGIT    [1-9]
 INTEGER          {DIGIT}+
-  // '\' is used to escape a character, in this case the '.'
-  // Accepts: '123.456', '.456'
+  // FLOAT accepts: '123.456', '.456'
 FLOAT            ({DIGIT}+\.{DIGIT}*)?
 COMMENT_MULTI    "/*" ( [^*] | (\*+[^*/]) )* \*+\/
 COMMENT          "//".*
@@ -66,7 +67,7 @@ LETTER           [a-zA-Z]
 "*"                        { FILTER( STAR);  } 
 "/"                        { FILTER( SLASH);  } 
 "%"                        { FILTER( PERCENT);  } 
-
+ 
 "<="                       { FILTER( LE);    }
 "<"                        { FILTER( LT);    } 
 ">="                       { FILTER( GE);    }
