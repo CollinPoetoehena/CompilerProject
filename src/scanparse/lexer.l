@@ -59,6 +59,7 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "return"                   { FILTER( RETURN); }
 "extern"                   { FILTER( EXTERN); }
 "export"                   { FILTER( EXPORT); }
+"include"                  { FILTER( INCLUDE); }
 
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
