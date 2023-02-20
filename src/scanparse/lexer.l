@@ -34,20 +34,27 @@ int yycolumn = 1;
 %option nounput
 %option yylineno
 
+DIGIT            [0-9]
+NONZERO_DIGIT    [1-9]
+INTEGER          {DIGIT}+
+  // '\' is used to escape a character, in this case the '.'
+  // Accepts: '123.456', '.456'
+FLOAT            ({DIGIT}+\.{DIGIT}*)?
+COMMENT_MULTI    "/*" ( [^*] | (\*+[^*/]) )* \*+\/
+COMMENT          "//".*
+LETTER           [a-zA-Z]
 
 %%
 
-"if"                       { FILTER( IF); }
-                           
-"else"                     { FILTER( ELSE); }
-                           
+  // Keywords
+"if"                       { FILTER( IF); }  
+"else"                     { FILTER( ELSE); }       
 "while"                    { FILTER( WHILE); }
-
 "do"                       { FILTER( DO); }
-
 "for"                      { FILTER( FOR); }
-
 "return"                   { FILTER( RETURN); }
+"extern"                   { FILTER( EXTERN); }
+"export"                   { FILTER( EXPORT); }
 
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }

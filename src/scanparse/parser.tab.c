@@ -90,7 +90,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
 
 
-#line 94 "y.tab.c"
+#line 94 "parser.tab.c"
 
 # ifndef YY_CAST
 #  ifdef __cplusplus
@@ -113,10 +113,7 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 #  endif
 # endif
 
-/* Use api.header.include to #include this header
-   instead of duplicating it here.  */
-#ifndef YY_YY_Y_TAB_H_INCLUDED
-# define YY_YY_Y_TAB_H_INCLUDED
+
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -166,40 +163,6 @@ extern int yydebug;
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
-/* Token kinds.  */
-#define YYEMPTY -2
-#define YYEOF 0
-#define YYerror 256
-#define YYUNDEF 257
-#define BRACKET_L 258
-#define BRACKET_R 259
-#define COMMA 260
-#define SEMICOLON 261
-#define MINUS 262
-#define PLUS 263
-#define STAR 264
-#define SLASH 265
-#define PERCENT 266
-#define LE 267
-#define LT 268
-#define GE 269
-#define GT 270
-#define EQ 271
-#define NE 272
-#define OR 273
-#define AND 274
-#define TRUEVAL 275
-#define FALSEVAL 276
-#define LET 277
-#define NUM 278
-#define FLOAT 279
-#define ID 280
-#define IF 281
-#define ELSE 282
-#define WHILE 283
-#define DO 284
-#define FOR 285
-#define RETURN 286
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -213,7 +176,7 @@ union YYSTYPE
  enum binop_type     cbinop;
  node_st             *node;
 
-#line 217 "y.tab.c"
+#line 180 "parser.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -242,7 +205,7 @@ extern YYLTYPE yylloc;
 int yyparse (void);
 
 
-#endif /* !YY_YY_Y_TAB_H_INCLUDED  */
+
 /* Symbol kind.  */
 enum yysymbol_kind_t
 {
@@ -1381,7 +1344,7 @@ yyreduce:
          {
            parseresult = ASTprogram((yyvsp[0].node));
          }
-#line 1385 "y.tab.c"
+#line 1348 "parser.tab.c"
     break;
 
   case 3: /* stmts: stmt stmts  */
@@ -1389,7 +1352,7 @@ yyreduce:
         {
           (yyval.node) = ASTstmts((yyvsp[-1].node), (yyvsp[0].node));
         }
-#line 1393 "y.tab.c"
+#line 1356 "parser.tab.c"
     break;
 
   case 4: /* stmts: stmt  */
@@ -1397,7 +1360,7 @@ yyreduce:
         {
           (yyval.node) = ASTstmts((yyvsp[0].node), NULL);
         }
-#line 1401 "y.tab.c"
+#line 1364 "parser.tab.c"
     break;
 
   case 5: /* stmt: assign  */
@@ -1405,7 +1368,7 @@ yyreduce:
        {
          (yyval.node) = (yyvsp[0].node);
        }
-#line 1409 "y.tab.c"
+#line 1372 "parser.tab.c"
     break;
 
   case 6: /* assign: varlet LET expr SEMICOLON  */
@@ -1413,7 +1376,7 @@ yyreduce:
         {
           (yyval.node) = ASTassign((yyvsp[-3].node), (yyvsp[-1].node));
         }
-#line 1417 "y.tab.c"
+#line 1380 "parser.tab.c"
     break;
 
   case 7: /* varlet: ID  */
@@ -1422,7 +1385,7 @@ yyreduce:
           (yyval.node) = ASTvarlet((yyvsp[0].id));
           AddLocToNode((yyval.node), &(yylsp[0]), &(yylsp[0]));
         }
-#line 1426 "y.tab.c"
+#line 1389 "parser.tab.c"
     break;
 
   case 8: /* expr: constant  */
@@ -1430,7 +1393,7 @@ yyreduce:
       {
         (yyval.node) = (yyvsp[0].node);
       }
-#line 1434 "y.tab.c"
+#line 1397 "parser.tab.c"
     break;
 
   case 9: /* expr: ID  */
@@ -1438,7 +1401,7 @@ yyreduce:
       {
         (yyval.node) = ASTvar((yyvsp[0].id));
       }
-#line 1442 "y.tab.c"
+#line 1405 "parser.tab.c"
     break;
 
   case 10: /* expr: BRACKET_L expr binop expr BRACKET_R  */
@@ -1447,7 +1410,7 @@ yyreduce:
         (yyval.node) = ASTbinop( (yyvsp[-3].node), (yyvsp[-1].node), (yyvsp[-2].cbinop));
         AddLocToNode((yyval.node), &(yylsp[-3]), &(yylsp[-1]));
       }
-#line 1451 "y.tab.c"
+#line 1414 "parser.tab.c"
     break;
 
   case 11: /* constant: floatval  */
@@ -1455,7 +1418,7 @@ yyreduce:
           {
             (yyval.node) = (yyvsp[0].node);
           }
-#line 1459 "y.tab.c"
+#line 1422 "parser.tab.c"
     break;
 
   case 12: /* constant: intval  */
@@ -1463,7 +1426,7 @@ yyreduce:
           {
             (yyval.node) = (yyvsp[0].node);
           }
-#line 1467 "y.tab.c"
+#line 1430 "parser.tab.c"
     break;
 
   case 13: /* constant: boolval  */
@@ -1471,7 +1434,7 @@ yyreduce:
           {
             (yyval.node) = (yyvsp[0].node);
           }
-#line 1475 "y.tab.c"
+#line 1438 "parser.tab.c"
     break;
 
   case 14: /* floatval: FLOAT  */
@@ -1479,7 +1442,7 @@ yyreduce:
            {
              (yyval.node) = ASTfloat((yyvsp[0].cflt));
            }
-#line 1483 "y.tab.c"
+#line 1446 "parser.tab.c"
     break;
 
   case 15: /* intval: NUM  */
@@ -1487,7 +1450,7 @@ yyreduce:
         {
           (yyval.node) = ASTnum((yyvsp[0].cint));
         }
-#line 1491 "y.tab.c"
+#line 1454 "parser.tab.c"
     break;
 
   case 16: /* boolval: TRUEVAL  */
@@ -1495,7 +1458,7 @@ yyreduce:
          {
            (yyval.node) = ASTbool(true);
          }
-#line 1499 "y.tab.c"
+#line 1462 "parser.tab.c"
     break;
 
   case 17: /* boolval: FALSEVAL  */
@@ -1503,83 +1466,83 @@ yyreduce:
          {
            (yyval.node) = ASTbool(false);
          }
-#line 1507 "y.tab.c"
+#line 1470 "parser.tab.c"
     break;
 
   case 18: /* binop: PLUS  */
 #line 139 "parser.y"
                  { (yyval.cbinop) = BO_add; }
-#line 1513 "y.tab.c"
+#line 1476 "parser.tab.c"
     break;
 
   case 19: /* binop: MINUS  */
 #line 140 "parser.y"
                  { (yyval.cbinop) = BO_sub; }
-#line 1519 "y.tab.c"
+#line 1482 "parser.tab.c"
     break;
 
   case 20: /* binop: STAR  */
 #line 141 "parser.y"
                  { (yyval.cbinop) = BO_mul; }
-#line 1525 "y.tab.c"
+#line 1488 "parser.tab.c"
     break;
 
   case 21: /* binop: SLASH  */
 #line 142 "parser.y"
                  { (yyval.cbinop) = BO_div; }
-#line 1531 "y.tab.c"
+#line 1494 "parser.tab.c"
     break;
 
   case 22: /* binop: PERCENT  */
 #line 143 "parser.y"
                  { (yyval.cbinop) = BO_mod; }
-#line 1537 "y.tab.c"
+#line 1500 "parser.tab.c"
     break;
 
   case 23: /* binop: LE  */
 #line 144 "parser.y"
                  { (yyval.cbinop) = BO_le; }
-#line 1543 "y.tab.c"
+#line 1506 "parser.tab.c"
     break;
 
   case 24: /* binop: LT  */
 #line 145 "parser.y"
                  { (yyval.cbinop) = BO_lt; }
-#line 1549 "y.tab.c"
+#line 1512 "parser.tab.c"
     break;
 
   case 25: /* binop: GE  */
 #line 146 "parser.y"
                  { (yyval.cbinop) = BO_ge; }
-#line 1555 "y.tab.c"
+#line 1518 "parser.tab.c"
     break;
 
   case 26: /* binop: GT  */
 #line 147 "parser.y"
                  { (yyval.cbinop) = BO_gt; }
-#line 1561 "y.tab.c"
+#line 1524 "parser.tab.c"
     break;
 
   case 27: /* binop: EQ  */
 #line 148 "parser.y"
                  { (yyval.cbinop) = BO_eq; }
-#line 1567 "y.tab.c"
+#line 1530 "parser.tab.c"
     break;
 
   case 28: /* binop: OR  */
 #line 149 "parser.y"
                  { (yyval.cbinop) = BO_or; }
-#line 1573 "y.tab.c"
+#line 1536 "parser.tab.c"
     break;
 
   case 29: /* binop: AND  */
 #line 150 "parser.y"
                  { (yyval.cbinop) = BO_and; }
-#line 1579 "y.tab.c"
+#line 1542 "parser.tab.c"
     break;
 
 
-#line 1583 "y.tab.c"
+#line 1546 "parser.tab.c"
 
       default: break;
     }
