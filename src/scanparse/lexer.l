@@ -37,6 +37,18 @@ int yycolumn = 1;
 
 %%
 
+"if"                       { FILTER( IF); }
+                           
+"else"                     { FILTER( ELSE); }
+                           
+"while"                    { FILTER( WHILE); }
+
+"do"                       { FILTER( DO); }
+
+"for"                      { FILTER( FOR); }
+
+"return"                   { FILTER( RETURN); }
+
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
 ","                        { FILTER( COMMA); }

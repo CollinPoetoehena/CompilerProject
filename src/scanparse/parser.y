@@ -39,6 +39,8 @@ void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 %token <cflt> FLOAT
 %token <id> ID
 
+%token IF ELSE WHILE DO FOR RETURN
+
 %type <node> intval floatval boolval constant expr
 %type <node> stmts stmt assign varlet program
 %type <cbinop> binop
