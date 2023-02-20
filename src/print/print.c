@@ -17,6 +17,9 @@
  */
 node_st *PRTprogram(node_st *node)
 {
+    // Go to the next nodes (children)
+    TRAVdeclarations(node);
+    
     return node;
 }
 
@@ -25,6 +28,10 @@ node_st *PRTprogram(node_st *node)
  */
 node_st *PRTdeclarations(node_st *node)
 {
+    // Go to the next nodes (children)
+    TRAVdeclaration(node);
+    TRAVnext(node);
+
     return node;
 }
 
