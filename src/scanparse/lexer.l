@@ -92,7 +92,7 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 {INTEGER}                  { yylval.cint=atoi(yytext);
                              FILTER( NUM);
                            }
-{FLOAT}                    { yylval.cint=atoi(yytext);
+{FLOAT}                    { yylval.cflt=atoi(yytext);
                              FILTER( FLOAT);
                            }
 
