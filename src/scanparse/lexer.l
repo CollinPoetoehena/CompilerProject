@@ -47,6 +47,7 @@ COMMENT_ONE      \/\/[^\n]*
 COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 
 %%
+  // TODO: why do comments under this one cause unrecognized rule???
 {COMMENT}                   { printf("Comment:\n%s\n", yytext); }
 
 "if"                       { FILTER( IF); }  
