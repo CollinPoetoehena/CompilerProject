@@ -47,10 +47,8 @@ COMMENT_ONE      \/\/[^\n]*
 COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 
 %%
-  // Comment on top because that is the first thing you want to evaluate
 {COMMENT}                   { printf("Comment:\n%s\n", yytext); }
 
-  // Keywords
 "if"                       { FILTER( IF); }  
 "else"                     { FILTER( ELSE); }       
 "while"                    { FILTER( WHILE); }
@@ -86,7 +84,6 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
 
-  // Scan identifier: (letter+(letter|number|underscore)) 0 or infinite amount of times
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);
                              FILTER( ID);
                            }

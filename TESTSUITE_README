@@ -13,7 +13,7 @@ How to merge the testsuite into your codebase
 # Testing
 #
 
-check: all
+check: all \
     @cd test; \
         CIVAS=../$(TEST_CIVAS) \
         CIVVM=../$(TEST_CIVVM) \
