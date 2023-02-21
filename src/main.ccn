@@ -42,11 +42,11 @@ enum return_type {
 };
 
 nodeset Expr = {Num, Float, Bool, Binop, Var};
-nodeset Stmt = {Assign};
+nodeset Stmt = {Assign, IfStatement, WhileStatement, DoWhileStatement, ForStatement, ReturnStatement};
 nodeset Declaration = {FunDec, FunDef, GlobalDec, GlobalDef};
 
 // Nodes you want to be able to link to from your symbol table.
-nodeset Link = Expr | Stmt;
+// nodeset Link = Expr | Stmt;
 
 root node Program {
     children {
@@ -146,6 +146,49 @@ node Assign {
     }
 };
 
+node IfStatement {
+    children {
+        Expr expr { constructor, mandatory },
+        Block block { constructor, mandatory },
+        Block else_block { constructor }
+    }
+};
+
+node WhileStatement {
+    children {
+        Expr expr { constructor, mandatory },
+        Block block { constructor, mandatory }
+    }
+};
+
+node DoWhileStatement {
+    children {
+        Block block { constructor, mandatory },
+        Expr expr { constructor, mandatory }
+    }
+};
+
+node ForStatement {
+    children {
+        Assign assignment { constructor, mandatory },
+        Expr expr { constructor, mandatory },
+        Expr optional_expr { constructor },
+        Block block { constructor, mandatory }
+    }
+};
+
+node ReturnStatement {
+    children {
+        Expr optional_expr { constructor }
+    }
+};
+
+node Block {
+    children {
+        Stmts stmts { constructor }
+    }
+};
+
 node Binop {
     children {
         Expr left  { constructor, mandatory },
@@ -160,16 +203,14 @@ node Binop {
 // Variable in assignment.
 node VarLet {
     attributes {
-        string name { constructor },
-        Link decl
+        string name { constructor }
     }
 };
 
 // Variable in an expression.
 node Var {
     attributes {
-        string name { constructor },
-        Link decl
+        string name { constructor }    
     }
 };
 

@@ -111,6 +111,54 @@ node_st *PRTstmts(node_st *node)
 }
 
 /**
+ * @fn PRTreturnstatement
+ */
+node_st *PRTreturnstatement(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTforstatement
+ */
+node_st *PRTforstatement(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTdowhilestatement
+ */
+node_st *PRTdowhilestatement(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTwhilestatement
+ */
+node_st *PRTwhilestatement(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTifstatement
+ */
+node_st *PRTifstatement(node_st *node)
+{
+    return node;
+}
+
+/**
+ * @fn PRTblock
+ */
+node_st *PRTblock(node_st *node)
+{
+    return node;
+}
+
+/**
  * @fn PRTassign
  */
 node_st *PRTassign(node_st *node)
