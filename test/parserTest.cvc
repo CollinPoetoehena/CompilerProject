@@ -1,0 +1,4 @@
+/* comment */
+
+extern int a;
+

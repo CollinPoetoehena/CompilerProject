@@ -150,6 +150,14 @@ binop: PLUS      { $$ = BO_add; }
      | AND       { $$ = BO_and; }
      ;
 
+// globaldecl: EXTERN <nodeBasicType defined in this parser> ID SEMICOLON
+//          {
+//           // $ refereert naar de positie in je regel
+//           // $$ = betekent wat die teruggeeft aan coconut
+//           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
+//            $$ = ASTglobaldecl($3);
+//          }
+//          ;
 %%
 
 void AddLocToNode(node_st *node, void *begin_loc, void *end_loc)

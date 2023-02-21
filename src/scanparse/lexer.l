@@ -61,6 +61,12 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "export"                   { FILTER( EXPORT); }
 "include"                  { FILTER( INCLUDE); }
 
+  /*
+  "bool"                     { FILTER( EXTERN); }
+  "int"                      { FILTER( EXPORT); }
+  "float"                    { FILTER( INCLUDE); }
+  */
+
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
 ","                        { FILTER( COMMA); }
@@ -89,6 +95,7 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
 
+  /* ID in parser now contains the value that is in yytext (read from input)  */
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);
                              FILTER( ID);
                            }
