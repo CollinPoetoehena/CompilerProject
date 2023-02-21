@@ -47,9 +47,10 @@ COMMENT_ONE      \/\/[^\n]*
 COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 
 %%
-  // TODO: why do comments under this one cause unrecognized rule???
-{COMMENT}                   { printf("Comment:\n%s\n", yytext); }
+  /* Comment on top because that is the first thing you want to scan */
+{COMMENT}                  { printf("Comment:\n%s\n", yytext); }
 
+  /* Keywords */
 "if"                       { FILTER( IF); }  
 "else"                     { FILTER( ELSE); }       
 "while"                    { FILTER( WHILE); }
@@ -64,7 +65,7 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 ")"                        { FILTER( BRACKET_R); }
 ","                        { FILTER( COMMA); }
 ";"                        { FILTER( SEMICOLON); }
-
+  
 "-"                        { FILTER( MINUS); }
 "+"                        { FILTER( PLUS);  }
 "*"                        { FILTER( STAR);  } 
@@ -81,6 +82,9 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "||"                       { FILTER( OR);    }
 
 "="                        { FILTER( LET);    }
+
+  /* Negation */
+"!"                        { FILTER( NEG);    }
 
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
