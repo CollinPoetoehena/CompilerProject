@@ -91,8 +91,11 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
                              FILTER( ID);
                            }
 
-{DIGIT}+                     { yylval.cint=atoi(yytext);
+{INTEGER}                  { yylval.cint=atoi(yytext);
                              FILTER( NUM);
+                           }
+{FLOAT}                    { yylval.cint=atoi(yytext);
+                             FILTER( FLOAT);
                            }
 
 \n.*                       { 
