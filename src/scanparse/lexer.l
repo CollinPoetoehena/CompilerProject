@@ -63,8 +63,8 @@ COMMENT_ONE      \/\/[^\n]*
                            }
                            */
   /* TODO: ask TA, how can I check an unterminated comment???? */
-"/*"                       { FILTER( COMMENT_START); }
-"*/"                       { FILTER( COMMENT_END); }
+  // "/*"                       { FILTER( COMMENT_START); }
+  // "*/"                       { FILTER( COMMENT_END); }
 "//".*                     { /* consume comment */ }
 
   /* Keywords */

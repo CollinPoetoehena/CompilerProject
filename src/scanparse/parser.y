@@ -70,9 +70,11 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 
 /* 
 Starting rule for the parser, in this case the program rule 
-Uncomment this when testing your grammar rules, and do you need it???
+From here it starts expanding. So, everything needs to be linked
+When coding grammars, you can change it to the grammar rule you are trying to test.
+This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
-// %start program
+%start globaldecl
 
 %%
 // All the grammar rules are specified here
