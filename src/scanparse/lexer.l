@@ -22,9 +22,18 @@
 
 static inline void token_action();
 
+/* TODO: Can be removed, because probably you need to handle unterminated comment in the parser */
+// int input() {
+//     return getchar();
+// }
+// /* prints grammar violation message */
+// void yyerror(const char *s) {
+//     fprintf(stderr, "Error: %s\n", s);
+// }  
+// static void comment(void);
+
 int yycolumn = 1;
 #define YY_USER_ACTION token_action();
-
 
 %}
 
@@ -44,11 +53,19 @@ INTEGER          {DIGIT}+
 FLOAT            ({DIGIT}+\.{DIGIT}*)?
 COMMENT_MULTI    \/\*[^*]*\*+([^/*][^*]*\*+)*\/
 COMMENT_ONE      \/\/[^\n]*
-COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
+  // COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 
 %%
   /* Comment on top because that is the first thing you want to scan */
-{COMMENT}                  { printf("Comment:\n%s\n", yytext); }
+  /*{COMMENT}                  { 
+                            printf("Comment:\n%s\n", yytext);
+                            comment();
+                           }
+                           */
+  /* TODO: ask TA, how can I check an unterminated comment???? */
+"/*"                       { FILTER( COMMENT_START); }
+"*/"                       { FILTER( COMMENT_END); }
+"//".*                     { /* consume comment */ }
 
   /* Keywords */
 "if"                       { FILTER( IF); }  
@@ -60,12 +77,6 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 "extern"                   { FILTER( EXTERN); }
 "export"                   { FILTER( EXPORT); }
 "include"                  { FILTER( INCLUDE); }
-
-  /*
-  "bool"                     { FILTER( EXTERN); }
-  "int"                      { FILTER( EXPORT); }
-  "float"                    { FILTER( INCLUDE); }
-  */
 
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
@@ -107,13 +118,13 @@ COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
                              FILTER( FLOAT);
                            }
 
+  /* Whitespace and other characters at the bottom, you want to read them if there is no other token */
 \n.*                       { 
                              yycolumn = 1;
                              global.line += 1;
                              global.col = 0;
                              yyless(1);
                            }
-
 [ \t]                      { global.col += yyleng;
                            } 
 %%
@@ -124,4 +135,23 @@ static inline void token_action() {
     yylloc.last_column = yycolumn + yyleng - 1;
     yycolumn += yyleng;
 }
+
+// static void comment(void)
+// {
+//     int c;
+
+//     while ((c = input()) != 0)
+//         if (c == '*')
+//         {
+//             while ((c = input()) == '*')
+//                 ;
+
+//             if (c == '/')
+//                 return;
+
+//             if (c == 0)
+//                 break;
+//         }
+//     yyerror("unterminated comment");
+// }
 
