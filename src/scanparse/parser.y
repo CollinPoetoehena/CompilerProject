@@ -38,7 +38,8 @@ Second part is the type that the parser will handle.
  char               *id;
  int                 cint;
  float               cflt;
- enum binop_type     cbinop;
+ enum BinOpEnum     cbinop;
+ enum Type           ctype;
  node_st             *node;
 }
 
@@ -177,14 +178,15 @@ binop: PLUS      { $$ = BO_add; }
 //         }
 //         ;
 
-// globaldecl: EXTERN <nodeBasicType defined in this parser> ID SEMICOLON
-//          {
-//           // $ refereert naar de positie in je regel
-//           // $$ = betekent wat die teruggeeft aan coconut
-//           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
-//            $$ = ASTglobaldecl($3);
-//          }
-//          ;
+//TODO: how to use node TYPE in here????
+globaldecl: EXTERN <How to use node TYPE in here??> ID SEMICOLON
+         {
+          // $ refereert naar de positie in je regel
+          // $$ = betekent wat die teruggeeft aan coconut
+          // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
+           $$ = ASTglobDecl();
+         }
+         ;
 %%
 
 /* Add location tracking information to a node in the parse tree */

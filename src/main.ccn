@@ -72,12 +72,14 @@ node Exprs {
     }
 };
 
+// TODO: is this array expression??
 node ArrExpr {
     children {
         Exprs exprs { constructor, mandatory }
     }
 };
 
+// TODO: Ids are .....
 node Ids {
     children {
         Ids next   
@@ -180,6 +182,7 @@ node For {
     }
 };
 
+// TODO: dims stands for .....
 node GlobDecl {
     children {
         Ids dims
