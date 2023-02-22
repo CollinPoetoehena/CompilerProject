@@ -37,6 +37,8 @@ int yycolumn = 1;
 
 %}
 
+%s IN_COMMENT
+
 %p 6000 /* set positions to 6000 */
 %e 2000 /* set nodes to 1100 */
 %option noyywrap
@@ -65,6 +67,17 @@ COMMENT_ONE      \/\/[^\n]*
   /* TODO: ask TA, how can I check an unterminated comment???? */
   // "/*"                       { FILTER( COMMENT_START); }
   // "*/"                       { FILTER( COMMENT_END); }
+
+  /* INITIAL and IN_COMMENT are states that you can be in */
+<INITIAL>{
+"/*"              BEGIN(IN_COMMENT);
+}
+<IN_COMMENT>{
+"*/"      BEGIN(INITIAL);
+[^*\n]+   // eat comment in chunks
+"*"       // eat the lone star
+\n        yylineno++;
+}
 "//".*                     { /* consume comment */ }
 
   /* Keywords */
