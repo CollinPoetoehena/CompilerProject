@@ -37,6 +37,7 @@ int yycolumn = 1;
 
 %}
 
+  /* Declare IN_COMMENT state for multi line comments */ 
 %s IN_COMMENT
 
 %p 6000 /* set positions to 6000 */
@@ -53,22 +54,15 @@ LETTER           [a-zA-Z]
 INTEGER          {DIGIT}+
   // This FLOAT accepts: '123.456', '.456'
 FLOAT            ({DIGIT}+\.{DIGIT}*)?
-COMMENT_MULTI    \/\*[^*]*\*+([^/*][^*]*\*+)*\/
-COMMENT_ONE      \/\/[^\n]*
-  // COMMENT          ({COMMENT_ONE}|{COMMENT_MULTI})
 
 %%
-  /* Comment on top because that is the first thing you want to scan */
-  /*{COMMENT}                  { 
-                            printf("Comment:\n%s\n", yytext);
-                            comment();
-                           }
-                           */
-  /* TODO: ask TA, how can I check an unterminated comment???? */
-  // "/*"                       { FILTER( COMMENT_START); }
-  // "*/"                       { FILTER( COMMENT_END); }
+  /* 
+  Comments on top because you want to check those first.
 
-  /* INITIAL and IN_COMMENT are states that you can be in */
+  INITIAL and IN_COMMENT are states that you can be in.
+  This is tested and working. It can appear that it does not work because
+  not all grammar rules are finished yet so an empty program could result in a syntax error.
+  */
 <INITIAL>{
 "/*"              BEGIN(IN_COMMENT);
 }
@@ -153,23 +147,3 @@ static inline void token_action() {
     yylloc.last_column = yycolumn + yyleng - 1;
     yycolumn += yyleng;
 }
-
-// static void comment(void)
-// {
-//     int c;
-
-//     while ((c = input()) != 0)
-//         if (c == '*')
-//         {
-//             while ((c = input()) == '*')
-//                 ;
-
-//             if (c == '/')
-//                 return;
-
-//             if (c == 0)
-//                 break;
-//         }
-//     yyerror("unterminated comment");
-// }
-

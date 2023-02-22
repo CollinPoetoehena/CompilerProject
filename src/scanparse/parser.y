@@ -194,14 +194,13 @@ type: BOOLTYPE  { $$ = CT_bool; }
     | VOIDTYPE  { $$ = CT_void; }
     ;
 
-//TODO: how to use node TYPE in here????
 globaldecl: EXTERN type ID SEMICOLON
          {
           // $ refereert naar de positie in je regel
           // $$ = betekent wat die teruggeeft aan coconut
           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
            // $$ = ASTglobDecl();
-           printf("global declaration");
+           printf("global declaration\n");
          }
          ;
 %%
