@@ -76,7 +76,6 @@ COMMENT_ONE      \/\/[^\n]*
 "return"                   { FILTER( RETURN); }
 "extern"                   { FILTER( EXTERN); }
 "export"                   { FILTER( EXPORT); }
-"include"                  { FILTER( INCLUDE); }
 
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
@@ -105,6 +104,12 @@ COMMENT_ONE      \/\/[^\n]*
 
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }
+
+  /* civic types */
+"int"                      { FILTER( INTTYPE); }
+"float"                    { FILTER( FLOATTYPE); }
+"bool"                     { FILTER( BOOLTYPE); }
+"void"                     { FILTER( VOIDTYPE); }
 
   /* ID in parser now contains the value that is in yytext (read from input)  */
 [A-Za-z][A-Za-z0-9_]*      { yylval.id = STRcpy(yytext);

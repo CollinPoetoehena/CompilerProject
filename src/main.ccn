@@ -73,6 +73,7 @@ node Exprs {
 };
 
 // TODO: is this array expression??
+// This is for the array expression, which is extension 2 and 3
 node ArrExpr {
     children {
         Exprs exprs { constructor, mandatory }
@@ -139,6 +140,7 @@ node FunDef {
     }
 };
 
+// local_fundefs is used for nested function definitions
 node FunBody {
     children {
         VarDecl decls,
@@ -182,7 +184,7 @@ node For {
     }
 };
 
-// TODO: dims stands for .....
+// dims stands for dimensions
 node GlobDecl {
     children {
         Ids dims
