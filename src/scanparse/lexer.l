@@ -22,16 +22,6 @@
 
 static inline void token_action();
 
-/* TODO: Can be removed, because probably you need to handle unterminated comment in the parser */
-// int input() {
-//     return getchar();
-// }
-// /* prints grammar violation message */
-// void yyerror(const char *s) {
-//     fprintf(stderr, "Error: %s\n", s);
-// }  
-// static void comment(void);
-
 int yycolumn = 1;
 #define YY_USER_ACTION token_action();
 
@@ -60,6 +50,9 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
   Comments on top because you want to check those first.
 
   INITIAL and IN_COMMENT are states that you can be in.
+  This structure also detects unterminated comments and throws 
+  a syntax error if an unterminated comment is found.
+
   This is tested and working. It can appear that it does not work because
   not all grammar rules are finished yet so an empty program could result in a syntax error.
   */

@@ -50,9 +50,6 @@ Second part is the type that the parser will handle.
 %token TRUEVAL FALSEVAL LET
 %token INTTYPE FLOATTYPE BOOLTYPE VOIDTYPE
 
-// TODO: is this the way to check for comments???
-%token COMMENT_START COMMENT_END ANY_CHARACTER
-
 %token <cint> NUM
 %token <cflt> FLOAT
 %token <id> ID
@@ -65,6 +62,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 */
 %type <node> intval floatval boolval constant expr
 %type <node> stmts stmt assign varlet program 
+%type <node> globdecl
 %type <cbinop> binop
 %type <ctype> type
 
@@ -74,7 +72,7 @@ From here it starts expanding. So, everything needs to be linked
 When coding grammars, you can change it to the grammar rule you are trying to test.
 This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
-%start globaldecl
+%start globdecl
 
 %%
 // All the grammar rules are specified here
@@ -180,13 +178,6 @@ binop: PLUS      { $$ = BO_add; }
      | AND       { $$ = BO_and; }
      ;
 
-// If unterminated comment, error, otherwise do nothing/consume comment
-// comment: COMMENT_START "." COMMENT_END
-//         {
-//             // Do nothing, consume comment
-//         }
-//         ;
-
 // type non-terminal
 type: BOOLTYPE  { $$ = CT_bool; }
     | FLOATTYPE { $$ = CT_float; }
@@ -194,12 +185,12 @@ type: BOOLTYPE  { $$ = CT_bool; }
     | VOIDTYPE  { $$ = CT_void; }
     ;
 
-globaldecl: EXTERN type ID SEMICOLON
+globdecl: EXTERN type ID SEMICOLON
          {
           // $ refereert naar de positie in je regel
           // $$ = betekent wat die teruggeeft aan coconut
           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
-           // $$ = ASTglobDecl();
+           $$ = ASTglobdecl();
            printf("global declaration\n");
          }
          ;
