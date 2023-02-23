@@ -40,6 +40,7 @@ Second part is the type that the parser will handle.
  float               cflt;
  enum Type           ctype;
  enum BinOpEnum     cbinop;
+ enum MonOpEnum     cmonop;
  node_st             *node;
 }
 
@@ -62,7 +63,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 */
 %type <node> intval floatval boolval constant expr
 %type <node> stmts stmt assign varlet program 
-%type <node> globdecl
+%type <node> globdecl vardecl globdef
 %type <cbinop> binop
 %type <ctype> type
 
@@ -72,7 +73,8 @@ From here it starts expanding. So, everything needs to be linked
 When coding grammars, you can change it to the grammar rule you are trying to test.
 This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
-%start globdecl
+// %start program
+%start globdef
 
 %%
 // All the grammar rules are specified here
@@ -179,11 +181,47 @@ binop: PLUS      { $$ = BO_add; }
      ;
 
 // type non-terminal
+// TODO: because this type also has void, with type checking there needs to be a check
+// if it can include a void type, but this is later on!
 type: BOOLTYPE  { $$ = CT_bool; }
     | FLOATTYPE { $$ = CT_float; }
     | INTTYPE   { $$ = CT_int; }
     | VOIDTYPE  { $$ = CT_void; }
     ;
+
+globdef: EXPORT type ID expr SEMICOLON
+        {
+          printf("glob def with export and expr\n");
+        }
+      | EXPORT type ID SEMICOLON 
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def with export\n");
+        }
+      | type ID expr SEMICOLON 
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def with expr \n");
+        }
+      | type ID SEMICOLON 
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def \n");
+        }
+      ;
+
+vardecl: type ID SEMICOLON
+        {
+          printf("var decl\n");
+        }
+      | type ID expr SEMICOLON 
+        {
+          printf("var decl with expr\n");
+        }
+      ;
 
 globdecl: EXTERN type ID SEMICOLON
          {
