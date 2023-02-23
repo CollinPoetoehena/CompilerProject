@@ -126,17 +126,30 @@ varlet: ID
 //       {
 //         $$ = ASTvar($1);
 //       }
-//     | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
-//       {
-//         $$ = ASTbinop( $left, $right, $type);
-//         AddLocToNode($$, &@left, &@right);
-//       }
+    // | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+    //   {
+    //     $$ = ASTbinop( $left, $right, $type);
+    //     AddLocToNode($$, &@left, &@right);
+    //   }
 //     ;
 
-expr: BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+// TODO: is the expr correct????
+expr: BRACKET_L expr BRACKET_R
+      {
+        printf("expr with brackets \n");
+      }
+    | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
       {
         $$ = ASTbinop( $left, $right, $type);
         AddLocToNode($$, &@left, &@right);
+      }
+    | expr binop expr
+      {
+        printf("expr binop expr \n");
+      }
+    | monop expr
+      {
+        printf("monop with expr \n");
       }
     | BRACKET_L type BRACKET_R expr
       {
