@@ -1,3 +1,10 @@
+TEST_DIRS := basic # nested_funs arrays preprocess
+TEST_CFLAGS := ""
+TEST_RUN_FUNCTIONAL := 0
+TEST_CIVAS := bin/civas
+TEST_CIVVM := bin/civvm
+TEST_CIVCC := build-debug/civicc
+
 .PHONY: help debug release dist clean deps coconut
 
 help:
@@ -23,3 +30,12 @@ dist:
 clean:
 	rm -f *.tar*
 	rm -rf build*/
+
+check: debug \
+    	@cd test; \
+        CIVAS=../$(TEST_CIVAS) \
+        CIVVM=../$(TEST_CIVVM) \
+        CIVCC=../$(TEST_CIVCC) \
+        RUN_FUNCTIONAL=$(TEST_RUN_FUNCTIONAL) \
+        bash run.bash $(TEST_DIRS)
+
