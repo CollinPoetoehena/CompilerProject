@@ -100,7 +100,7 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
 "="                        { FILTER( LET);    }
 
   /* Negation */
-"!"                        { FILTER( NEG);    }
+"!"                        { FILTER( EXCLAMATION);    }
 
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }

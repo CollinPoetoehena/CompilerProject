@@ -47,7 +47,7 @@ Second part is the type that the parser will handle.
 %locations
 
 %token BRACKET_L BRACKET_R COMMA SEMICOLON
-%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND NEG
+%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND EXCLAMATION
 %token TRUEVAL FALSEVAL LET
 %token INTTYPE FLOATTYPE BOOLTYPE VOIDTYPE
 
@@ -115,20 +115,72 @@ varlet: ID
         ;
 
 
-expr: constant
-      {
-        $$ = $1;
-      }
-    | ID
-      {
-        $$ = ASTvar($1);
-      }
-    | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+// OLD EXPR THAT WAS STANDARD IN HERE
+// expr: constant
+//       {
+//         $$ = $1;
+//       }
+//     | ID
+//       {
+//         $$ = ASTvar($1);
+//       }
+//     | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+//       {
+//         $$ = ASTbinop( $left, $right, $type);
+//         AddLocToNode($$, &@left, &@right);
+//       }
+//     ;
+
+expr: BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
       {
         $$ = ASTbinop( $left, $right, $type);
         AddLocToNode($$, &@left, &@right);
       }
+    | BRACKET_L type BRACKET_R expr
+      {
+        printf("expr with basic type \n");
+      }
+    | ID BRACKET_L args BRACKET_R
+      {
+        printf("ID expr with args \n");
+      }
+    | ID
+      {
+        $$ = ASTvar($1);
+        printf("ID expr \n");
+      }
+    | constant
+      {
+        $$ = $1;
+        printf("constant expr\n");
+      }
     ;
+
+args : expr
+     | args COMMA expr
+     ;
+
+// type non-terminal
+// TODO: because this type also has void, with type checking there needs to be a check
+// if it can include a void type, but this is later on!
+type: BOOLTYPE  { $$ = CT_bool; }
+    | FLOATTYPE { $$ = CT_float; }
+    | INTTYPE   { $$ = CT_int; }
+    | VOIDTYPE  { $$ = CT_void; }
+    ;
+
+monop: MINUS    
+       { 
+        // arithmetic negation, used for arithmetic values (=numbers, etc)
+        $$ = MO_neg; 
+        printf("arithmetic negation (-) \n");
+       }
+      | EXCLAMATION
+       {
+        // logical negation, used for boolean values (true, false)
+        $$ = MO_not;
+        printf("logical negation (!) \n");
+       }
 
 constant: floatval
           {
@@ -179,15 +231,6 @@ binop: PLUS      { $$ = BO_add; }
      | OR        { $$ = BO_or; }
      | AND       { $$ = BO_and; }
      ;
-
-// type non-terminal
-// TODO: because this type also has void, with type checking there needs to be a check
-// if it can include a void type, but this is later on!
-type: BOOLTYPE  { $$ = CT_bool; }
-    | FLOATTYPE { $$ = CT_float; }
-    | INTTYPE   { $$ = CT_int; }
-    | VOIDTYPE  { $$ = CT_void; }
-    ;
 
 globdef: EXPORT type ID expr SEMICOLON
         {
