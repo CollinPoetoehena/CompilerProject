@@ -79,6 +79,8 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
 
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
+"{"                        { FILTER( CURLYBRACE_L); }
+"}"                        { FILTER( CURLYBRACE_R); }
 ","                        { FILTER( COMMA); }
 ";"                        { FILTER( SEMICOLON); }
   

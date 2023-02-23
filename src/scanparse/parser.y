@@ -46,7 +46,7 @@ Second part is the type that the parser will handle.
 
 %locations
 
-%token BRACKET_L BRACKET_R COMMA SEMICOLON
+%token BRACKET_L BRACKET_R COMMA SEMICOLON CURLYBRACE_L CURLYBRACE_R
 %token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND EXCLAMATION
 %token TRUEVAL FALSEVAL LET
 %token INTTYPE FLOATTYPE BOOLTYPE VOIDTYPE
@@ -63,7 +63,12 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 */
 %type <node> intval floatval boolval constant expr
 %type <node> stmts stmt assign varlet program 
-%type <node> globdecl vardecl globdef
+%type <node> globdecl vardecl vardecls globdef
+
+// Statement nodes
+%type <node> ifelse whileStatment dowhile forStatement returnStatement
+
+// Enum types
 %type <cbinop> binop
 %type <ctype> type
 %type <cmonop> monop
@@ -75,7 +80,7 @@ When coding grammars, you can change it to the grammar rule you are trying to te
 This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
 // %start program
-%start globdef
+%start stmt
 
 %%
 // All the grammar rules are specified here
@@ -86,6 +91,7 @@ program: stmts
          }
          ;
 
+//TODO: this is probably the block part in CiviC.pdf, ask TA!
 stmts: stmt stmts
         {
           $$ = ASTstmts($1, $2);
@@ -96,16 +102,92 @@ stmts: stmt stmts
         }
         ;
 
+block: CURLYBRACE_L stmts CURLYBRACE_R
+      {
+        printf("block with curly braces \n");
+      }
+    | stmt
+      {
+        printf("stmt block without curly braces \n");
+      }
+
+//TODO: finish this statement and ask a TA in the lesson if it is correct.
 stmt: assign
        {
          $$ = $1;
        }
-       ;
+    | ID BRACKET_L args BRACKET_R
+      {
+        printf("ID expr with args for statement grammar \n");
+      }
+    | ifelse
+      {
+        printf("ifelse in statement found \n");
+      }
+    | whileStatment
+      {
+        printf("while in statement found \n");
+      }
+    | dowhile
+      {
+        printf("do while in statement found \n");
+      }
+    | forStatement
+      {
+        printf("for in statement found \n");
+      }
+      ;
+    | returnStatement
+      {
+        printf("return in statement found \n");
+      }
+      ;
+// TESTED
+ifelse: IF BRACKET_L expr BRACKET_R block
+        {
+          printf("IF without else block \n");
+        }
+      | IF BRACKET_L expr BRACKET_R block ELSE block
+        {
+          printf("IF including else block \n");
+        }
+      ;
+// TESTED
+whileStatment: WHILE BRACKET_L expr BRACKET_R block
+               {
+                 printf("WHILE statement \n");
+               }
+             ;
+// TESTED
+dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
+               {
+                 printf("DO-WHILE statement \n");
+               }
+             ;
+// TESTED
+forStatement: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
+               {
+                 printf("FOR statement with second expr \n");
+               }
+              | FOR BRACKET_L INTTYPE varlet LET expr COMMA expr BRACKET_R block
+               {
+                 printf("FOR statement without second expr \n");
+               }
+             ;
+// TESTED
+returnStatement: RETURN SEMICOLON
+               {
+                 printf("RETURN statement without expr \n");
+               }
+              | RETURN expr SEMICOLON
+               {
+                 printf("RETURN statement including expr \n");
+               }
+             ;
 
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
-
         }
         ;
 
@@ -142,10 +224,11 @@ expr: BRACKET_L expr BRACKET_R
       {
         $$ = ASTbinop( $left, $right, $type);
         AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
       }
     | expr binop expr
       {
-        printf("expr binop expr \n");
+        printf("expr binop expr without brackets \n");
       }
     | monop expr
       {
@@ -171,6 +254,7 @@ expr: BRACKET_L expr BRACKET_R
       }
     ;
 
+// args has zero or an infinite amount of expr
 args : expr
      | args COMMA expr
      ;
@@ -247,11 +331,12 @@ binop: PLUS      { $$ = BO_add; }
      | AND       { $$ = BO_and; }
      ;
 
+// TESTED
 globdef: EXPORT type assign
         {
           printf("glob def with export and assignment (= expr)\n");
         }
-      | type assign 
+      | type assign
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
@@ -271,6 +356,7 @@ globdef: EXPORT type assign
         }
       ;
 
+// TESTED
 vardecl: type ID SEMICOLON
         {
           printf("var decl\n");
@@ -280,7 +366,18 @@ vardecl: type ID SEMICOLON
           printf("var decl with assign\n");
         }
       ;
+// Zero or infinite amount of vardecl
+vardecls: vardecl vardecls
+         {
+           $$ = ASTvardecls($1, $2);
+         }
+       |
+         {
+           $$ = NULL;
+         }
+       ;
 
+// TESTED
 globdecl: EXTERN type ID SEMICOLON
          {
           // $ refereert naar de positie in je regel
