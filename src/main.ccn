@@ -123,9 +123,7 @@ node Cast {
     }
 };
 
-// Added FunDecl myself because it was missing?????
-//node FunDec {};
-
+// Used for first extension: nested functions
 node FunDefs {
     children {
         FunDef fundef { constructor, mandatory },
@@ -133,7 +131,9 @@ node FunDefs {
     }
 };
 
-// FunHeader not necessary because it is made inside the params, use first param as return type???
+// This ast uses the FunDef node for both the function definition and the function declaration. 
+// A function declaration is simply represented as a FunDef node without a FunBody.
+// FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
 node FunDef {
     children {
         FunBody body,

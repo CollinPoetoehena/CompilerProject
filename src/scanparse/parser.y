@@ -65,7 +65,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <node> program decls
 
 // Function nodes
-%type <node> funbody param fundef
+%type <node> funbody param fundef funcall
 
 // Statement nodes
 %type <node> stmts stmt
@@ -86,7 +86,6 @@ From here it starts expanding. So, everything needs to be linked
 When coding grammars, you can change it to the grammar rule you are trying to test.
 This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
-// %start program
 %start program
 
 %%
@@ -108,6 +107,7 @@ decls: decl decls
         }
       ;
 
+// TESTED
 decl: fundef
         {
           printf("fundef decl\n");
@@ -121,13 +121,27 @@ decl: fundef
           printf("globdef decl\n");
         }
       ;
-//TODO: does this need to be added, also in main.ccn then or is it left out for a reason???
-// fundec: EXTERN funheader SEMICOLON
-//         {
-//           printf("fun dec\n");
-//         }
-//       ;
 
+// TESTED
+funcall: ID BRACKET_L BRACKET_R SEMICOLON
+        {
+          printf("fun call without args with semicolon\n");
+        }
+      | ID BRACKET_L args BRACKET_R SEMICOLON
+        {
+          printf("fun call with args with semicolon\n");
+        }
+      | ID BRACKET_L BRACKET_R 
+        {
+          printf("fun call without args without semicolon\n");
+        }
+      | ID BRACKET_L args BRACKET_R 
+        {
+          printf("fun call with args without semicolon\n");
+        }
+      ;
+
+// TESTED
 fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R
         {
           printf("fun def with export\n");
@@ -136,8 +150,13 @@ fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R
         {
           printf("fun def without export\n");
         }
+      | EXTERN funheader
+        {
+          printf("fun dec (fundef is also used for a fundec)\n");
+        }
       ;
 
+// TESTED
 // FunBody
 funbody: vardecls stmts
         {
@@ -158,6 +177,7 @@ funbody: vardecls stmts
         }
       ;
 
+// TESTED
 // No FunHeader node in main.ccn because funHeader return type 
 // is encoded in the params, such as first param is return type
 funheader: type ID BRACKET_L params BRACKET_R
@@ -170,8 +190,9 @@ funheader: type ID BRACKET_L params BRACKET_R
         }
         ;
 
+// TESTED
 // Can have 1 or an infinite amount of params
-params: param params
+params: param COMMA params
         {
             printf("param with params\n");
         }
@@ -181,12 +202,14 @@ params: param params
         }
       ;
 
+// TESTED
 param: type ID
       {
           printf("fun body with 0 or infinite vardecls and statements\n");
       }
       ;
 
+// TESTED
 stmts: stmt stmts
         {
           $$ = ASTstmts($1, $2);
@@ -197,6 +220,7 @@ stmts: stmt stmts
         }
         ;
 
+// TESTED
 block: CURLYBRACE_L stmts CURLYBRACE_R
       {
         printf("block with curly braces \n");
@@ -207,10 +231,11 @@ block: CURLYBRACE_L stmts CURLYBRACE_R
       }
 
 //TODO: finish this statement and ask a TA in the lesson if it is correct.
+// TESTED
 stmt: assign
-       {
+      {
          $$ = $1;
-       }
+      }
     | ID BRACKET_L args BRACKET_R
       {
         printf("ID expr with args for statement grammar \n");
@@ -236,7 +261,12 @@ stmt: assign
       {
         printf("return in statement found \n");
       }
-      ;
+    | funcall
+      {
+        //TODO: does funcall belong in stmt???
+        printf("expr function call\n");
+      }
+    ;
 // TESTED
 ifelse: IF BRACKET_L expr BRACKET_R block
         {
@@ -274,17 +304,24 @@ return: RETURN SEMICOLON
                {
                  printf("RETURN statement without expr \n");
                }
-              | RETURN expr SEMICOLON
+      | RETURN expr SEMICOLON
                {
                  printf("RETURN statement including expr \n");
                }
-             ;
+      ;
 
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
+          printf("assign without cast\n");
         }
-        ;
+      | varlet LET BRACKET_L type BRACKET_R expr SEMICOLON
+        {
+          // no separate cast grammar rule because of conflicts
+          $$ = ASTassign($1, $6);
+          printf("assign with cast\n");
+        }
+      ;
 
 // Variable in assignment.
 varlet: ID
@@ -302,24 +339,10 @@ var: ID
         }
         ;
 
-
-// OLD EXPR THAT WAS STANDARD IN HERE
-// expr: constant
-//       {
-//         $$ = $1;
-//       }
-//     | ID
-//       {
-//         $$ = ASTvar($1);
-//       }
-    // | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
-    //   {
-    //     $$ = ASTbinop( $left, $right, $type);
-    //     AddLocToNode($$, &@left, &@right);
-    //   }
-//     ;
-
 // TODO: is the expr correct????
+exprs: expr exprs
+     | expr
+     ;
 expr: BRACKET_L expr BRACKET_R
       {
         printf("expr with brackets \n");
@@ -356,10 +379,20 @@ expr: BRACKET_L expr BRACKET_R
         $$ = $1;
         printf("constant expr\n");
       }
+    | funcall
+      {
+        //TODO: does funcall belong in expr???
+        printf("expr function call\n");
+      }
+    | funcall expr
+      {
+        //TODO: does funcall belong in expr???
+        printf("expr function call with expr\n");
+      }
     ;
 
 // args has one or an infinite amount of expr
-args : expr
+args: expr
      | args COMMA expr
      ;
 
@@ -491,7 +524,7 @@ globdecl: EXTERN type ID SEMICOLON
            $$ = ASTglobdecl();
            printf("global declaration\n");
          }
-         ;
+        ;
 %%
 
 /* Add location tracking information to a node in the parse tree */
