@@ -52,6 +52,8 @@ nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 // I put it as a decl now, because an empty nodeset is not allowed.
 nodeset Link = Decl;
 
+//TODO: constructor and mandatory have to be specified yourself
+// https://canvas.uva.nl/courses/36019/discussion_topics/662838
 root node Program {
     children {
         Decls decls { constructor, mandatory }
@@ -121,6 +123,9 @@ node Cast {
     }
 };
 
+// Added FunDecl myself because it was missing?????
+//node FunDec {};
+
 node FunDefs {
     children {
         FunDef fundef { constructor, mandatory },
@@ -128,6 +133,7 @@ node FunDefs {
     }
 };
 
+// FunHeader not necessary because it is made inside the params, use first param as return type???
 node FunDef {
     children {
         FunBody body,
@@ -269,6 +275,7 @@ node Monop {
     }
 };
 
+// Variable in assignment.
 node VarLet {
     children {
         Exprs indices
@@ -280,7 +287,7 @@ node VarLet {
     }
 };
 
-
+// Variable in an expression.
 node Var {
     children {
         Exprs indices
@@ -309,3 +316,10 @@ node Bool {
         bool val { constructor }
     }
 };
+
+/* Symbol table entry
+ * TODO: fill in.
+node Ste {
+
+}
+*/
