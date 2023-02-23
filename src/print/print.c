@@ -17,8 +17,9 @@
  */
 node_st *PRTprogram(node_st *node)
 {
-    // Go to the next nodes (children)
-    TRAVdecls(node);
+    // Go through the tree
+    TRAVchildren(node);
+    printf("start program");
     
     return node;
 }
@@ -28,6 +29,9 @@ node_st *PRTprogram(node_st *node)
  */
 node_st *PRTdecls(node_st *node)
 {
+    // Go through the tree
+    TRAVchildren(node);
+    printf("");
     return node;
 }
 
@@ -272,6 +276,27 @@ node_st *PRTbinop(node_st *node)
  */
 node_st *PRTmonop(node_st *node)
 {
+char *tmp = NULL;
+    printf( "( ");
+
+    TRAVoperand(node);
+
+    // Type of the operator
+    switch (MONOP_OP(node)) {
+    case MO_not:
+      tmp = "!";
+      break;
+    case MO_neg:
+      tmp = "-";
+      break;
+    case BO_NULL:
+      DBUG_ASSERT(false, "unknown monop detected!");
+    }
+
+    printf( " %s ", tmp);
+
+    printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));    
+    
     return node;
 }
 
@@ -289,7 +314,7 @@ node_st *PRTvarlet(node_st *node)
  */
 node_st *PRTvar(node_st *node)
 {
-    printf( "%s", VAR_NAME(node));
+    printf("%s", VAR_NAME(node));
     return node;
 }
 
@@ -307,7 +332,7 @@ node_st *PRTnum(node_st *node)
  */
 node_st *PRTfloat(node_st *node)
 {
-    printf( "%f", FLOAT_VAL(node));
+    printf("%f", FLOAT_VAL(node));
     return node;
 }
 
