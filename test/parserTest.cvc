@@ -1,1 +1,1 @@
-bool f = false;
+export int d2 = 321;

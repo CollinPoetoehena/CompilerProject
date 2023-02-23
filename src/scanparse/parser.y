@@ -66,6 +66,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <node> globdecl vardecl globdef
 %type <cbinop> binop
 %type <ctype> type
+%type <cmonop> monop
 
 /* 
 Starting rule for the parser, in this case the program rule 
@@ -104,6 +105,7 @@ stmt: assign
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
+
         }
         ;
 
@@ -232,9 +234,15 @@ binop: PLUS      { $$ = BO_add; }
      | AND       { $$ = BO_and; }
      ;
 
-globdef: EXPORT type ID expr SEMICOLON
+globdef: EXPORT type assign
         {
-          printf("glob def with export and expr\n");
+          printf("glob def with export and assignment (= expr)\n");
+        }
+      | type assign 
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def type and assign\n");
         }
       | EXPORT type ID SEMICOLON 
         {
@@ -242,17 +250,11 @@ globdef: EXPORT type ID expr SEMICOLON
           // Can I just do vardecl here??
           printf("glob def with export\n");
         }
-      | type ID expr SEMICOLON 
-        {
-          //TODO: how to decide between globdef and vardecl for this part, because == same
-          // Can I just do vardecl here??
-          printf("glob def with expr \n");
-        }
       | type ID SEMICOLON 
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
-          printf("glob def \n");
+          printf("glob def without export\n");
         }
       ;
 
@@ -260,9 +262,9 @@ vardecl: type ID SEMICOLON
         {
           printf("var decl\n");
         }
-      | type ID expr SEMICOLON 
+      | type assign
         {
-          printf("var decl with expr\n");
+          printf("var decl with assign\n");
         }
       ;
 
