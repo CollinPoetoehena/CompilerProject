@@ -190,7 +190,7 @@ node For {
     }
 };
 
-// dims stands for dimensions
+// TODO: dims stands for dimensions????
 node GlobDecl {
     children {
         Ids dims
