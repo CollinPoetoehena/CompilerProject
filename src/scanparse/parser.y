@@ -80,6 +80,11 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <ctype> type
 %type <cmonop> monop
 
+// Precedence rules, lowest on top, highest at the bottom
+%left LE LT GE GT EQ NE OR AND
+%left MINUS PLUS
+%left STAR SLASH
+
 /* 
 Starting rule for the parser, in this case the program rule 
 From here it starts expanding. So, everything needs to be linked
@@ -340,22 +345,91 @@ var: ID
         ;
 
 // TODO: is the expr correct????
-exprs: expr exprs
-     | expr
-     ;
+// exprs: expr exprs
+//      | expr
+//      ;
+// For precedence of operators call them with the lexer token and not the binop rule
 expr: BRACKET_L expr BRACKET_R
       {
         printf("expr with brackets \n");
       }
-    | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+    | expr[left] PLUS expr[right]
       {
-        $$ = ASTbinop( $left, $right, $type);
+        $$ = ASTbinop( $left, $right, BO_add);
         AddLocToNode($$, &@left, &@right);
         printf("expr binop expr including brackets \n");
       }
-    | expr binop expr
+    | expr[left] MINUS expr[right]
       {
-        printf("expr binop expr without brackets \n");
+        $$ = ASTbinop( $left, $right, BO_sub);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] SLASH expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_div);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] STAR expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_mul);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] PERCENT expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_mod);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] LE expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_le);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] LT expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_lt);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] GE expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_ge);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] GT expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_gt);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] EQ expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_eq);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] OR expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_or);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] AND expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_and);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
+      }
+    | expr[left] NE expr[right]
+      {
+        $$ = ASTbinop( $left, $right, BO_ne);
+        AddLocToNode($$, &@left, &@right);
+        printf("expr binop expr including brackets \n");
       }
     | monop expr
       {
@@ -390,6 +464,29 @@ expr: BRACKET_L expr BRACKET_R
         printf("expr function call with expr\n");
       }
     ;
+// Old unused expr grammar rules:
+    // | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
+    //   {
+    //     $$ = ASTbinop( $left, $right, $type);
+    //     AddLocToNode($$, &@left, &@right);
+    //     printf("expr binop expr including brackets \n");
+    //   }
+    // | expr binop expr
+    //   {
+    //     printf("expr binop expr without brackets \n");
+    //   }
+
+// Removed operators with precedence
+// binop: PERCENT   { $$ = BO_mod; }
+//      | LE        { $$ = BO_le; }
+//      | LT        { $$ = BO_lt; }
+//      | GE        { $$ = BO_ge; }
+//      | GT        { $$ = BO_gt; }
+//      | EQ        { $$ = BO_eq; }
+//      | OR        { $$ = BO_or; }
+//      | AND       { $$ = BO_and; }
+//      | NE        { $$ = BO_ne; }
+//      ;
 
 // args has one or an infinite amount of expr
 args: expr
@@ -453,20 +550,6 @@ boolval: TRUEVAL
            $$ = ASTbool(false);
          }
        ;
-
-binop: PLUS      { $$ = BO_add; }
-     | MINUS     { $$ = BO_sub; }
-     | STAR      { $$ = BO_mul; }
-     | SLASH     { $$ = BO_div; }
-     | PERCENT   { $$ = BO_mod; }
-     | LE        { $$ = BO_le; }
-     | LT        { $$ = BO_lt; }
-     | GE        { $$ = BO_ge; }
-     | GT        { $$ = BO_gt; }
-     | EQ        { $$ = BO_eq; }
-     | OR        { $$ = BO_or; }
-     | AND       { $$ = BO_and; }
-     ;
 
 // TESTED
 globdef: EXPORT type assign
