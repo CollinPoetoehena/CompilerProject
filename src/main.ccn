@@ -147,9 +147,10 @@ node FunDef {
 // local_fundefs is used for nested function definitions
 node FunBody {
     children {
-        VarDecl decls,
+        VarDecl decls { constructor },
+        // local_fundefs is for the first extension, ignore for now
         FunDefs local_fundefs,
-        Stmts stmts
+        Stmts stmts { constructor }
     }
 };
 
@@ -233,7 +234,7 @@ node VarDecl {
     },
 
     attributes {
-        string name,
+        string name { constructor },
         Type type { constructor }
     }
 };

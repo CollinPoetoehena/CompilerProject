@@ -64,7 +64,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <node> program decls
 
 // Function nodes
-%type <node> funbody param fundef funcall
+%type <node> funbody param params fundef funcall
 
 // Statement nodes
 %type <node> stmts stmt
@@ -72,7 +72,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 
 %type <node> intval floatval boolval constant expr
 %type <node> assign varlet var
-%type <node> globdecl vardecl globdef
+%type <node> globdecl globdef vardecl vardecls
 
 // Enum types
 %type <ctype> type
@@ -217,6 +217,7 @@ params: param COMMA params
         }
       | param
         {
+          
             //printf("param\n");
         }
       ;
@@ -224,6 +225,8 @@ params: param COMMA params
 // TESTED
 param: type ID
       {
+        //TODO: is this correct
+        $$ = ASTparam(NULL, $2, $1);
           //printf("fun body with 0 or infinite vardecls and statements\n");
       }
       ;
@@ -231,18 +234,25 @@ param: type ID
 // TESTED
 funbody: vardecls stmts
         {
+          // TODO: how do I get the VarDecls and Stmts in the ASTfunbody????
+          $$ = ASTfunbody(NULL, NULL);
           //printf("fun body with 1 or infinite vardecls and statements\n");
         }
       | vardecls
         {
+          // TODO
+          $$ = ASTfunbody(NULL, NULL);
           //printf("fun body with only 1 or infinite vardecls\n");
         }
       | stmts
         {
+          // TODO
+          $$ = ASTfunbody(NULL, NULL);
           //printf("fun body with only 1 or infinite statements\n");
         }
       | 
         {
+          //TODO: is this correct for an empty functionbody???
           $$ = NULL;
           //printf("empty fun body\n");
         }
@@ -251,24 +261,29 @@ funbody: vardecls stmts
 // TESTED
 vardecl: type ID SEMICOLON
         {
-          // dims expr is NULL, initial expr is var, next is NULL, type is type
-          // $$ = ASTvardecl(NULL, $2, NULL, $3);
+          // dims expr is NULL, initial expr is NULL, next is NULL, name is ID, type is type
+          $$ = ASTvardecl(NULL, NULL, NULL, $2, $1);
           //printf("var decl\n");
         }
       | type assign
         {
-          // $$ = ASTvardecl(NULL, $2, NULL, $3);
+          //TODO: how do I get the assign expr in the ASTvardecl node????
+          // $$ = ASTvardecl(NULL, NULL, NULL, $2, $1);
           //printf("var decl with assign\n");
         }
       ;
 // Zero or infinite amount of vardecl
 vardecls: vardecl vardecls
          {
+           // TODO: how to make this vardecls???
+
            // Probably no action here because the action to the ast is handled in vardecl and VarDecls is not a node!
            //printf("vardecls empty\n");
          }
        | vardecl
          {
+          // TODO: is this correct??
+          $$ = $1
            //printf("one vardecl from vardecls\n");
          }
        ;
@@ -547,6 +562,7 @@ var: ID
 
 constant: floatval
           {
+            // Assign the value of the floatval grammar rule AST creation to this constant node type
             $$ = $1;
           }
         | intval
