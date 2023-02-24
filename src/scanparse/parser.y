@@ -97,8 +97,9 @@ See union section, <node> stands for node_st, which is a generic type for an ast
   // Multiplication, division, and remainder
 %left STAR SLASH PERCENT
   // Monary operators (right associative)
-  // MONOP_MINUS is a separate token
-%right MONOP_MINUS EXCLAMATION
+  // MONOP_MINUS is a created precedence rule for monary operator -
+  // TYPE_CAST is a created precedence rule for a type cast
+%right MONOP_MINUS EXCLAMATION TYPECAST
 
 /* 
 Starting rule for the parser, in this case the program rule 
@@ -119,41 +120,41 @@ program: decls
 
 decls: decl decls
         {
-          printf("decl and decls\n");
+          //printf("decl and decls\n");
         }
       | decl
         {
-          printf("one decl\n");
+          //printf("one decl\n");
         }
       ;
 
 // TESTED
 decl: fundef
         {
-          printf("fundef decl\n");
+          //printf("fundef decl\n");
         }
       | globdecl
         {
-          printf("globdecl decl\n");
+          //printf("globdecl decl\n");
         }
       | globdef
         {
-          printf("globdef decl\n");
+          //printf("globdef decl\n");
         }
       ;
 
 // TESTED
 fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R
         {
-          printf("fun def with export\n");
+          //printf("fun def with export\n");
         }
       | funheader CURLYBRACE_L funbody CURLYBRACE_R
         {
-          printf("fun def without export\n");
+          //printf("fun def without export\n");
         }
       | EXTERN funheader
         {
-          printf("fun dec (fundef is also used for a fundec)\n");
+          //printf("fun dec (fundef is also used for a fundec)\n");
         }
       ;
 
@@ -162,11 +163,11 @@ fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R
 // is encoded in the params, such as first param is return type
 funheader: type ID BRACKET_L params BRACKET_R
         {
-          printf("fun header\n");
+          //printf("fun header\n");
         }
       | type ID BRACKET_L BRACKET_R
         {
-          printf("fun header without params\n");
+          //printf("fun header without params\n");
         }
         ;
 
@@ -177,32 +178,32 @@ globdecl: EXTERN type ID SEMICOLON
           // $$ = betekent wat die teruggeeft aan coconut
           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
            $$ = ASTglobdecl($2, $3);
-           printf("global declaration\n");
+           //printf("global declaration\n");
          }
         ;
 
 // TESTED
 globdef: EXPORT type assign
         {
-          printf("glob def with export and assignment (= expr)\n");
+          //printf("glob def with export and assignment (= expr)\n");
         }
       | type assign
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
-          printf("glob def type and assign\n");
+          //printf("glob def type and assign\n");
         }
       | EXPORT type ID SEMICOLON 
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
-          printf("glob def with export\n");
+          //printf("glob def with export\n");
         }
       | type ID SEMICOLON 
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
-          printf("glob def without export\n");
+          //printf("glob def without export\n");
         }
       ;
 
@@ -210,39 +211,38 @@ globdef: EXPORT type assign
 // Can have 1 or an infinite amount of params
 params: param COMMA params
         {
-            printf("param with params\n");
+            //printf("param with params\n");
         }
       | param
         {
-            printf("param\n");
+            //printf("param\n");
         }
       ;
 
 // TESTED
 param: type ID
       {
-          printf("fun body with 0 or infinite vardecls and statements\n");
+          //printf("fun body with 0 or infinite vardecls and statements\n");
       }
       ;
 
 // TESTED
-// FunBody
 funbody: vardecls stmts
         {
-          printf("fun body with 1 or infinite vardecls and statements\n");
+          //printf("fun body with 1 or infinite vardecls and statements\n");
         }
       | vardecls
         {
-          printf("fun body with only 1 or infinite vardecls\n");
+          //printf("fun body with only 1 or infinite vardecls\n");
         }
       | stmts
         {
-          printf("fun body with only 1 or infinite statements\n");
+          //printf("fun body with only 1 or infinite statements\n");
         }
       | 
         {
           $$ = NULL;
-          printf("empty fun body\n");
+          //printf("empty fun body\n");
         }
       ;
 
@@ -251,23 +251,23 @@ vardecl: type ID SEMICOLON
         {
           // dims expr is NULL, initial expr is var, next is NULL, type is type
           // $$ = ASTvardecl(NULL, $2, NULL, $3);
-          printf("var decl\n");
+          //printf("var decl\n");
         }
       | type assign
         {
           // $$ = ASTvardecl(NULL, $2, NULL, $3);
-          printf("var decl with assign\n");
+          //printf("var decl with assign\n");
         }
       ;
 // Zero or infinite amount of vardecl
 vardecls: vardecl vardecls
          {
            // Probably no action here because the action to the ast is handled in vardecl and VarDecls is not a node!
-           printf("vardecls empty\n");
+           //printf("vardecls empty\n");
          }
        | vardecl
          {
-           printf("one vardecl from vardecls\n");
+           //printf("one vardecl from vardecls\n");
          }
        ;
 
@@ -290,191 +290,183 @@ stmt: assign
       }
     | ID BRACKET_L args BRACKET_R
       {
-        printf("ID expr with args for statement grammar \n");
+        //printf("ID expr with args for statement grammar \n");
       }
     | ifelse
       {
-        printf("ifelse in statement found \n");
+        //printf("ifelse in statement found \n");
       }
     | while
       {
-        printf("while in statement found \n");
+        //printf("while in statement found \n");
       }
     | dowhile
       {
-        printf("do while in statement found \n");
+        //printf("do while in statement found \n");
       }
     | for
       {
-        printf("for in statement found \n");
+        //printf("for in statement found \n");
       }
       ;
     | return
       {
-        printf("return in statement found \n");
+        //printf("return in statement found \n");
       }
-    | funcall
+    | funcall SEMICOLON
       {
         //TODO: does funcall belong in stmt???
-        printf("expr function call\n");
+        //printf("expr function call\n");
       }
     ;
 // TESTED
 ifelse: IF BRACKET_L expr BRACKET_R block
         {
-          printf("IF without else block \n");
+          //printf("IF without else block \n");
         }
       | IF BRACKET_L expr BRACKET_R block ELSE block
         {
-          printf("IF including else block \n");
+          //printf("IF including else block \n");
         }
       ;
 // TESTED
 while: WHILE BRACKET_L expr BRACKET_R block
                {
-                 printf("WHILE statement \n");
+                 //printf("WHILE statement \n");
                }
              ;
 // TESTED
 dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
                {
-                 printf("DO-WHILE statement \n");
+                 //printf("DO-WHILE statement \n");
                }
              ;
 // TESTED
 for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
                {
-                 printf("FOR statement with second expr \n");
+                 //printf("FOR statement with second expr \n");
                }
               | FOR BRACKET_L INTTYPE varlet LET expr COMMA expr BRACKET_R block
                {
-                 printf("FOR statement without second expr \n");
+                 //printf("FOR statement without second expr \n");
                }
              ;
 // TESTED
 return: RETURN SEMICOLON
         {
-          printf("RETURN statement without expr \n");
+          //printf("RETURN statement without expr \n");
         }
       | RETURN expr SEMICOLON
         {
-          printf("RETURN statement including expr \n");
+          //printf("RETURN statement including expr \n");
         }
       ;
 
 // TESTED
 block: CURLYBRACE_L stmts CURLYBRACE_R
       {
-        printf("block with curly braces \n");
+        //printf("block with curly braces \n");
       }
     | stmt
       {
-        printf("stmt block without curly braces \n");
+        //printf("stmt block without curly braces \n");
       }
     ;
 
 // TESTED
 // ID BRACKET_L 
-funcall: ID BRACKET_L BRACKET_R SEMICOLON
+funcall: ID BRACKET_L BRACKET_R
         {
-          printf("fun call without args with semicolon\n");
-        }
-      | ID BRACKET_L args BRACKET_R SEMICOLON
-        {
-          printf("fun call with args with semicolon\n");
-        }
-      | ID BRACKET_L BRACKET_R 
-        {
-          printf("fun call without args without semicolon\n");
+          //printf("fun call without args with semicolon\n");
         }
       | ID BRACKET_L args BRACKET_R 
         {
-          printf("fun call with args without semicolon\n");
+          //printf("fun call with args with semicolon\n");
         }
       ;
 
 // For precedence of operators call them with the lexer token and not another rule
 expr: BRACKET_L expr BRACKET_R
       {
-        printf("expr with brackets \n");
+        //printf("expr with brackets \n");
       }
     | expr[left] PLUS expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_add);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] MINUS expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_sub);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] SLASH expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_div);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] STAR expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_mul);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] PERCENT expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_mod);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] LE expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_le);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] LT expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_lt);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] GE expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_ge);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] GT expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_gt);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] EQ expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_eq);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] OR expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_or);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] AND expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_and);
         AddLocToNode($$, &@left, &@right);
-        // printf("expr binop expr including brackets \n");
+        // //printf("expr binop expr including brackets \n");
       }
     | expr[left] NE expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_ne);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        //printf("expr binop expr including brackets \n");
       }
     | MINUS expr %prec MONOP_MINUS
       {
@@ -482,37 +474,39 @@ expr: BRACKET_L expr BRACKET_R
         // arithmetic negation, used for arithmetic values (=numbers, etc)
         $$ = ASTmonop($2, MO_neg);
         // AddLocToNode($$, &@2);
-        printf("monop expr including brackets \n");
+        //printf("monop expr including brackets \n");
       }
     | EXCLAMATION expr
       {
         // logical negation, used for boolean values (true, false)
         $$ = ASTmonop($2, MO_not);
         // AddLocToNode($$, &@2);
-        printf("expr monop expr including brackets \n");
+        //printf("expr monop expr including brackets \n");
       }
-    | BRACKET_L type BRACKET_R expr
+    | BRACKET_L type BRACKET_R expr %prec TYPECAST
       {
-        printf("expr with basic type \n");
+        // Type cast
+        // $$ = ASTcast($4, $2);
+        //printf("expr with basic type \n");
       }
     | ID BRACKET_L args BRACKET_R
       {
-        printf("ID expr with args \n");
+        //printf("ID expr with args \n");
       }
     | ID
       {
         $$ = ASTvar($1);
-        printf("ID expr \n");
+        //printf("ID expr \n");
       }
     | constant
       {
         $$ = $1;
-        printf("constant expr\n");
+        //printf("constant expr\n");
       }
     | funcall
       {
         //TODO: does funcall belong in expr??? 
-        printf("expr function call\n");
+        // //printf("expr function call\n");
       }
     ;
 
@@ -524,13 +518,13 @@ args: expr
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
-          printf("assign without cast\n");
+          // //printf("assign without cast\n");
         }
       | varlet LET BRACKET_L type BRACKET_R expr SEMICOLON
         {
           // no separate cast grammar rule because of conflicts
           $$ = ASTassign($1, $6);
-          printf("assign with cast\n");
+          // //printf("assign with cast\n");
         }
       ;
 
