@@ -39,8 +39,6 @@ Second part is the type that the parser will handle.
  int                 cint;
  float               cflt;
  enum Type           ctype;
- enum BinOpEnum     cbinop;
- enum MonOpEnum     cmonop;
  node_st             *node;
 }
 
@@ -77,9 +75,10 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <node> globdecl vardecl globdef
 
 // Enum types
-%type <cbinop> binop
 %type <ctype> type
-%type <cmonop> monop
+ //TODO: remove??? because not used anymore because of operator precedences
+// %type <cbinop> binop
+// %type <cmonop> monop
 
 // Precedence rules, lowest on top, highest at the bottom
 // Precedence rules in C https://en.cppreference.com/w/c/language/operator_precedence
@@ -107,7 +106,7 @@ From here it starts expanding. So, everything needs to be linked
 When coding grammars, you can change it to the grammar rule you are trying to test.
 This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
-%start program
+// %start program
 
 %%
 // All the grammar rules are specified here
@@ -178,27 +177,6 @@ fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R
       ;
 
 // TESTED
-// FunBody
-funbody: vardecls stmts
-        {
-          printf("fun body with 1 or infinite vardecls and statements\n");
-        }
-      | vardecls
-        {
-          printf("fun body with only 1 or infinite vardecls\n");
-        }
-      | stmts
-        {
-          printf("fun body with only 1 or infinite statements\n");
-        }
-      | 
-        {
-          $$ = NULL;
-          printf("empty fun body\n");
-        }
-      ;
-
-// TESTED
 // No FunHeader node in main.ccn because funHeader return type 
 // is encoded in the params, such as first param is return type
 funheader: type ID BRACKET_L params BRACKET_R
@@ -210,6 +188,52 @@ funheader: type ID BRACKET_L params BRACKET_R
           printf("fun header without params\n");
         }
         ;
+
+// TESTED
+globdecl: EXTERN type ID SEMICOLON
+         {
+          // $ refereert naar de positie in je regel
+          // $$ = betekent wat die teruggeeft aan coconut
+          // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
+           $$ = ASTglobdecl($2, $3);
+           printf("global declaration\n");
+         }
+        ;
+
+// TESTED
+globdef: EXPORT type assign
+        {
+          printf("glob def with export and assignment (= expr)\n");
+        }
+      | type assign
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def type and assign\n");
+        }
+      | EXPORT type ID SEMICOLON 
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def with export\n");
+        }
+      | type ID SEMICOLON 
+        {
+          //TODO: how to decide between globdef and vardecl for this part, because == same
+          // Can I just do vardecl here??
+          printf("glob def without export\n");
+        }
+      ;
+
+// type non-terminal
+// TODO: because this type also has void, with type checking there needs to be a check
+// if it can include a void type, but this is later on!
+type: BOOLTYPE  { $$ = CT_bool; }
+    | FLOATTYPE { $$ = CT_float; }
+    | INTTYPE   { $$ = CT_int; }
+    | VOIDTYPE  { $$ = CT_void; }
+    ;
+
 
 // TESTED
 // Can have 1 or an infinite amount of params
@@ -231,6 +255,52 @@ param: type ID
       ;
 
 // TESTED
+// FunBody
+funbody: vardecls stmts
+        {
+          printf("fun body with 1 or infinite vardecls and statements\n");
+        }
+      | vardecls
+        {
+          printf("fun body with only 1 or infinite vardecls\n");
+        }
+      | stmts
+        {
+          printf("fun body with only 1 or infinite statements\n");
+        }
+      | 
+        {
+          $$ = NULL;
+          printf("empty fun body\n");
+        }
+      ;
+
+// TESTED
+vardecl: type ID SEMICOLON
+        {
+          // dims expr is NULL, initial expr is var, next is NULL, type is type
+          // $$ = ASTvardecl(NULL, $2, NULL, $3);
+          printf("var decl\n");
+        }
+      | type assign
+        {
+          // $$ = ASTvardecl(NULL, $2, NULL, $3);
+          printf("var decl with assign\n");
+        }
+      ;
+// Zero or infinite amount of vardecl
+vardecls: vardecl vardecls
+         {
+           // Probably no action here because the action to the ast is handled in vardecl and VarDecls is not a node!
+           printf("vardecls empty\n");
+         }
+       | vardecl
+         {
+           printf("one vardecl from vardecls\n");
+         }
+       ;
+
+// TESTED
 stmts: stmt stmts
         {
           $$ = ASTstmts($1, $2);
@@ -239,17 +309,7 @@ stmts: stmt stmts
         {
           $$ = ASTstmts($1, NULL);
         }
-        ;
-
-// TESTED
-block: CURLYBRACE_L stmts CURLYBRACE_R
-      {
-        printf("block with curly braces \n");
-      }
-    | stmt
-      {
-        printf("stmt block without curly braces \n");
-      }
+      ;
 
 //TODO: finish this statement and ask a TA in the lesson if it is correct.
 // TESTED
@@ -322,67 +382,30 @@ for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
              ;
 // TESTED
 return: RETURN SEMICOLON
-               {
-                 printf("RETURN statement without expr \n");
-               }
+        {
+          printf("RETURN statement without expr \n");
+        }
       | RETURN expr SEMICOLON
-               {
-                 printf("RETURN statement including expr \n");
-               }
-      ;
-
-assign: varlet LET expr SEMICOLON
         {
-          $$ = ASTassign($1, $3);
-          printf("assign without cast\n");
-        }
-      | varlet LET BRACKET_L type BRACKET_R expr SEMICOLON
-        {
-          // no separate cast grammar rule because of conflicts
-          $$ = ASTassign($1, $6);
-          printf("assign with cast\n");
+          printf("RETURN statement including expr \n");
         }
       ;
 
-// Variable in assignment.
-varlet: ID
-        {
-          $$ = ASTvarlet($1);
-          AddLocToNode($$, &@1, &@1);
-        }
-        ;
+// TESTED
+block: CURLYBRACE_L stmts CURLYBRACE_R
+      {
+        printf("block with curly braces \n");
+      }
+    | stmt
+      {
+        printf("stmt block without curly braces \n");
+      }
+    ;
 
-// Variable in an expression.
-var: ID
-        {
-          $$ = ASTvar($1);
-          AddLocToNode($$, &@1, &@1);
-        }
-        ;
-
-// TODO: is the expr correct????
-// exprs: expr exprs
-//      | expr
-//      ;
-// For precedence of operators call them with the lexer token and not the binop rule
-// Monary op: %prec MONOP_MINUS
+// For precedence of operators call them with the lexer token and not another rule
 expr: BRACKET_L expr BRACKET_R
       {
         printf("expr with brackets \n");
-      }
-    | MINUS expr %prec MONOP_MINUS
-      {
-        // This MINUS uses the MONOP_MINUS precedence rule
-        // arithmetic negation, used for arithmetic values (=numbers, etc)
-        $$ = ASTmonop($2, MO_neg);
-        // AddLocToNode($$, &@2);
-        printf("monop expr including brackets \n");
-      }
-    | EXCLAMATION expr
-      {
-        $$ = ASTmonop( $left, $right, BO_add);
-        // AddLocToNode($$, &@left, &@right);
-        printf("expr monop expr including brackets \n");
       }
     | expr[left] PLUS expr[right]
       {
@@ -462,6 +485,21 @@ expr: BRACKET_L expr BRACKET_R
         AddLocToNode($$, &@left, &@right);
         printf("expr binop expr including brackets \n");
       }
+    | MINUS expr %prec MONOP_MINUS
+      {
+        // This MINUS uses the MONOP_MINUS precedence rule
+        // arithmetic negation, used for arithmetic values (=numbers, etc)
+        $$ = ASTmonop($2, MO_neg);
+        // AddLocToNode($$, &@2);
+        printf("monop expr including brackets \n");
+      }
+    | EXCLAMATION expr
+      {
+        // logical negation, used for boolean values (true, false)
+        $$ = ASTmonop($2, MO_not);
+        // AddLocToNode($$, &@2);
+        printf("expr monop expr including brackets \n");
+      }
     | BRACKET_L type BRACKET_R expr
       {
         printf("expr with basic type \n");
@@ -482,7 +520,7 @@ expr: BRACKET_L expr BRACKET_R
       }
     | funcall
       {
-        //TODO: does funcall belong in expr???
+        //TODO: does funcall belong in expr??? 
         printf("expr function call\n");
       }
     | funcall expr
@@ -491,60 +529,40 @@ expr: BRACKET_L expr BRACKET_R
         printf("expr function call with expr\n");
       }
     ;
-// Old unused expr grammar rules:
-    // | BRACKET_L expr[left] binop[type] expr[right] BRACKET_R
-    //   {
-    //     $$ = ASTbinop( $left, $right, $type);
-    //     AddLocToNode($$, &@left, &@right);
-    //     printf("expr binop expr including brackets \n");
-    //   }
-    // | expr binop expr
-    //   {
-    //     printf("expr binop expr without brackets \n");
-    //   }
-    //| monop expr
-    //   {
-    //     printf("monop with expr \n");
-    //   }
-
-// Removed operators with precedence
-// binop: PERCENT   { $$ = BO_mod; }
-//      | LE        { $$ = BO_le; }
-//      | LT        { $$ = BO_lt; }
-//      | GE        { $$ = BO_ge; }
-//      | GT        { $$ = BO_gt; }
-//      | EQ        { $$ = BO_eq; }
-//      | OR        { $$ = BO_or; }
-//      | AND       { $$ = BO_and; }
-//      | NE        { $$ = BO_ne; }
-//      ;
 
 // args has one or an infinite amount of expr
 args: expr
      | args COMMA expr
      ;
 
-// type non-terminal
-// TODO: because this type also has void, with type checking there needs to be a check
-// if it can include a void type, but this is later on!
-type: BOOLTYPE  { $$ = CT_bool; }
-    | FLOATTYPE { $$ = CT_float; }
-    | INTTYPE   { $$ = CT_int; }
-    | VOIDTYPE  { $$ = CT_void; }
-    ;
+assign: varlet LET expr SEMICOLON
+        {
+          $$ = ASTassign($1, $3);
+          printf("assign without cast\n");
+        }
+      | varlet LET BRACKET_L type BRACKET_R expr SEMICOLON
+        {
+          // no separate cast grammar rule because of conflicts
+          $$ = ASTassign($1, $6);
+          printf("assign with cast\n");
+        }
+      ;
 
-// monop: MINUS    
-//        { 
-        // // arithmetic negation, used for arithmetic values (=numbers, etc)
-        // $$ = MO_neg; 
-//         printf("arithmetic negation (-) \n");
-//        }
-//       | EXCLAMATION
-//        {
-//         // logical negation, used for boolean values (true, false)
-//         $$ = MO_not;
-//         printf("logical negation (!) \n");
-//        }
+// Variable in assignment.
+varlet: ID
+        {
+          $$ = ASTvarlet($1);
+          AddLocToNode($$, &@1, &@1);
+        }
+        ;
+
+// Variable in an expression.
+var: ID
+        {
+          $$ = ASTvar($1);
+          AddLocToNode($$, &@1, &@1);
+        }
+        ;
 
 constant: floatval
           {
@@ -581,67 +599,6 @@ boolval: TRUEVAL
            $$ = ASTbool(false);
          }
        ;
-
-// TESTED
-globdef: EXPORT type assign
-        {
-          printf("glob def with export and assignment (= expr)\n");
-        }
-      | type assign
-        {
-          //TODO: how to decide between globdef and vardecl for this part, because == same
-          // Can I just do vardecl here??
-          printf("glob def type and assign\n");
-        }
-      | EXPORT type ID SEMICOLON 
-        {
-          //TODO: how to decide between globdef and vardecl for this part, because == same
-          // Can I just do vardecl here??
-          printf("glob def with export\n");
-        }
-      | type ID SEMICOLON 
-        {
-          //TODO: how to decide between globdef and vardecl for this part, because == same
-          // Can I just do vardecl here??
-          printf("glob def without export\n");
-        }
-      ;
-
-// TESTED
-vardecl: type ID SEMICOLON
-        {
-          // dims expr is NULL, initial expr is var, next is NULL, type is type
-          // $$ = ASTvardecl(NULL, $2, NULL, $3);
-          printf("var decl\n");
-        }
-      | type assign
-        {
-          // $$ = ASTvardecl(NULL, $2, NULL, $3);
-          printf("var decl with assign\n");
-        }
-      ;
-// Zero or infinite amount of vardecl
-vardecls: vardecl vardecls
-         {
-           // Probably no action here because the action to the ast is handled in vardecl and VarDecls is not a node!
-           printf("vardecls empty\n");
-         }
-       | vardecl
-         {
-           printf("one vardecl from vardecls\n");
-         }
-       ;
-
-// TESTED
-globdecl: EXTERN type ID SEMICOLON
-         {
-          // $ refereert naar de positie in je regel
-          // $$ = betekent wat die teruggeeft aan coconut
-          // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
-           $$ = ASTglobdecl($2, $3);
-           printf("global declaration\n");
-         }
-        ;
 %%
 
 /* Add location tracking information to a node in the parse tree */
