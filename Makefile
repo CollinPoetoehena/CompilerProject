@@ -31,11 +31,11 @@ clean:
 	rm -f *.tar*
 	rm -rf build*/
 
-check: debug \
-    	@cd test; \
-        CIVAS=../$(TEST_CIVAS) \
-        CIVVM=../$(TEST_CIVVM) \
-        CIVCC=../$(TEST_CIVCC) \
-        RUN_FUNCTIONAL=$(TEST_RUN_FUNCTIONAL) \
-        bash run.bash $(TEST_DIRS)
+check: debug
+		@cd test; \
+			CIVAS=../$(TEST_CIVAS) \
+			CIVVM=../$(TEST_CIVVM) \
+			CIVCC=../$(TEST_CIVCC) \
+			RUN_FUNCTIONAL=$(TEST_RUN_FUNCTIONAL) \
+			bash run.bash $(TEST_DIRS)
 

@@ -5,8 +5,6 @@ start phase RootPhase {
     }
 };
 
-
-
 traversal Print {
     uid = PRT
 };

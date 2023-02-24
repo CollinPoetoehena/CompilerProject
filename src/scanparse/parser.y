@@ -143,25 +143,6 @@ decl: fundef
       ;
 
 // TESTED
-funcall: ID BRACKET_L BRACKET_R SEMICOLON
-        {
-          printf("fun call without args with semicolon\n");
-        }
-      | ID BRACKET_L args BRACKET_R SEMICOLON
-        {
-          printf("fun call with args with semicolon\n");
-        }
-      | ID BRACKET_L BRACKET_R 
-        {
-          printf("fun call without args without semicolon\n");
-        }
-      | ID BRACKET_L args BRACKET_R 
-        {
-          printf("fun call with args without semicolon\n");
-        }
-      ;
-
-// TESTED
 fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R
         {
           printf("fun def with export\n");
@@ -224,16 +205,6 @@ globdef: EXPORT type assign
           printf("glob def without export\n");
         }
       ;
-
-// type non-terminal
-// TODO: because this type also has void, with type checking there needs to be a check
-// if it can include a void type, but this is later on!
-type: BOOLTYPE  { $$ = CT_bool; }
-    | FLOATTYPE { $$ = CT_float; }
-    | INTTYPE   { $$ = CT_int; }
-    | VOIDTYPE  { $$ = CT_void; }
-    ;
-
 
 // TESTED
 // Can have 1 or an infinite amount of params
@@ -402,6 +373,26 @@ block: CURLYBRACE_L stmts CURLYBRACE_R
       }
     ;
 
+// TESTED
+// ID BRACKET_L 
+funcall: ID BRACKET_L BRACKET_R SEMICOLON
+        {
+          printf("fun call without args with semicolon\n");
+        }
+      | ID BRACKET_L args BRACKET_R SEMICOLON
+        {
+          printf("fun call with args with semicolon\n");
+        }
+      | ID BRACKET_L BRACKET_R 
+        {
+          printf("fun call without args without semicolon\n");
+        }
+      | ID BRACKET_L args BRACKET_R 
+        {
+          printf("fun call with args without semicolon\n");
+        }
+      ;
+
 // For precedence of operators call them with the lexer token and not another rule
 expr: BRACKET_L expr BRACKET_R
       {
@@ -411,73 +402,73 @@ expr: BRACKET_L expr BRACKET_R
       {
         $$ = ASTbinop( $left, $right, BO_add);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] MINUS expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_sub);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] SLASH expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_div);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] STAR expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_mul);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] PERCENT expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_mod);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] LE expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_le);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] LT expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_lt);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] GE expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_ge);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] GT expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_gt);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] EQ expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_eq);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] OR expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_or);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] AND expr[right]
       {
         $$ = ASTbinop( $left, $right, BO_and);
         AddLocToNode($$, &@left, &@right);
-        printf("expr binop expr including brackets \n");
+        // printf("expr binop expr including brackets \n");
       }
     | expr[left] NE expr[right]
       {
@@ -523,11 +514,6 @@ expr: BRACKET_L expr BRACKET_R
         //TODO: does funcall belong in expr??? 
         printf("expr function call\n");
       }
-    | funcall expr
-      {
-        //TODO: does funcall belong in expr???
-        printf("expr function call with expr\n");
-      }
     ;
 
 // args has one or an infinite amount of expr
@@ -547,6 +533,15 @@ assign: varlet LET expr SEMICOLON
           printf("assign with cast\n");
         }
       ;
+
+// type non-terminal
+// TODO: because this type also has void, with type checking there needs to be a check
+// if it can include a void type, but this is later on!
+type: BOOLTYPE  { $$ = CT_bool; }
+    | FLOATTYPE { $$ = CT_float; }
+    | INTTYPE   { $$ = CT_int; }
+    | VOIDTYPE  { $$ = CT_void; }
+    ;
 
 // Variable in assignment.
 varlet: ID
