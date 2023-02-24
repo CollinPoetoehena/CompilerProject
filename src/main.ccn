@@ -98,16 +98,16 @@ node ExprStmt {
 
 node Return {
     children {
-        Expr expr
+        Expr expr { constructor }
     }
 };
 
 node FunCall {
     children {
-        Exprs args
+        Exprs args { constructor }
     },
     attributes {
-        string name,
+        string name { constructor },
         Link decl
     }
 };
@@ -134,44 +134,46 @@ node FunDefs {
 // FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
 node FunDef {
     children {
-        FunBody body,
-        Param params
+        FunBody body { constructor },
+        Param params { constructor }
     },
     attributes {
-        Type type,
-        string name,
-        bool export 
+        Type type { constructor },
+        string name { constructor },
+        bool export { constructor }
+        // No need to do anything with EXTERN for the FunDec because they are always external!
     }
 };
 
 // local_fundefs is used for nested function definitions
 node FunBody {
     children {
-        VarDecl decls,
+        VarDecl decls { constructor },
+        // local_fundefs is for the first extension, ignore for now
         FunDefs local_fundefs,
-        Stmts stmts
+        Stmts stmts { constructor }
     }
 };
 
 node IfElse {
     children {
         Expr cond { constructor, mandatory },
-        Stmts then,
-        Stmts else_block
+        Stmts then { constructor},
+        Stmts else_block { constructor, mandatory }
     }
 };
 
 node While {
     children {
         Expr cond { constructor, mandatory },
-        Stmts block
+        Stmts block { constructor}
     }
 };
 
 node DoWhile {
     children {
         Expr cond { constructor, mandatory },
-        Stmts block
+        Stmts block { constructor}
     }
 };
 
@@ -179,8 +181,8 @@ node For {
     children {
         Expr start_expr { constructor, mandatory },
         Expr stop { constructor, mandatory },
-        Expr step,
-        Stmts block
+        Expr step { constructor },
+        Stmts block { constructor }
     },
 
     attributes {
@@ -202,8 +204,8 @@ node GlobDecl {
 
 node GlobDef {
     children {
-        Exprs dims,
-        Expr init
+        Exprs dims { constructor },
+        Expr init { constructor }
     },
 
     attributes {
@@ -233,7 +235,7 @@ node VarDecl {
     },
 
     attributes {
-        string name,
+        string name { constructor },
         Type type { constructor }
     }
 };
