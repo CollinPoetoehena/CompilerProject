@@ -1,6 +1,0 @@
-
-// First program that is not working yet
-void foo() {
-    b = a != 6;
-    b = a != 6 && a >= 4;
-}

@@ -47,7 +47,8 @@ Second part is the type that the parser will handle.
 %locations
 
 %token BRACKET_L BRACKET_R COMMA SEMICOLON CURLYBRACE_L CURLYBRACE_R
-%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND EXCLAMATION
+%token MINUS PLUS STAR SLASH PERCENT LE LT GE GT EQ NE OR AND 
+%token EXCLAMATION
 %token TRUEVAL FALSEVAL LET
 %token INTTYPE FLOATTYPE BOOLTYPE VOIDTYPE
 
@@ -81,9 +82,24 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <cmonop> monop
 
 // Precedence rules, lowest on top, highest at the bottom
-%left LE LT GE GT EQ NE OR AND
+// Precedence rules in C https://en.cppreference.com/w/c/language/operator_precedence
+%left COMMA
+  // Simple assignment (right associative)
+%right LET
+  // Logical OR 
+%left OR
+  // Logical AND
+%left AND
+  // Relational operators 
+%left EQ NE
+%left GT GE LT LE
+  // Addition and subtraction
 %left MINUS PLUS
-%left STAR SLASH
+  // Multiplication, division, and remainder
+%left STAR SLASH PERCENT
+  // Monary operators (right associative)
+  // MONOP_MINUS is a separate token
+%right MONOP_MINUS EXCLAMATION
 
 /* 
 Starting rule for the parser, in this case the program rule 
@@ -349,9 +365,24 @@ var: ID
 //      | expr
 //      ;
 // For precedence of operators call them with the lexer token and not the binop rule
+// Monary op: %prec MONOP_MINUS
 expr: BRACKET_L expr BRACKET_R
       {
         printf("expr with brackets \n");
+      }
+    | MINUS expr %prec MONOP_MINUS
+      {
+        // This MINUS uses the MONOP_MINUS precedence rule
+        // arithmetic negation, used for arithmetic values (=numbers, etc)
+        $$ = ASTmonop($2, MO_neg);
+        // AddLocToNode($$, &@2);
+        printf("monop expr including brackets \n");
+      }
+    | EXCLAMATION expr
+      {
+        $$ = ASTmonop( $left, $right, BO_add);
+        // AddLocToNode($$, &@left, &@right);
+        printf("expr monop expr including brackets \n");
       }
     | expr[left] PLUS expr[right]
       {
@@ -431,10 +462,6 @@ expr: BRACKET_L expr BRACKET_R
         AddLocToNode($$, &@left, &@right);
         printf("expr binop expr including brackets \n");
       }
-    | monop expr
-      {
-        printf("monop with expr \n");
-      }
     | BRACKET_L type BRACKET_R expr
       {
         printf("expr with basic type \n");
@@ -475,6 +502,10 @@ expr: BRACKET_L expr BRACKET_R
     //   {
     //     printf("expr binop expr without brackets \n");
     //   }
+    //| monop expr
+    //   {
+    //     printf("monop with expr \n");
+    //   }
 
 // Removed operators with precedence
 // binop: PERCENT   { $$ = BO_mod; }
@@ -502,18 +533,18 @@ type: BOOLTYPE  { $$ = CT_bool; }
     | VOIDTYPE  { $$ = CT_void; }
     ;
 
-monop: MINUS    
-       { 
-        // arithmetic negation, used for arithmetic values (=numbers, etc)
-        $$ = MO_neg; 
-        printf("arithmetic negation (-) \n");
-       }
-      | EXCLAMATION
-       {
-        // logical negation, used for boolean values (true, false)
-        $$ = MO_not;
-        printf("logical negation (!) \n");
-       }
+// monop: MINUS    
+//        { 
+        // // arithmetic negation, used for arithmetic values (=numbers, etc)
+        // $$ = MO_neg; 
+//         printf("arithmetic negation (-) \n");
+//        }
+//       | EXCLAMATION
+//        {
+//         // logical negation, used for boolean values (true, false)
+//         $$ = MO_not;
+//         printf("logical negation (!) \n");
+//        }
 
 constant: floatval
           {
@@ -577,12 +608,15 @@ globdef: EXPORT type assign
       ;
 
 // TESTED
-vardecl: type var SEMICOLON
+vardecl: type ID SEMICOLON
         {
+          // dims expr is NULL, initial expr is var, next is NULL, type is type
+          // $$ = ASTvardecl(NULL, $2, NULL, $3);
           printf("var decl\n");
         }
       | type assign
         {
+          // $$ = ASTvardecl(NULL, $2, NULL, $3);
           printf("var decl with assign\n");
         }
       ;
@@ -604,7 +638,7 @@ globdecl: EXTERN type ID SEMICOLON
           // $ refereert naar de positie in je regel
           // $$ = betekent wat die teruggeeft aan coconut
           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
-           $$ = ASTglobdecl();
+           $$ = ASTglobdecl($2, $3);
            printf("global declaration\n");
          }
         ;

@@ -197,8 +197,8 @@ node GlobDecl {
     },
 
     attributes {
-        Type type,
-        string name
+        Type type { constructor },
+        string name { constructor }
     }
 };
 
@@ -209,34 +209,34 @@ node GlobDef {
     },
 
     attributes {
-        Type type,
-        string name,
-        bool export
+        Type type { constructor },
+        string name { constructor },
+        bool export { constructor }
     }
 };
 
 node Param {
     children {
         Ids dims,
-        Param next
+        Param next { constructor }
     },
 
     attributes {
-        string name,
-        Type type
+        string name { constructor },
+        Type type { constructor }
     }
 };
 
 node VarDecl {
     children {
-        Exprs dims,
-        Expr init,
-        VarDecl next
+        Exprs dims { constructor },
+        Expr init { constructor },
+        VarDecl next { constructor }
     },
 
     attributes {
         string name,
-        Type type
+        Type type { constructor }
     }
 };
 
