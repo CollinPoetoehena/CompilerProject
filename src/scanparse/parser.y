@@ -80,6 +80,10 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 // %type <cbinop> binop
 // %type <cmonop> monop
 
+// Yacc version: Bison 3.8.2 supports %precedence, so %precedence warning can be ignored
+%precedence THEN
+%precedence ELSE
+
 // Precedence rules, lowest on top, highest at the bottom
 // Precedence rules in C https://en.cppreference.com/w/c/language/operator_precedence
 %left COMMA
@@ -394,10 +398,9 @@ stmt: assign
     ;
 // TESTED
 // %prec LOWER_THAN_ELSE (== nonassoc) makes sure that the else belongs to the closest if statement
-ifelse: IF BRACKET_L expr BRACKET_R block
+ifelse: IF BRACKET_L expr BRACKET_R block %prec THEN
         {
           //TODO: how to get the Stmts: then and else_block in????
-          //TODO: use announcement simon to fix last conflict about dangling else problem!!
           $$ = ASTifelse($3, NULL, NULL);
           //printf("IF without else block \n");
         }
