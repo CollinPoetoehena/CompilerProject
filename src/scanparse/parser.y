@@ -317,7 +317,7 @@ stmt: assign
       }
     | funcall SEMICOLON %prec FUNCTIONCALL
       {
-        //TODO: does funcall belong in stmt???
+        // Funcall belongs in expr and stmt, in stmt it has a SEMICOLON
         //printf("expr function call\n");
       }
     ;
@@ -488,12 +488,13 @@ expr: BRACKET_L expr BRACKET_R
     | BRACKET_L type BRACKET_R expr %prec TYPECAST
       {
         // Type cast
-        // $$ = ASTcast($4, $2);
+        $$ = ASTcast($4, $2);
         //printf("expr with basic type \n");
       }
-    | ID BRACKET_L args BRACKET_R
+    | funcall %prec FUNCTIONCALL
       {
-        //printf("ID expr with args \n");
+        // Funcall belongs in expr and stmt, in expr it does not have a SEMICOLON
+        // //printf("expr function call\n");
       }
     | ID
       {
@@ -504,11 +505,6 @@ expr: BRACKET_L expr BRACKET_R
       {
         $$ = $1;
         //printf("constant expr\n");
-      }
-    | funcall %prec FUNCTIONCALL
-      {
-        //TODO: does funcall belong in expr??? 
-        // //printf("expr function call\n");
       }
     ;
 
@@ -521,12 +517,6 @@ assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
           // //printf("assign without cast\n");
-        }
-      | varlet LET BRACKET_L type BRACKET_R expr SEMICOLON
-        {
-          // no separate cast grammar rule because of conflicts
-          $$ = ASTassign($1, $6);
-          // //printf("assign with cast\n");
         }
       ;
 
