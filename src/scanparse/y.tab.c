@@ -175,7 +175,8 @@ extern int yydebug;
     EXTERN = 294,                  /* EXTERN  */
     EXPORT = 295,                  /* EXPORT  */
     MONOP_MINUS = 296,             /* MONOP_MINUS  */
-    TYPECAST = 297                 /* TYPECAST  */
+    TYPECAST = 297,                /* TYPECAST  */
+    FUNCTIONCALL = 298             /* FUNCTIONCALL  */
   };
   typedef enum yytokentype yytoken_kind_t;
 #endif
@@ -224,6 +225,7 @@ extern int yydebug;
 #define EXPORT 295
 #define MONOP_MINUS 296
 #define TYPECAST 297
+#define FUNCTIONCALL 298
 
 /* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
@@ -237,7 +239,7 @@ union YYSTYPE
  enum Type           ctype;
  node_st             *node;
 
-#line 241 "y.tab.c"
+#line 243 "y.tab.c"
 
 };
 typedef union YYSTYPE YYSTYPE;
@@ -314,37 +316,38 @@ enum yysymbol_kind_t
   YYSYMBOL_EXPORT = 40,                    /* EXPORT  */
   YYSYMBOL_MONOP_MINUS = 41,               /* MONOP_MINUS  */
   YYSYMBOL_TYPECAST = 42,                  /* TYPECAST  */
-  YYSYMBOL_YYACCEPT = 43,                  /* $accept  */
-  YYSYMBOL_program = 44,                   /* program  */
-  YYSYMBOL_decls = 45,                     /* decls  */
-  YYSYMBOL_decl = 46,                      /* decl  */
-  YYSYMBOL_fundef = 47,                    /* fundef  */
-  YYSYMBOL_funheader = 48,                 /* funheader  */
-  YYSYMBOL_globdecl = 49,                  /* globdecl  */
-  YYSYMBOL_globdef = 50,                   /* globdef  */
-  YYSYMBOL_params = 51,                    /* params  */
-  YYSYMBOL_param = 52,                     /* param  */
-  YYSYMBOL_funbody = 53,                   /* funbody  */
-  YYSYMBOL_vardecl = 54,                   /* vardecl  */
-  YYSYMBOL_vardecls = 55,                  /* vardecls  */
-  YYSYMBOL_stmts = 56,                     /* stmts  */
-  YYSYMBOL_stmt = 57,                      /* stmt  */
-  YYSYMBOL_ifelse = 58,                    /* ifelse  */
-  YYSYMBOL_while = 59,                     /* while  */
-  YYSYMBOL_dowhile = 60,                   /* dowhile  */
-  YYSYMBOL_for = 61,                       /* for  */
-  YYSYMBOL_return = 62,                    /* return  */
-  YYSYMBOL_block = 63,                     /* block  */
-  YYSYMBOL_funcall = 64,                   /* funcall  */
-  YYSYMBOL_expr = 65,                      /* expr  */
-  YYSYMBOL_args = 66,                      /* args  */
-  YYSYMBOL_assign = 67,                    /* assign  */
-  YYSYMBOL_type = 68,                      /* type  */
-  YYSYMBOL_varlet = 69,                    /* varlet  */
-  YYSYMBOL_constant = 70,                  /* constant  */
-  YYSYMBOL_floatval = 71,                  /* floatval  */
-  YYSYMBOL_intval = 72,                    /* intval  */
-  YYSYMBOL_boolval = 73                    /* boolval  */
+  YYSYMBOL_FUNCTIONCALL = 43,              /* FUNCTIONCALL  */
+  YYSYMBOL_YYACCEPT = 44,                  /* $accept  */
+  YYSYMBOL_program = 45,                   /* program  */
+  YYSYMBOL_decls = 46,                     /* decls  */
+  YYSYMBOL_decl = 47,                      /* decl  */
+  YYSYMBOL_fundef = 48,                    /* fundef  */
+  YYSYMBOL_funheader = 49,                 /* funheader  */
+  YYSYMBOL_globdecl = 50,                  /* globdecl  */
+  YYSYMBOL_globdef = 51,                   /* globdef  */
+  YYSYMBOL_params = 52,                    /* params  */
+  YYSYMBOL_param = 53,                     /* param  */
+  YYSYMBOL_funbody = 54,                   /* funbody  */
+  YYSYMBOL_vardecl = 55,                   /* vardecl  */
+  YYSYMBOL_vardecls = 56,                  /* vardecls  */
+  YYSYMBOL_stmts = 57,                     /* stmts  */
+  YYSYMBOL_stmt = 58,                      /* stmt  */
+  YYSYMBOL_ifelse = 59,                    /* ifelse  */
+  YYSYMBOL_while = 60,                     /* while  */
+  YYSYMBOL_dowhile = 61,                   /* dowhile  */
+  YYSYMBOL_for = 62,                       /* for  */
+  YYSYMBOL_return = 63,                    /* return  */
+  YYSYMBOL_block = 64,                     /* block  */
+  YYSYMBOL_funcall = 65,                   /* funcall  */
+  YYSYMBOL_expr = 66,                      /* expr  */
+  YYSYMBOL_args = 67,                      /* args  */
+  YYSYMBOL_assign = 68,                    /* assign  */
+  YYSYMBOL_type = 69,                      /* type  */
+  YYSYMBOL_varlet = 70,                    /* varlet  */
+  YYSYMBOL_constant = 71,                  /* constant  */
+  YYSYMBOL_floatval = 72,                  /* floatval  */
+  YYSYMBOL_intval = 73,                    /* intval  */
+  YYSYMBOL_boolval = 74                    /* boolval  */
 };
 typedef enum yysymbol_kind_t yysymbol_kind_t;
 
@@ -678,7 +681,7 @@ union yyalloc
 #define YYLAST   399
 
 /* YYNTOKENS -- Number of terminals.  */
-#define YYNTOKENS  43
+#define YYNTOKENS  44
 /* YYNNTS -- Number of nonterminals.  */
 #define YYNNTS  31
 /* YYNRULES -- Number of rules.  */
@@ -687,7 +690,7 @@ union yyalloc
 #define YYNSTATES  171
 
 /* YYMAXUTOK -- Last valid token kind.  */
-#define YYMAXUTOK   297
+#define YYMAXUTOK   298
 
 
 /* YYTRANSLATE(TOKEN-NUM) -- Symbol number corresponding to TOKEN-NUM
@@ -730,22 +733,22 @@ static const yytype_int8 yytranslate[] =
        5,     6,     7,     8,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,    22,    23,    24,
       25,    26,    27,    28,    29,    30,    31,    32,    33,    34,
-      35,    36,    37,    38,    39,    40,    41,    42
+      35,    36,    37,    38,    39,    40,    41,    42,    43
 };
 
 #if YYDEBUG
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   115,   115,   121,   125,   132,   136,   140,   147,   151,
-     155,   164,   168,   175,   186,   190,   196,   202,   212,   216,
-     223,   230,   234,   238,   243,   250,   256,   263,   268,   275,
-     279,   287,   291,   295,   299,   303,   307,   312,   316,   323,
-     327,   333,   339,   345,   349,   355,   359,   366,   370,   378,
-     382,   389,   393,   399,   405,   411,   417,   423,   429,   435,
-     441,   447,   453,   459,   465,   471,   479,   486,   492,   496,
-     501,   506,   514,   515,   518,   523,   534,   535,   536,   537,
-     541,   556,   560,   564,   570,   576,   582,   586
+       0,   117,   117,   123,   127,   134,   138,   142,   149,   153,
+     157,   166,   170,   177,   188,   192,   198,   204,   214,   218,
+     225,   232,   236,   240,   245,   252,   258,   265,   270,   277,
+     281,   289,   293,   297,   301,   305,   309,   314,   318,   325,
+     329,   335,   341,   347,   351,   357,   361,   368,   372,   380,
+     384,   391,   395,   401,   407,   413,   419,   425,   431,   437,
+     443,   449,   455,   461,   467,   473,   481,   488,   494,   498,
+     503,   508,   516,   517,   520,   525,   536,   537,   538,   539,
+     543,   558,   562,   566,   572,   578,   584,   588
 };
 #endif
 
@@ -767,8 +770,8 @@ static const char *const yytname[] =
   "EQ", "NE", "OR", "AND", "EXCLAMATION", "TRUEVAL", "FALSEVAL", "LET",
   "INTTYPE", "FLOATTYPE", "BOOLTYPE", "VOIDTYPE", "NUM", "FLOAT", "ID",
   "IF", "ELSE", "WHILE", "DO", "FOR", "RETURN", "EXTERN", "EXPORT",
-  "MONOP_MINUS", "TYPECAST", "$accept", "program", "decls", "decl",
-  "fundef", "funheader", "globdecl", "globdef", "params", "param",
+  "MONOP_MINUS", "TYPECAST", "FUNCTIONCALL", "$accept", "program", "decls",
+  "decl", "fundef", "funheader", "globdecl", "globdef", "params", "param",
   "funbody", "vardecl", "vardecls", "stmts", "stmt", "ifelse", "while",
   "dowhile", "for", "return", "block", "funcall", "expr", "args", "assign",
   "type", "varlet", "constant", "floatval", "intval", "boolval", YY_NULLPTR
@@ -953,38 +956,38 @@ static const yytype_int16 yycheck[] =
    state STATE-NUM.  */
 static const yytype_int8 yystos[] =
 {
-       0,    26,    27,    28,    29,    39,    40,    44,    45,    46,
-      47,    48,    49,    50,    68,    48,    68,    48,    68,     0,
-      45,     7,    32,    67,    69,    32,     7,    32,    67,    32,
-      33,    35,    36,    37,    38,    53,    54,    55,    56,    57,
-      58,    59,    60,    61,    62,    64,    67,    68,     3,     6,
-      25,     6,    53,     6,     3,     3,     3,     7,    57,    63,
+       0,    26,    27,    28,    29,    39,    40,    45,    46,    47,
+      48,    49,    50,    51,    69,    49,    69,    49,    69,     0,
+      46,     7,    32,    68,    70,    32,     7,    32,    68,    32,
+      33,    35,    36,    37,    38,    54,    55,    56,    57,    58,
+      59,    60,    61,    62,    63,    65,    68,    69,     3,     6,
+      25,     6,    54,     6,     3,     3,     3,     7,    58,    64,
        3,     3,     6,     9,    22,    23,    24,    30,    31,    32,
-      64,    65,    70,    71,    72,    73,     8,    55,    56,    56,
-       6,    32,    67,     4,    51,    52,    68,     3,    65,     8,
-       4,    65,    66,    65,    65,    56,    35,    26,    65,    68,
-      65,    65,     3,     6,     9,    10,    11,    12,    13,    14,
+      65,    66,    71,    72,    73,    74,     8,    56,    57,    57,
+       6,    32,    68,     4,    52,    53,    69,     3,    66,     8,
+       4,    66,    67,    66,    66,    57,    35,    26,    66,    69,
+      66,    66,     3,     6,     9,    10,    11,    12,    13,    14,
       15,    16,    17,    18,    19,    20,    21,     6,     4,     5,
-      32,    68,     6,     4,     5,     4,     4,     8,     3,    32,
-      69,     4,     4,    66,    65,    65,    65,    65,    65,    65,
-      65,    65,    65,    65,    65,    65,    65,    51,     4,    65,
-      63,    63,    65,    25,    65,     4,    65,    34,     4,    65,
-       6,    63,     6,     5,    65,     4,     5,    63,    65,     4,
-      63
+      32,    69,     6,     4,     5,     4,     4,     8,     3,    32,
+      70,     4,     4,    67,    66,    66,    66,    66,    66,    66,
+      66,    66,    66,    66,    66,    66,    66,    52,     4,    66,
+      64,    64,    66,    25,    66,     4,    66,    34,     4,    66,
+       6,    64,     6,     5,    66,     4,     5,    64,    66,     4,
+      64
 };
 
 /* YYR1[RULE-NUM] -- Symbol kind of the left-hand side of rule RULE-NUM.  */
 static const yytype_int8 yyr1[] =
 {
-       0,    43,    44,    45,    45,    46,    46,    46,    47,    47,
-      47,    48,    48,    49,    50,    50,    50,    50,    51,    51,
-      52,    53,    53,    53,    53,    54,    54,    55,    55,    56,
-      56,    57,    57,    57,    57,    57,    57,    57,    57,    58,
-      58,    59,    60,    61,    61,    62,    62,    63,    63,    64,
-      64,    65,    65,    65,    65,    65,    65,    65,    65,    65,
-      65,    65,    65,    65,    65,    65,    65,    65,    65,    65,
-      65,    65,    66,    66,    67,    67,    68,    68,    68,    68,
-      69,    70,    70,    70,    71,    72,    73,    73
+       0,    44,    45,    46,    46,    47,    47,    47,    48,    48,
+      48,    49,    49,    50,    51,    51,    51,    51,    52,    52,
+      53,    54,    54,    54,    54,    55,    55,    56,    56,    57,
+      57,    58,    58,    58,    58,    58,    58,    58,    58,    59,
+      59,    60,    61,    62,    62,    63,    63,    64,    64,    65,
+      65,    66,    66,    66,    66,    66,    66,    66,    66,    66,
+      66,    66,    66,    66,    66,    66,    66,    66,    66,    66,
+      66,    66,    67,    67,    68,    68,    69,    69,    69,    69,
+      70,    71,    71,    71,    72,    73,    74,    74
 };
 
 /* YYR2[RULE-NUM] -- Number of symbols on the right-hand side of rule RULE-NUM.  */
@@ -1575,95 +1578,95 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: decls  */
-#line 116 "parser.y"
+#line 118 "parser.y"
          {
           //  parseresult = ASTprogram($1);
          }
-#line 1583 "y.tab.c"
+#line 1586 "y.tab.c"
     break;
 
   case 3: /* decls: decl decls  */
-#line 122 "parser.y"
+#line 124 "parser.y"
         {
           //printf("decl and decls\n");
         }
-#line 1591 "y.tab.c"
+#line 1594 "y.tab.c"
     break;
 
   case 4: /* decls: decl  */
-#line 126 "parser.y"
+#line 128 "parser.y"
         {
           //printf("one decl\n");
         }
-#line 1599 "y.tab.c"
+#line 1602 "y.tab.c"
     break;
 
   case 5: /* decl: fundef  */
-#line 133 "parser.y"
+#line 135 "parser.y"
         {
           //printf("fundef decl\n");
         }
-#line 1607 "y.tab.c"
+#line 1610 "y.tab.c"
     break;
 
   case 6: /* decl: globdecl  */
-#line 137 "parser.y"
+#line 139 "parser.y"
         {
           //printf("globdecl decl\n");
         }
-#line 1615 "y.tab.c"
+#line 1618 "y.tab.c"
     break;
 
   case 7: /* decl: globdef  */
-#line 141 "parser.y"
+#line 143 "parser.y"
         {
           //printf("globdef decl\n");
         }
-#line 1623 "y.tab.c"
+#line 1626 "y.tab.c"
     break;
 
   case 8: /* fundef: EXPORT funheader CURLYBRACE_L funbody CURLYBRACE_R  */
-#line 148 "parser.y"
+#line 150 "parser.y"
         {
           //printf("fun def with export\n");
         }
-#line 1631 "y.tab.c"
+#line 1634 "y.tab.c"
     break;
 
   case 9: /* fundef: funheader CURLYBRACE_L funbody CURLYBRACE_R  */
-#line 152 "parser.y"
+#line 154 "parser.y"
         {
           //printf("fun def without export\n");
         }
-#line 1639 "y.tab.c"
+#line 1642 "y.tab.c"
     break;
 
   case 10: /* fundef: EXTERN funheader  */
-#line 156 "parser.y"
+#line 158 "parser.y"
         {
           //printf("fun dec (fundef is also used for a fundec)\n");
         }
-#line 1647 "y.tab.c"
+#line 1650 "y.tab.c"
     break;
 
   case 11: /* funheader: type ID BRACKET_L params BRACKET_R  */
-#line 165 "parser.y"
+#line 167 "parser.y"
         {
           //printf("fun header\n");
         }
-#line 1655 "y.tab.c"
+#line 1658 "y.tab.c"
     break;
 
   case 12: /* funheader: type ID BRACKET_L BRACKET_R  */
-#line 169 "parser.y"
+#line 171 "parser.y"
         {
           //printf("fun header without params\n");
         }
-#line 1663 "y.tab.c"
+#line 1666 "y.tab.c"
     break;
 
   case 13: /* globdecl: EXTERN type ID SEMICOLON  */
-#line 176 "parser.y"
+#line 178 "parser.y"
          {
           // $ refereert naar de positie in je regel
           // $$ = betekent wat die teruggeeft aan coconut
@@ -1671,457 +1674,457 @@ yyreduce:
            (yyval.node) = ASTglobdecl((yyvsp[-2].ctype), (yyvsp[-1].id));
            //printf("global declaration\n");
          }
-#line 1675 "y.tab.c"
+#line 1678 "y.tab.c"
     break;
 
   case 14: /* globdef: EXPORT type assign  */
-#line 187 "parser.y"
+#line 189 "parser.y"
         {
           //printf("glob def with export and assignment (= expr)\n");
         }
-#line 1683 "y.tab.c"
+#line 1686 "y.tab.c"
     break;
 
   case 15: /* globdef: type assign  */
-#line 191 "parser.y"
+#line 193 "parser.y"
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
           //printf("glob def type and assign\n");
         }
-#line 1693 "y.tab.c"
+#line 1696 "y.tab.c"
     break;
 
   case 16: /* globdef: EXPORT type ID SEMICOLON  */
-#line 197 "parser.y"
+#line 199 "parser.y"
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
           //printf("glob def with export\n");
         }
-#line 1703 "y.tab.c"
+#line 1706 "y.tab.c"
     break;
 
   case 17: /* globdef: type ID SEMICOLON  */
-#line 203 "parser.y"
+#line 205 "parser.y"
         {
           //TODO: how to decide between globdef and vardecl for this part, because == same
           // Can I just do vardecl here??
           //printf("glob def without export\n");
         }
-#line 1713 "y.tab.c"
+#line 1716 "y.tab.c"
     break;
 
   case 18: /* params: param COMMA params  */
-#line 213 "parser.y"
+#line 215 "parser.y"
         {
             //printf("param with params\n");
         }
-#line 1721 "y.tab.c"
+#line 1724 "y.tab.c"
     break;
 
   case 19: /* params: param  */
-#line 217 "parser.y"
+#line 219 "parser.y"
         {
             //printf("param\n");
         }
-#line 1729 "y.tab.c"
+#line 1732 "y.tab.c"
     break;
 
   case 20: /* param: type ID  */
-#line 224 "parser.y"
+#line 226 "parser.y"
       {
           //printf("fun body with 0 or infinite vardecls and statements\n");
       }
-#line 1737 "y.tab.c"
+#line 1740 "y.tab.c"
     break;
 
   case 21: /* funbody: vardecls stmts  */
-#line 231 "parser.y"
+#line 233 "parser.y"
         {
           //printf("fun body with 1 or infinite vardecls and statements\n");
         }
-#line 1745 "y.tab.c"
+#line 1748 "y.tab.c"
     break;
 
   case 22: /* funbody: vardecls  */
-#line 235 "parser.y"
+#line 237 "parser.y"
         {
           //printf("fun body with only 1 or infinite vardecls\n");
         }
-#line 1753 "y.tab.c"
+#line 1756 "y.tab.c"
     break;
 
   case 23: /* funbody: stmts  */
-#line 239 "parser.y"
+#line 241 "parser.y"
         {
           //printf("fun body with only 1 or infinite statements\n");
         }
-#line 1761 "y.tab.c"
+#line 1764 "y.tab.c"
     break;
 
   case 24: /* funbody: %empty  */
-#line 243 "parser.y"
+#line 245 "parser.y"
         {
           (yyval.node) = NULL;
           //printf("empty fun body\n");
         }
-#line 1770 "y.tab.c"
+#line 1773 "y.tab.c"
     break;
 
   case 25: /* vardecl: type ID SEMICOLON  */
-#line 251 "parser.y"
+#line 253 "parser.y"
         {
           // dims expr is NULL, initial expr is var, next is NULL, type is type
           // $$ = ASTvardecl(NULL, $2, NULL, $3);
           //printf("var decl\n");
         }
-#line 1780 "y.tab.c"
+#line 1783 "y.tab.c"
     break;
 
   case 26: /* vardecl: type assign  */
-#line 257 "parser.y"
+#line 259 "parser.y"
         {
           // $$ = ASTvardecl(NULL, $2, NULL, $3);
           //printf("var decl with assign\n");
         }
-#line 1789 "y.tab.c"
+#line 1792 "y.tab.c"
     break;
 
   case 27: /* vardecls: vardecl vardecls  */
-#line 264 "parser.y"
+#line 266 "parser.y"
          {
            // Probably no action here because the action to the ast is handled in vardecl and VarDecls is not a node!
            //printf("vardecls empty\n");
          }
-#line 1798 "y.tab.c"
+#line 1801 "y.tab.c"
     break;
 
   case 28: /* vardecls: vardecl  */
-#line 269 "parser.y"
+#line 271 "parser.y"
          {
            //printf("one vardecl from vardecls\n");
          }
-#line 1806 "y.tab.c"
+#line 1809 "y.tab.c"
     break;
 
   case 29: /* stmts: stmt stmts  */
-#line 276 "parser.y"
+#line 278 "parser.y"
         {
           (yyval.node) = ASTstmts((yyvsp[-1].node), (yyvsp[0].node));
         }
-#line 1814 "y.tab.c"
+#line 1817 "y.tab.c"
     break;
 
   case 30: /* stmts: stmt  */
-#line 280 "parser.y"
+#line 282 "parser.y"
         {
           (yyval.node) = ASTstmts((yyvsp[0].node), NULL);
         }
-#line 1822 "y.tab.c"
+#line 1825 "y.tab.c"
     break;
 
   case 31: /* stmt: assign  */
-#line 288 "parser.y"
+#line 290 "parser.y"
       {
          (yyval.node) = (yyvsp[0].node);
       }
-#line 1830 "y.tab.c"
+#line 1833 "y.tab.c"
     break;
 
   case 32: /* stmt: ID BRACKET_L args BRACKET_R  */
-#line 292 "parser.y"
+#line 294 "parser.y"
       {
         //printf("ID expr with args for statement grammar \n");
       }
-#line 1838 "y.tab.c"
+#line 1841 "y.tab.c"
     break;
 
   case 33: /* stmt: ifelse  */
-#line 296 "parser.y"
+#line 298 "parser.y"
       {
         //printf("ifelse in statement found \n");
       }
-#line 1846 "y.tab.c"
+#line 1849 "y.tab.c"
     break;
 
   case 34: /* stmt: while  */
-#line 300 "parser.y"
+#line 302 "parser.y"
       {
         //printf("while in statement found \n");
       }
-#line 1854 "y.tab.c"
+#line 1857 "y.tab.c"
     break;
 
   case 35: /* stmt: dowhile  */
-#line 304 "parser.y"
+#line 306 "parser.y"
       {
         //printf("do while in statement found \n");
       }
-#line 1862 "y.tab.c"
+#line 1865 "y.tab.c"
     break;
 
   case 36: /* stmt: for  */
-#line 308 "parser.y"
+#line 310 "parser.y"
       {
         //printf("for in statement found \n");
       }
-#line 1870 "y.tab.c"
+#line 1873 "y.tab.c"
     break;
 
   case 37: /* stmt: return  */
-#line 313 "parser.y"
+#line 315 "parser.y"
       {
         //printf("return in statement found \n");
       }
-#line 1878 "y.tab.c"
+#line 1881 "y.tab.c"
     break;
 
   case 38: /* stmt: funcall SEMICOLON  */
-#line 317 "parser.y"
+#line 319 "parser.y"
       {
         //TODO: does funcall belong in stmt???
         //printf("expr function call\n");
       }
-#line 1887 "y.tab.c"
+#line 1890 "y.tab.c"
     break;
 
   case 39: /* ifelse: IF BRACKET_L expr BRACKET_R block  */
-#line 324 "parser.y"
+#line 326 "parser.y"
         {
           //printf("IF without else block \n");
         }
-#line 1895 "y.tab.c"
+#line 1898 "y.tab.c"
     break;
 
   case 40: /* ifelse: IF BRACKET_L expr BRACKET_R block ELSE block  */
-#line 328 "parser.y"
+#line 330 "parser.y"
         {
           //printf("IF including else block \n");
         }
-#line 1903 "y.tab.c"
+#line 1906 "y.tab.c"
     break;
 
   case 41: /* while: WHILE BRACKET_L expr BRACKET_R block  */
-#line 334 "parser.y"
+#line 336 "parser.y"
                {
                  //printf("WHILE statement \n");
                }
-#line 1911 "y.tab.c"
+#line 1914 "y.tab.c"
     break;
 
   case 42: /* dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON  */
-#line 340 "parser.y"
+#line 342 "parser.y"
                {
                  //printf("DO-WHILE statement \n");
                }
-#line 1919 "y.tab.c"
+#line 1922 "y.tab.c"
     break;
 
   case 43: /* for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block  */
-#line 346 "parser.y"
+#line 348 "parser.y"
                {
                  //printf("FOR statement with second expr \n");
                }
-#line 1927 "y.tab.c"
+#line 1930 "y.tab.c"
     break;
 
   case 44: /* for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr BRACKET_R block  */
-#line 350 "parser.y"
+#line 352 "parser.y"
                {
                  //printf("FOR statement without second expr \n");
                }
-#line 1935 "y.tab.c"
+#line 1938 "y.tab.c"
     break;
 
   case 45: /* return: RETURN SEMICOLON  */
-#line 356 "parser.y"
+#line 358 "parser.y"
         {
           //printf("RETURN statement without expr \n");
         }
-#line 1943 "y.tab.c"
+#line 1946 "y.tab.c"
     break;
 
   case 46: /* return: RETURN expr SEMICOLON  */
-#line 360 "parser.y"
+#line 362 "parser.y"
         {
           //printf("RETURN statement including expr \n");
         }
-#line 1951 "y.tab.c"
+#line 1954 "y.tab.c"
     break;
 
   case 47: /* block: CURLYBRACE_L stmts CURLYBRACE_R  */
-#line 367 "parser.y"
+#line 369 "parser.y"
       {
         //printf("block with curly braces \n");
       }
-#line 1959 "y.tab.c"
+#line 1962 "y.tab.c"
     break;
 
   case 48: /* block: stmt  */
-#line 371 "parser.y"
+#line 373 "parser.y"
       {
         //printf("stmt block without curly braces \n");
       }
-#line 1967 "y.tab.c"
+#line 1970 "y.tab.c"
     break;
 
   case 49: /* funcall: ID BRACKET_L BRACKET_R  */
-#line 379 "parser.y"
+#line 381 "parser.y"
         {
           //printf("fun call without args with semicolon\n");
         }
-#line 1975 "y.tab.c"
+#line 1978 "y.tab.c"
     break;
 
   case 50: /* funcall: ID BRACKET_L args BRACKET_R  */
-#line 383 "parser.y"
+#line 385 "parser.y"
         {
           //printf("fun call with args with semicolon\n");
         }
-#line 1983 "y.tab.c"
+#line 1986 "y.tab.c"
     break;
 
   case 51: /* expr: BRACKET_L expr BRACKET_R  */
-#line 390 "parser.y"
+#line 392 "parser.y"
       {
         //printf("expr with brackets \n");
       }
-#line 1991 "y.tab.c"
+#line 1994 "y.tab.c"
     break;
 
   case 52: /* expr: expr PLUS expr  */
-#line 394 "parser.y"
+#line 396 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_add);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2001 "y.tab.c"
+#line 2004 "y.tab.c"
     break;
 
   case 53: /* expr: expr MINUS expr  */
-#line 400 "parser.y"
+#line 402 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_sub);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2011 "y.tab.c"
+#line 2014 "y.tab.c"
     break;
 
   case 54: /* expr: expr SLASH expr  */
-#line 406 "parser.y"
+#line 408 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_div);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2021 "y.tab.c"
+#line 2024 "y.tab.c"
     break;
 
   case 55: /* expr: expr STAR expr  */
-#line 412 "parser.y"
+#line 414 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_mul);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2031 "y.tab.c"
+#line 2034 "y.tab.c"
     break;
 
   case 56: /* expr: expr PERCENT expr  */
-#line 418 "parser.y"
+#line 420 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_mod);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2041 "y.tab.c"
+#line 2044 "y.tab.c"
     break;
 
   case 57: /* expr: expr LE expr  */
-#line 424 "parser.y"
+#line 426 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_le);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2051 "y.tab.c"
+#line 2054 "y.tab.c"
     break;
 
   case 58: /* expr: expr LT expr  */
-#line 430 "parser.y"
+#line 432 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_lt);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2061 "y.tab.c"
+#line 2064 "y.tab.c"
     break;
 
   case 59: /* expr: expr GE expr  */
-#line 436 "parser.y"
+#line 438 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_ge);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2071 "y.tab.c"
+#line 2074 "y.tab.c"
     break;
 
   case 60: /* expr: expr GT expr  */
-#line 442 "parser.y"
+#line 444 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_gt);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2081 "y.tab.c"
+#line 2084 "y.tab.c"
     break;
 
   case 61: /* expr: expr EQ expr  */
-#line 448 "parser.y"
+#line 450 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_eq);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2091 "y.tab.c"
+#line 2094 "y.tab.c"
     break;
 
   case 62: /* expr: expr OR expr  */
-#line 454 "parser.y"
+#line 456 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_or);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2101 "y.tab.c"
+#line 2104 "y.tab.c"
     break;
 
   case 63: /* expr: expr AND expr  */
-#line 460 "parser.y"
+#line 462 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_and);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         // //printf("expr binop expr including brackets \n");
       }
-#line 2111 "y.tab.c"
+#line 2114 "y.tab.c"
     break;
 
   case 64: /* expr: expr NE expr  */
-#line 466 "parser.y"
+#line 468 "parser.y"
       {
         (yyval.node) = ASTbinop( (yyvsp[-2].node), (yyvsp[0].node), BO_ne);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
         //printf("expr binop expr including brackets \n");
       }
-#line 2121 "y.tab.c"
+#line 2124 "y.tab.c"
     break;
 
   case 65: /* expr: MINUS expr  */
-#line 472 "parser.y"
+#line 474 "parser.y"
       {
         // This MINUS uses the MONOP_MINUS precedence rule
         // arithmetic negation, used for arithmetic values (=numbers, etc)
@@ -2129,175 +2132,175 @@ yyreduce:
         // AddLocToNode($$, &@2);
         //printf("monop expr including brackets \n");
       }
-#line 2133 "y.tab.c"
+#line 2136 "y.tab.c"
     break;
 
   case 66: /* expr: EXCLAMATION expr  */
-#line 480 "parser.y"
+#line 482 "parser.y"
       {
         // logical negation, used for boolean values (true, false)
         (yyval.node) = ASTmonop((yyvsp[0].node), MO_not);
         // AddLocToNode($$, &@2);
         //printf("expr monop expr including brackets \n");
       }
-#line 2144 "y.tab.c"
+#line 2147 "y.tab.c"
     break;
 
   case 67: /* expr: BRACKET_L type BRACKET_R expr  */
-#line 487 "parser.y"
+#line 489 "parser.y"
       {
         // Type cast
         // $$ = ASTcast($4, $2);
         //printf("expr with basic type \n");
       }
-#line 2154 "y.tab.c"
+#line 2157 "y.tab.c"
     break;
 
   case 68: /* expr: ID BRACKET_L args BRACKET_R  */
-#line 493 "parser.y"
+#line 495 "parser.y"
       {
         //printf("ID expr with args \n");
       }
-#line 2162 "y.tab.c"
+#line 2165 "y.tab.c"
     break;
 
   case 69: /* expr: ID  */
-#line 497 "parser.y"
+#line 499 "parser.y"
       {
         (yyval.node) = ASTvar((yyvsp[0].id));
         //printf("ID expr \n");
       }
-#line 2171 "y.tab.c"
+#line 2174 "y.tab.c"
     break;
 
   case 70: /* expr: constant  */
-#line 502 "parser.y"
+#line 504 "parser.y"
       {
         (yyval.node) = (yyvsp[0].node);
         //printf("constant expr\n");
       }
-#line 2180 "y.tab.c"
+#line 2183 "y.tab.c"
     break;
 
   case 71: /* expr: funcall  */
-#line 507 "parser.y"
+#line 509 "parser.y"
       {
         //TODO: does funcall belong in expr??? 
         // //printf("expr function call\n");
       }
-#line 2189 "y.tab.c"
+#line 2192 "y.tab.c"
     break;
 
   case 74: /* assign: varlet LET expr SEMICOLON  */
-#line 519 "parser.y"
+#line 521 "parser.y"
         {
           (yyval.node) = ASTassign((yyvsp[-3].node), (yyvsp[-1].node));
           // //printf("assign without cast\n");
         }
-#line 2198 "y.tab.c"
+#line 2201 "y.tab.c"
     break;
 
   case 75: /* assign: varlet LET BRACKET_L type BRACKET_R expr SEMICOLON  */
-#line 524 "parser.y"
+#line 526 "parser.y"
         {
           // no separate cast grammar rule because of conflicts
           (yyval.node) = ASTassign((yyvsp[-6].node), (yyvsp[-1].node));
           // //printf("assign with cast\n");
         }
-#line 2208 "y.tab.c"
+#line 2211 "y.tab.c"
     break;
 
   case 76: /* type: BOOLTYPE  */
-#line 534 "parser.y"
+#line 536 "parser.y"
                 { (yyval.ctype) = CT_bool; }
-#line 2214 "y.tab.c"
+#line 2217 "y.tab.c"
     break;
 
   case 77: /* type: FLOATTYPE  */
-#line 535 "parser.y"
+#line 537 "parser.y"
                 { (yyval.ctype) = CT_float; }
-#line 2220 "y.tab.c"
+#line 2223 "y.tab.c"
     break;
 
   case 78: /* type: INTTYPE  */
-#line 536 "parser.y"
+#line 538 "parser.y"
                 { (yyval.ctype) = CT_int; }
-#line 2226 "y.tab.c"
+#line 2229 "y.tab.c"
     break;
 
   case 79: /* type: VOIDTYPE  */
-#line 537 "parser.y"
+#line 539 "parser.y"
                 { (yyval.ctype) = CT_void; }
-#line 2232 "y.tab.c"
+#line 2235 "y.tab.c"
     break;
 
   case 80: /* varlet: ID  */
-#line 542 "parser.y"
+#line 544 "parser.y"
         {
           (yyval.node) = ASTvarlet((yyvsp[0].id));
           AddLocToNode((yyval.node), &(yylsp[0]), &(yylsp[0]));
         }
-#line 2241 "y.tab.c"
+#line 2244 "y.tab.c"
     break;
 
   case 81: /* constant: floatval  */
-#line 557 "parser.y"
+#line 559 "parser.y"
           {
             (yyval.node) = (yyvsp[0].node);
           }
-#line 2249 "y.tab.c"
+#line 2252 "y.tab.c"
     break;
 
   case 82: /* constant: intval  */
-#line 561 "parser.y"
+#line 563 "parser.y"
           {
             (yyval.node) = (yyvsp[0].node);
           }
-#line 2257 "y.tab.c"
+#line 2260 "y.tab.c"
     break;
 
   case 83: /* constant: boolval  */
-#line 565 "parser.y"
+#line 567 "parser.y"
           {
             (yyval.node) = (yyvsp[0].node);
           }
-#line 2265 "y.tab.c"
+#line 2268 "y.tab.c"
     break;
 
   case 84: /* floatval: FLOAT  */
-#line 571 "parser.y"
+#line 573 "parser.y"
            {
              (yyval.node) = ASTfloat((yyvsp[0].cflt));
            }
-#line 2273 "y.tab.c"
+#line 2276 "y.tab.c"
     break;
 
   case 85: /* intval: NUM  */
-#line 577 "parser.y"
+#line 579 "parser.y"
         {
           (yyval.node) = ASTnum((yyvsp[0].cint));
         }
-#line 2281 "y.tab.c"
+#line 2284 "y.tab.c"
     break;
 
   case 86: /* boolval: TRUEVAL  */
-#line 583 "parser.y"
+#line 585 "parser.y"
          {
            (yyval.node) = ASTbool(true);
          }
-#line 2289 "y.tab.c"
+#line 2292 "y.tab.c"
     break;
 
   case 87: /* boolval: FALSEVAL  */
-#line 587 "parser.y"
+#line 589 "parser.y"
          {
            (yyval.node) = ASTbool(false);
          }
-#line 2297 "y.tab.c"
+#line 2300 "y.tab.c"
     break;
 
 
-#line 2301 "y.tab.c"
+#line 2304 "y.tab.c"
 
       default: break;
     }
@@ -2495,7 +2498,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 591 "parser.y"
+#line 593 "parser.y"
 
 
 /* Add location tracking information to a node in the parse tree */

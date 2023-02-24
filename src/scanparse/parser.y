@@ -100,6 +100,8 @@ See union section, <node> stands for node_st, which is a generic type for an ast
   // MONOP_MINUS is a created precedence rule for monary operator -
   // TYPE_CAST is a created precedence rule for a type cast
 %right MONOP_MINUS EXCLAMATION TYPECAST
+  // Function call
+  %left FUNCTIONCALL
 
 /* 
 Starting rule for the parser, in this case the program rule 
@@ -313,7 +315,7 @@ stmt: assign
       {
         //printf("return in statement found \n");
       }
-    | funcall SEMICOLON
+    | funcall SEMICOLON %prec FUNCTIONCALL
       {
         //TODO: does funcall belong in stmt???
         //printf("expr function call\n");
@@ -503,7 +505,7 @@ expr: BRACKET_L expr BRACKET_R
         $$ = $1;
         //printf("constant expr\n");
       }
-    | funcall
+    | funcall %prec FUNCTIONCALL
       {
         //TODO: does funcall belong in expr??? 
         // //printf("expr function call\n");
