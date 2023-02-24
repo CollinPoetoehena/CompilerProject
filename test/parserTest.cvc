@@ -1,3 +1,8 @@
-/* you didn't have to cut me of ... */
-
-extern float pi ;
+void testVarInits()
+{
+  int a = 3;
+  int c = 5;
+  int d = a + c;
+  int b;
+  b = a+2;
+}

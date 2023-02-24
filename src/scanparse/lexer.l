@@ -79,6 +79,8 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
 
 "("                        { FILTER( BRACKET_L); }
 ")"                        { FILTER( BRACKET_R); }
+"{"                        { FILTER( CURLYBRACE_L); }
+"}"                        { FILTER( CURLYBRACE_R); }
 ","                        { FILTER( COMMA); }
 ";"                        { FILTER( SEMICOLON); }
   
@@ -100,7 +102,7 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
 "="                        { FILTER( LET);    }
 
   /* Negation */
-"!"                        { FILTER( NEG);    }
+"!"                        { FILTER( EXCLAMATION);    }
 
 "true"                     { FILTER( TRUEVAL); }
 "false"                    { FILTER( FALSEVAL); }

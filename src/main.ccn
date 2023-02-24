@@ -5,8 +5,6 @@ start phase RootPhase {
     }
 };
 
-
-
 traversal Print {
     uid = PRT
 };
@@ -52,6 +50,8 @@ nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 // I put it as a decl now, because an empty nodeset is not allowed.
 nodeset Link = Decl;
 
+//TODO: constructor and mandatory have to be specified yourself
+// https://canvas.uva.nl/courses/36019/discussion_topics/662838
 root node Program {
     children {
         Decls decls { constructor, mandatory }
@@ -117,10 +117,11 @@ node Cast {
         Expr expr {constructor, mandatory }
     }, 
     attributes {
-        Type type
+        Type type {constructor }
     }
 };
 
+// Used for first extension: nested functions
 node FunDefs {
     children {
         FunDef fundef { constructor, mandatory },
@@ -128,6 +129,9 @@ node FunDefs {
     }
 };
 
+// This ast uses the FunDef node for both the function definition and the function declaration. 
+// A function declaration is simply represented as a FunDef node without a FunBody.
+// FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
 node FunDef {
     children {
         FunBody body,
@@ -184,15 +188,15 @@ node For {
     }
 };
 
-// dims stands for dimensions
+// TODO: dims stands for dimensions????
 node GlobDecl {
     children {
         Ids dims
     },
 
     attributes {
-        Type type,
-        string name
+        Type type { constructor },
+        string name { constructor }
     }
 };
 
@@ -203,34 +207,34 @@ node GlobDef {
     },
 
     attributes {
-        Type type,
-        string name,
-        bool export
+        Type type { constructor },
+        string name { constructor },
+        bool export { constructor }
     }
 };
 
 node Param {
     children {
         Ids dims,
-        Param next
+        Param next { constructor }
     },
 
     attributes {
-        string name,
-        Type type
+        string name { constructor },
+        Type type { constructor }
     }
 };
 
 node VarDecl {
     children {
-        Exprs dims,
-        Expr init,
-        VarDecl next
+        Exprs dims { constructor },
+        Expr init { constructor },
+        VarDecl next { constructor }
     },
 
     attributes {
         string name,
-        Type type
+        Type type { constructor }
     }
 };
 
@@ -269,6 +273,7 @@ node Monop {
     }
 };
 
+// Variable in assignment.
 node VarLet {
     children {
         Exprs indices
@@ -280,7 +285,7 @@ node VarLet {
     }
 };
 
-
+// Variable in an expression.
 node Var {
     children {
         Exprs indices
@@ -309,3 +314,10 @@ node Bool {
         bool val { constructor }
     }
 };
+
+/* Symbol table entry
+ * TODO: fill in.
+node Ste {
+
+}
+*/
