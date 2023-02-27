@@ -74,6 +74,9 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <node> assign varlet var
 %type <node> globdecl globdef vardecl
 
+//TODO: is this correct or is the block incorrect????
+%type <node> block
+
 // Enum types
 %type <ctype> type
  //TODO: remove??? because not used anymore because of operator precedences
@@ -386,13 +389,15 @@ stmts: stmt stmts
 
 //TODO: finish this statement and ask a TA in the lesson if it is correct.
 // TESTED
+// Old removed rule, but this is probably a funcall, so can be removed!
+// | ID BRACKET_L exprs BRACKET_R
+//       {
+        
+//         //printf("ID expr with exprs for statement grammar \n");
+//       }
 stmt: assign
       {
          $$ = $1;
-      }
-    | ID BRACKET_L exprs BRACKET_R
-      {
-        //printf("ID expr with exprs for statement grammar \n");
       }
     | ifelse
       {
@@ -427,10 +432,8 @@ stmt: assign
       }
     | funcall SEMICOLON %prec FUNCTIONCALL
       {
-        //TODO: how to add this one to the AST???
-        //Maybe access it with: 
-        // node_st *n = ASTfuncall(); VARDECL_NEXT(n) = next; VARDECL_DIMS(n) = NULL;
-
+        //TODO: Is this correct???
+        $$ = ASTexprstmt($1);
         // Funcall belongs in expr and stmt, in stmt it has a SEMICOLON
         //printf("expr function call\n");
       }
@@ -439,44 +442,45 @@ stmt: assign
 // %prec LOWER_THAN_ELSE (== nonassoc) makes sure that the else belongs to the closest if statement
 ifelse: IF BRACKET_L expr BRACKET_R block %prec THEN
         {
-          //TODO: how to get the Stmts: then and else_block in????
-          $$ = ASTifelse($3, NULL, NULL);
+          //TODO: is this correct with the blocks (always returns ASTstmts node)????
+          $$ = ASTifelse($3, $5, NULL);
           //printf("IF without else block \n");
         }
       | IF BRACKET_L expr BRACKET_R block ELSE block 
         {
-          //TODO: how to get the Stmts: then and else_block in????
-          $$ = ASTifelse($3, NULL, NULL);
+          //TODO: is this correct with the blocks (always returns ASTstmts node)????
+          $$ = ASTifelse($3, $5, $7);
           //printf("IF including else block \n");
         }
       ;
 // TESTED
 while: WHILE BRACKET_L expr BRACKET_R block
        {
-        //TODO: how to get the Stmts: block in????
-        $$ = ASTwhile($3, NULL);
+        //TODO: is this correct with the blocks (always returns ASTstmts node)????
+        $$ = ASTwhile($3, $5);
         //printf("WHILE statement \n");
       }
     ;
 // TESTED
 dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
-               {
-                //TODO: how to get the Stmts: block in????
-                $$ = ASTdowhile($5, NULL);
-                //printf("DO-WHILE statement \n");
-               }
-             ;
+          {
+           //TODO: is this correct with the blocks (always returns ASTstmts node)????
+           $$ = ASTdowhile($5, $2);
+           //printf("DO-WHILE statement \n");
+          }
+        ;
 // TESTED
 for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
      {
-      //TODO: how to get the Stmts: block in????
-      $$ = ASTfor($6, $8, $10, NULL);
+      //TODO: is this correct with the blocks (always returns ASTstmts node)????
+      $$ = ASTfor($6, $8, $10, $12);
       //printf("FOR statement with second expr \n");
      }
     | FOR BRACKET_L INTTYPE varlet LET expr COMMA expr BRACKET_R block
      {
-      //TODO: how to get the Stmts: block in???? And how to code standard step +1, can it just be +1???
-      $$ = ASTfor($6, $8, NULL, NULL);
+      //TODO: is this correct with the blocks (always returns ASTstmts node)????
+      //TODO: And how to code standard step +1, can it just be +1???
+      $$ = ASTfor($6, $8, NULL, $10);
       //printf("FOR statement without second expr \n");
      }
     ;
@@ -494,16 +498,17 @@ return: RETURN SEMICOLON
       ;
 
 // TESTED
+// Block always needs to return ASTstmts, because it is used in the statements as a Stmts node type 
 block: CURLYBRACE_L stmts CURLYBRACE_R
       {
-        //TODO: what to do here???
-
+        //TODO: is this correct???
+        $$ = $2;
         //printf("block with curly braces \n");
       }
     | stmt
       {
-        //TODO: what to do here???
-
+        //TODO: is this correct???
+        $$ = ASTstmts($1, NULL);
         //printf("stmt block without curly braces \n");
       }
     ;
@@ -668,7 +673,7 @@ exprs: expr
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
-          // //printf("assign without cast\n");
+          //printf("assign without cast\n");
         }
       ;
 
@@ -687,7 +692,7 @@ varlet: ID
           $$ = ASTvarlet($1);
           AddLocToNode($$, &@1, &@1);
         }
-        ;
+      ;
 
 // Variable in an expression.
 var: ID
@@ -695,7 +700,7 @@ var: ID
           $$ = ASTvar($1);
           AddLocToNode($$, &@1, &@1);
         }
-        ;
+      ;
 
 constant: floatval
           {

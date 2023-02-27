@@ -159,7 +159,7 @@ node FunBody {
 node IfElse {
     children {
         Expr cond { constructor, mandatory },
-        Stmts then { constructor},
+        Stmts then { constructor },
         Stmts else_block { constructor, mandatory }
     }
 };
@@ -167,14 +167,14 @@ node IfElse {
 node While {
     children {
         Expr cond { constructor, mandatory },
-        Stmts block { constructor}
+        Stmts block { constructor }
     }
 };
 
 node DoWhile {
     children {
         Expr cond { constructor, mandatory },
-        Stmts block { constructor}
+        Stmts block { constructor }
     }
 };
 
