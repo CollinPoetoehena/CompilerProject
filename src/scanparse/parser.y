@@ -70,7 +70,7 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 %type <node> stmts stmt
 %type <node> ifelse while dowhile for return
 
-%type <node> intval floatval boolval constant expr
+%type <node> intval floatval boolval constant expr exprs
 %type <node> assign varlet var
 %type <node> globdecl globdef vardecl
 
@@ -167,7 +167,7 @@ decl: fundef
 fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           //TODO: how do I get funbody and param inside the ASTfundef???
-          $$ = ASTfundef($7, $5, $2, $3, true);
+          $$ = ASTfundef($8, $5, $2, $3, true);
           //printf("fun def including funheader param with export\n");
         }
       | EXPORT type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
@@ -390,9 +390,9 @@ stmt: assign
       {
          $$ = $1;
       }
-    | ID BRACKET_L args BRACKET_R
+    | ID BRACKET_L exprs BRACKET_R
       {
-        //printf("ID expr with args for statement grammar \n");
+        //printf("ID expr with exprs for statement grammar \n");
       }
     | ifelse
       {
@@ -497,7 +497,7 @@ return: RETURN SEMICOLON
 block: CURLYBRACE_L stmts CURLYBRACE_R
       {
         //TODO: what to do here???
-        
+
         //printf("block with curly braces \n");
       }
     | stmt
@@ -514,13 +514,13 @@ funcall: ID BRACKET_L BRACKET_R
         {
           // No arguments
           $$ = ASTfuncall(NULL, $1);
-          //printf("fun call without args with semicolon\n");
+          //printf("fun call without exprs with semicolon\n");
         }
-      | ID BRACKET_L args BRACKET_R 
+      | ID BRACKET_L exprs BRACKET_R 
         {
-          // TODO: how to get args in???
+          // TODO: how to get exprs in???
           $$ = ASTfuncall($3, $1);
-          //printf("fun call with args with semicolon\n");
+          //printf("fun call with exprs with semicolon\n");
         }
       ;
 
@@ -650,14 +650,14 @@ expr: BRACKET_L expr BRACKET_R
       }
     ;
 
-// args has one or an infinite amount of expr
-args: expr
+// exprs has one or an infinite amount of expr
+exprs: expr
       {
         //TODO: how to make expr here????
         $$ = ASTexprs($1, NULL);
         // //printf("assign without cast\n");
       }
-     | args COMMA expr
+     | exprs COMMA expr
       {
         //TODO: What to do here????
         $$ = ASTexprs($1, $3);
