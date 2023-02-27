@@ -20,8 +20,10 @@ node_st *PRTprogram(node_st *node)
     // Go through the tree
     TRAVchildren(node);
 
+    //TODO: make this correct with every node so milestone 2 or 3 is correct!
+
     printf("\n-----------Printing Program node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
     
     return node;
 }
@@ -66,7 +68,7 @@ node_st *PRTarrexpr(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing ArrExpr node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }
@@ -95,7 +97,7 @@ node_st *PRTexprstmt(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing ExprStmt node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }
@@ -109,7 +111,7 @@ node_st *PRTreturn(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing Return node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }
@@ -223,7 +225,7 @@ node_st *PRTfunbody(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing FunBody node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
     
     return node;
 }
@@ -237,7 +239,7 @@ node_st *PRTifelse(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing IfElse node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }
@@ -251,7 +253,7 @@ node_st *PRTwhile(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing While node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }
@@ -265,7 +267,7 @@ node_st *PRTdowhile(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing DoWhile node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }
@@ -279,7 +281,7 @@ node_st *PRTfor(node_st *node)
     TRAVchildren(node);
 
     printf("\n-----------Printing For node--------------:\n");
-    printf("This node does not have a representation to print, so it if empty, there is nothing going wrong in this part!\n");
+    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
 
     return node;
 }

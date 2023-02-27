@@ -79,9 +79,6 @@ See union section, <node> stands for node_st, which is a generic type for an ast
 
 // Enum types
 %type <ctype> type
- //TODO: remove??? because not used anymore because of operator precedences
-// %type <cbinop> binop
-// %type <cmonop> monop
 
 // Yacc version: Bison 3.8.2 supports %precedence, so %precedence warning can be ignored
 %precedence THEN
@@ -116,7 +113,7 @@ From here it starts expanding. So, everything needs to be linked
 When coding grammars, you can change it to the grammar rule you are trying to test.
 This will give warnings from useless grammars because they are not linked, but you can ignore that.
 */
-// %start program
+%start program
 
 %%
 // All the grammar rules are specified here
@@ -129,7 +126,7 @@ program: decls
 
 decls: decl decls
         {
-          //TODO: How do I get the decl and next decl in the ASTnode???
+          // $$ = means what you return to coconut
           $$ = ASTdecls($1, $2);
           //printf("decl and decls\n");
         }
@@ -169,33 +166,28 @@ decl: fundef
 // FunDec is also specified in FunDef node
 fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
-          //TODO: how do I get funbody and param inside the ASTfundef???
           $$ = ASTfundef($8, $5, $2, $3, true);
           //printf("fun def including funheader param with export\n");
         }
       | EXPORT type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
-          // TODO
           // Empty param
           $$ = ASTfundef($7, NULL, $2, $3, true);
           //printf("fun def without funheader param with export\n");
         }
       | type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
-          // TODO
           $$ = ASTfundef($7, $4, $1, $2, false);
           //printf("fun def including funheader param without export\n");
         }
       | type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
-          //TODO
           // Empty param
           $$ = ASTfundef($6, NULL, $1, $2, false);
           //printf("fun def wihtout funheader param without export\n");
         }
       | EXTERN type ID BRACKET_L param BRACKET_R
         {
-          //TODO: get param in the ASTfundef
           // Empty funbody
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, $5, $2, $3, true);
@@ -203,7 +195,6 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
         }
       | EXTERN type ID BRACKET_L BRACKET_R
         {
-          //TODO
           // Empty param and empty funbody
           $$ = ASTfundef(NULL, NULL, $2, $3, true);
           // No need to do anything with EXTERN for the FunDec because they are always external!
@@ -211,26 +202,8 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
         }
       ;
 
-// TESTED
-// No FunHeader node in main.ccn because funHeader return type 
-// is encoded in the param, such as first param is return type
-// funheader: type ID BRACKET_L param BRACKET_R
-//         {
-//           //printf("fun header\n");
-//         }
-//       | type ID BRACKET_L BRACKET_R
-//         {
-//           //TODO: is this correct???
-//           $$ = $1;
-//           //printf("fun header without param\n");
-//         }
-//       ;
-
-// TESTED
 globdecl: EXTERN type ID SEMICOLON
          {
-          // $ refereert naar de positie in je regel
-          // $$ = betekent wat die teruggeeft aan coconut
           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
            $$ = ASTglobdecl($2, $3);
            //TODO: what is Ids node in main.ccn?????
@@ -238,30 +211,14 @@ globdecl: EXTERN type ID SEMICOLON
          }
         ;
 
-// TESTED
-// Old rules with assign 
-// EXPORT type assign
-//         {
-//           //TODO: how do I get the expr and ID in the AST???
-//           $$ = ASTglobdef(NULL, NULL, $2, NULL, true);
-//           //printf("glob def with export and assignment (= expr)\n");
-//         }
-//       | type assign
-//         {
-//           //TODO: how do I get the expr and ID in the AST???
-//           $$ = ASTglobdef(NULL, NULL, $1, NULL, false);
-//           //printf("glob def type and assign\n");
-//         }
 globdef: EXPORT type ID LET expr SEMICOLON
         {
-          //TODO: how do I get the expr and ID in the AST???
           // dims is NULL for now because it stands for array dimensions
           $$ = ASTglobdef(NULL, $5, $2, $3, true);
           //printf("glob def with export and assignment (= expr)\n");
         }
       | type ID LET expr SEMICOLON
         {
-          //TODO: how do I get the expr and ID in the AST???
           $$ = ASTglobdef(NULL, $4, $1, $2, false);
           //printf("glob def type and assign\n");
         }
@@ -277,24 +234,6 @@ globdef: EXPORT type ID LET expr SEMICOLON
         }
       ;
 
-// TESTED
-// Can have 1 or an infinite amount of params
-// Old params, but not necessary
-// params: param COMMA params
-//         {
-//           //TODO: how do I get to tupe and name from this param???
-//           $$ = ASTparam(NULL, $3, $1.type, $1.name);
-//           //printf("param with params\n");
-//         }
-//       | param
-//         {
-//           //TODO: is this correct???
-//           $$ = $1;
-//           //printf("param\n");
-//         }
-//       ;
-
-// TESTED
 param: type ID COMMA param
       {
         //TODO: is this correct
@@ -309,22 +248,18 @@ param: type ID COMMA param
       }
     ;
 
-// TESTED
 funbody: vardecl stmts
         {
-          // TODO: how do I get the VarDecls and Stmts in the ASTfunbody????
           $$ = ASTfunbody($1, $2);
           //printf("fun body with 1 or infinite vardecl and statements\n");
         }
       | vardecl
         {
-          // TODO
           $$ = ASTfunbody($1, NULL);
           //printf("fun body with only 1 or infinite vardecl\n");
         }
       | stmts
         {
-          // TODO
           $$ = ASTfunbody(NULL, $1);
           //printf("fun body with only 1 or infinite statements\n");
         }
@@ -336,7 +271,6 @@ funbody: vardecl stmts
         }
       ;
 
-// TESTED
 vardecl: type ID SEMICOLON
         {
           // dims expr is NULL, initial expr is NULL, next is NULL, name is ID, type is type
@@ -360,23 +294,7 @@ vardecl: type ID SEMICOLON
           //printf("var decl with assign\n");
         }
       ;
-// // Zero or infinite amount of vardecl
-// vardecls: vardecl vardecls
-//          {
-//            // TODO: how to make this vardecl???
 
-//            // Probably no action here because the action to the ast is handled in vardecl and VarDecls is not a node!
-//            //printf("vardecl empty\n");
-//          }
-//        | vardecl
-//          {
-//           // TODO: is this correct??
-//           $$ = $1;
-//            //printf("one vardecl from vardecl\n");
-//          }
-//        ;
-
-// TESTED
 stmts: stmt stmts
         {
           $$ = ASTstmts($1, $2);
@@ -387,14 +305,7 @@ stmts: stmt stmts
         }
       ;
 
-//TODO: finish this statement and ask a TA in the lesson if it is correct.
-// TESTED
-// Old removed rule, but this is probably a funcall, so can be removed!
-// | ID BRACKET_L exprs BRACKET_R
-//       {
-        
-//         //printf("ID expr with exprs for statement grammar \n");
-//       }
+//TODO: is this correct and all other things in parser, ask Simon or TA!
 stmt: assign
       {
          $$ = $1;
@@ -438,7 +349,6 @@ stmt: assign
         //printf("expr function call\n");
       }
     ;
-// TESTED
 // %prec LOWER_THAN_ELSE (== nonassoc) makes sure that the else belongs to the closest if statement
 ifelse: IF BRACKET_L expr BRACKET_R block %prec THEN
         {
@@ -453,15 +363,13 @@ ifelse: IF BRACKET_L expr BRACKET_R block %prec THEN
           //printf("IF including else block \n");
         }
       ;
-// TESTED
 while: WHILE BRACKET_L expr BRACKET_R block
        {
         //TODO: is this correct with the blocks (always returns ASTstmts node)????
         $$ = ASTwhile($3, $5);
         //printf("WHILE statement \n");
-      }
-    ;
-// TESTED
+       }
+      ;
 dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
           {
            //TODO: is this correct with the blocks (always returns ASTstmts node)????
@@ -469,7 +377,6 @@ dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
            //printf("DO-WHILE statement \n");
           }
         ;
-// TESTED
 for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
      {
       //TODO: is this correct with the blocks (always returns ASTstmts node)????
@@ -484,7 +391,6 @@ for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
       //printf("FOR statement without second expr \n");
      }
     ;
-// TESTED
 return: RETURN SEMICOLON
         {
           $$ = ASTreturn(NULL);
@@ -497,7 +403,6 @@ return: RETURN SEMICOLON
         }
       ;
 
-// TESTED
 // Block always needs to return ASTstmts, because it is used in the statements as a Stmts node type 
 block: CURLYBRACE_L stmts CURLYBRACE_R
       {
@@ -513,8 +418,6 @@ block: CURLYBRACE_L stmts CURLYBRACE_R
       }
     ;
 
-// TESTED
-// ID BRACKET_L 
 funcall: ID BRACKET_L BRACKET_R
         {
           // No arguments
@@ -523,13 +426,12 @@ funcall: ID BRACKET_L BRACKET_R
         }
       | ID BRACKET_L exprs BRACKET_R 
         {
-          // TODO: how to get exprs in???
           $$ = ASTfuncall($3, $1);
           //printf("fun call with exprs with semicolon\n");
         }
       ;
 
-// For precedence of operators call them with the lexer token and not another rule
+// For precedence of operators call them with the lexer token and not another rule such as binop
 //TODO: check with Simon or TA if all rules are correct and specifically the expr rule!
 expr: BRACKET_L expr BRACKET_R
       {
@@ -658,13 +560,12 @@ expr: BRACKET_L expr BRACKET_R
 // exprs has one or an infinite amount of expr
 exprs: expr
       {
-        //TODO: how to make expr here????
+        //TODO: is this correct??
         $$ = ASTexprs($1, NULL);
         // //printf("assign without cast\n");
       }
      | exprs COMMA expr
       {
-        //TODO: What to do here????
         $$ = ASTexprs($1, $3);
         // //printf("assign without cast\n");
       }
