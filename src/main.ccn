@@ -108,6 +108,7 @@ node FunCall {
     },
     attributes {
         string name { constructor },
+        // TODO: what is Link decl and what can and should you do with it????
         Link decl
     }
 };
@@ -190,9 +191,9 @@ node For {
     }
 };
 
-// TODO: dims stands for dimensions????
 node GlobDecl {
     children {
+        // Dimensions for array extension 3, leave for now
         Ids dims
     },
 
@@ -204,6 +205,7 @@ node GlobDecl {
 
 node GlobDef {
     children {
+        // Dimensions for array extension 3, leave for now
         Exprs dims { constructor },
         Expr init { constructor }
     },
@@ -217,7 +219,8 @@ node GlobDef {
 
 node Param {
     children {
-        Ids dims,
+        // Dimensions for array extension 3, leave for now
+        Ids dims { constructor },
         Param next { constructor }
     },
 
@@ -229,6 +232,7 @@ node Param {
 
 node VarDecl {
     children {
+        // Dimensions for array extension 3, leave for now
         Exprs dims { constructor },
         Expr init { constructor },
         VarDecl next { constructor }
