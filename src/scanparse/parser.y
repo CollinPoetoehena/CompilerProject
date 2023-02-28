@@ -316,14 +316,14 @@ dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
            $$ = ASTdowhile($5, $2);
           }
         ;
-for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block
+for: FOR BRACKET_L INTTYPE ID LET expr COMMA expr COMMA expr BRACKET_R block
      {
-      $$ = ASTfor($6, $8, $10, $12);
+      $$ = ASTfor($6, $8, $10, $12, $4);
      }
-    | FOR BRACKET_L INTTYPE varlet LET expr COMMA expr BRACKET_R block
+    | FOR BRACKET_L INTTYPE ID LET expr COMMA expr BRACKET_R block
      {
       // No step means NULL, which will be used as + 1, this is coded somewhere else
-      $$ = ASTfor($6, $8, NULL, $10);
+      $$ = ASTfor($6, $8, NULL, $10, $4);
      }
     ;
 return: RETURN SEMICOLON

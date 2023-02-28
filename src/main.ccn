@@ -49,6 +49,7 @@ nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 // You need to adapt it when working with the symbol tables.
 // I put it as a decl now, because an empty nodeset is not allowed.
 nodeset Link = Decl;
+// TODO: Simon said that Link is used for Context analysis, such as for the symbol table
 
 root node Program {
     children {
@@ -184,7 +185,7 @@ node For {
     },
 
     attributes {
-        string var
+        string var { constructor }
     }
 };
 

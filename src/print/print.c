@@ -20,6 +20,9 @@ node_st *PRTprogram(node_st *node)
     // Go to child and print it
     TRAVdecls(node);
 
+    // TODO: test every basic program by running that file and see if the output is correct!
+    // TODO: add indentation global variable, add a function that has a parameter int tabs to print tabs!
+
     // TODO: how to print newline at the end of the program
     // Print new line at the end of the program
     // printf("\n");
@@ -102,8 +105,9 @@ node_st *PRTexprstmt(node_st *node)
  */
 node_st *PRTreturn(node_st *node)
 {
-    // Go to the expr node
+    // Go to the print traversal function for the expr child to print it
     TRAVexpr(node);
+
     return node;
 }
 
@@ -112,7 +116,22 @@ node_st *PRTreturn(node_st *node)
  */
 node_st *PRTfuncall(node_st *node)
 {
-    
+    printf("%s", FUNCALL_NAME(node));
+
+    // IF the function call has arguments, print them, otherwise just use ()
+    if (FUNCALL_ARGS(node) != NULL) {
+      // Start the funcall arguments
+      printf("(");
+      // Print the arguments
+      TRAVargs(node);
+      // End the funcall arguments
+      printf(")");
+    } else {
+      printf("()");
+    }
+
+    // TODO: does a semicolon need to be added here??
+
     return node;
 }
 
@@ -169,13 +188,7 @@ node_st *PRTfundefs(node_st *node)
  */
 node_st *PRTfundef(node_st *node)
 {    
-    bool isExported = FUNDEF_EXPORT(node) ? true : false;
-    if (isExported) {
-      // TODO: how to determine if it is export or extern????
-      printf("EXPORT");
-    }
-
-    // Print function type
+    // Get function type
     char *tmp = NULL;
 
     // Get the type
@@ -196,29 +209,49 @@ node_st *PRTfundef(node_st *node)
       DBUG_ASSERT(false, "unknown type detected!");
     }
 
-    // Print spaces and function type and then function name
-    printf(" %s %s", tmp, FUNDEF_NAME(node));
-
-    // If function has params, print params
-    if (FUNDEF_PARAMS(node) != NULL) {
-      printf("(");
-      // Print the params in between the fundef (no new lines)
-      // No need for a for loop because Param is a LinkedList and the next is automatically printed there
-      TRAVparams(node);
-      // Close the params with a brace
-      printf(")");
-    } else {
-      printf("()");
-    }
-
-    // If function has funbody, print funbody
+    // No funBody means that it is a FunDeclaration, so print that, else print FunDefinition
     if (FUNDEF_BODY(node) != NULL) {
+      bool isExported = FUNDEF_EXPORT(node) ? true : false;
+      if (isExported) {
+        printf("export");
+      }
+
+      // Print spaces and function type and then function name
+      printf(" %s %s", tmp, FUNDEF_NAME(node));
+
+      // If function has params, print params
+      if (FUNDEF_PARAMS(node) != NULL) {
+        printf("(");
+        // Print the params in between the fundef (no new lines)
+        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
+        TRAVparams(node);
+        // Close the params with a brace
+        printf(")");
+      } else {
+        printf("()");
+      }
+
       // Open funbody
       printf(" {\n");
       // Print funbody
       TRAVbody(node);
       // Close funbody
       printf("\n}");
+    } else {
+      // FunDeclaration is always extern
+      printf("extern %s %s", tmp, FUNDEF_NAME(node));
+
+      // If function has params, print params
+      if (FUNDEF_PARAMS(node) != NULL) {
+        printf("(");
+        // Print the params in between the fundef (no new lines)
+        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
+        TRAVparams(node);
+        // Close the params with a brace
+        printf(")");
+      } else {
+        printf("()");
+      }
     }
 
     return node;
@@ -242,6 +275,8 @@ node_st *PRTfunbody(node_st *node)
       // No need for a for loop because Stmts is a LinkedList and the next is automatically printed there
       TRAVstmts(node);
     }
+
+    // Print nothing if it is an empty function body
     
     return node;
 }
@@ -348,14 +383,29 @@ node_st *PRTdowhile(node_st *node)
 node_st *PRTfor(node_st *node)
 {
     // Start the for statement
-    printf("for (");
+    printf("for (int %s", FOR_VAR(node));
     // Print the start expression
     TRAVstart_expr(node);
     // Print the stop expression
     TRAVstop(node);
 
     // Print the step expression if it is present
+    if (FOR_STEP(node) != NULL) {
+      // Print step expression
+      TRAVstep(node);
+    }
     
+    // End start if statement and start for block
+    printf(") {\n");
+
+    // Print Stmts block if it has any
+    if (FOR_BLOCK(node) != NULL) {
+      // Print the block
+      TRAVblock(node);
+    }
+
+    // End for loop block
+    printf("\n}");
 
     return node;
 }
@@ -365,7 +415,6 @@ node_st *PRTfor(node_st *node)
  */
 node_st *PRTglobdecl(node_st *node)
 {
-    printf("\n-----------Printing GlobDecl node--------------:\n");
     char *tmp = NULL;
 
     // Get the type
@@ -385,9 +434,10 @@ node_st *PRTglobdecl(node_st *node)
     case CT_NULL:
       DBUG_ASSERT(false, "unknown type detected!");
     }
-    
-    printf("Globdecl name: %s\nGlobdecl type: %s", GLOBDECL_NAME(node), tmp);
 
+    // Print Global declaration
+    printf("extern %s %s;", tmp, GLOBDECL_NAME(node));
+    
     return node;
 }
 
@@ -396,7 +446,7 @@ node_st *PRTglobdecl(node_st *node)
  */
 node_st *PRTglobdef(node_st *node)
 {
-    printf("\n-----------Printing GlobDef node--------------:\n");
+    //TODO: left off here, so all these traversal functions under here and including this one need to be made + indentation functionality
     char *tmp = NULL;
 
     // Get the type
@@ -416,11 +466,6 @@ node_st *PRTglobdef(node_st *node)
     case CT_NULL:
       DBUG_ASSERT(false, "unknown type detected!");
     }
-    
-    printf("Globdef name: %s\nGlobdef type: %s\n", GLOBDEF_NAME(node), tmp);
-
-    char *bool_str = GLOBDEF_EXPORT(node) ? "true" : "false";
-    printf("  Is exported: %s\n", bool_str);
 
     return node;
 }
