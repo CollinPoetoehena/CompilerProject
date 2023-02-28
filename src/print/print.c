@@ -347,8 +347,15 @@ node_st *PRTdowhile(node_st *node)
  */
 node_st *PRTfor(node_st *node)
 {
-    printf("\n-----------Printing For node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
+    // Start the for statement
+    printf("for (");
+    // Print the start expression
+    TRAVstart_expr(node);
+    // Print the stop expression
+    TRAVstop(node);
+
+    // Print the step expression if it is present
+    
 
     return node;
 }
