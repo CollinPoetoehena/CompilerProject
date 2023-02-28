@@ -17,17 +17,18 @@
  */
 node_st *PRTprogram(node_st *node)
 {
-    // Go through the tree
-    TRAVchildren(node);
+    // Go to child and print it
+    TRAVdecls(node);
 
     //TODO: change everything to correctly TRAV to make a good representation. When you use TRAVnodechildren
     // It goes to the print function of that node, that way you can properly create the representation of the nodes
-    // Remove all TRAVchildren(node) and TRAVchild(node)
+    // Remove TRAVchildren(node) and change it to TRAVchild(node) or TRAVchildren(node) for Decls for example
 
-    //glob variable for indentation
+    // You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
+    //glob variable for indentation and function to prints indents
 
-    printf("\n-----------Printing Program node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
+    // printf("\n-----------Printing Program node--------------:\n");
+    // printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
     
     return node;
 }
@@ -37,9 +38,11 @@ node_st *PRTprogram(node_st *node)
  */
 node_st *PRTdecls(node_st *node)
 {
-    printf("\n-----------Printing Decls node--------------:\n");
-    char *bool_str = DECLS_NEXT(node) ? "true" : "false";
-    printf("  Has next decl: %s\n", bool_str);
+    TRAVchildren(node);
+
+    // printf("\n-----------Printing Decls node--------------:\n");
+    // char *bool_str = DECLS_NEXT(node) ? "true" : "false";
+    // printf("  Has next decl: %s\n", bool_str);
 
     return node;
 }
@@ -49,10 +52,14 @@ node_st *PRTdecls(node_st *node)
  */
 node_st *PRTexprs(node_st *node)
 {
-    printf("\n-----------Printing Exprs node--------------:\n");
+  // Go to current expr
+  TRAVexpr(node);
+  // Then go to the next expr
+  TRAVnext(node);
+    // printf("\n-----------Printing Exprs node--------------:\n");
 
-    char *bool_str = EXPRS_NEXT(node) ? "true" : "false";
-    printf("  Has next expr: %s\n", bool_str);
+    // char *bool_str = EXPRS_NEXT(node) ? "true" : "false";
+    // printf("  Has next expr: %s\n", bool_str);
 
     return node;
 }
@@ -62,9 +69,7 @@ node_st *PRTexprs(node_st *node)
  */
 node_st *PRTarrexpr(node_st *node)
 {
-    printf("\n-----------Printing ArrExpr node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
-
+    // NOT USED FOR NOW BECAUSE THERE ARE NO EXTENSIONS YET
     return node;
 }
 
@@ -73,10 +78,7 @@ node_st *PRTarrexpr(node_st *node)
  */
 node_st *PRTids(node_st *node)
 {
-    printf("\n-----------Printing Ids node--------------:\n");
-    printf("  Ids name: %s\n", IDS_NAME(node));
-
-
+    // NOT USED FOR NOW BECAUSE THERE ARE NO EXTENSIONS YET
     return node;
 }
 
@@ -85,9 +87,8 @@ node_st *PRTids(node_st *node)
  */
 node_st *PRTexprstmt(node_st *node)
 {
-    printf("\n-----------Printing ExprStmt node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
-
+    // Go to the expr node
+    TRAVexpr(node);
     return node;
 }
 
@@ -96,9 +97,8 @@ node_st *PRTexprstmt(node_st *node)
  */
 node_st *PRTreturn(node_st *node)
 {
-    printf("\n-----------Printing Return node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
-
+    // Go to the expr node
+    TRAVexpr(node);
     return node;
 }
 
@@ -107,9 +107,7 @@ node_st *PRTreturn(node_st *node)
  */
 node_st *PRTfuncall(node_st *node)
 {
-    printf("\n-----------Printing FunCall node--------------:\n");
-    printf("  Funcall name: %s\n", FUNCALL_NAME(node));
-
+    
     return node;
 }
 
@@ -118,7 +116,6 @@ node_st *PRTfuncall(node_st *node)
  */
 node_st *PRTcast(node_st *node)
 {
-    printf("\n-----------Printing Cast node--------------:\n");
     char *tmp = NULL;
 
     // Get the type
@@ -139,7 +136,8 @@ node_st *PRTcast(node_st *node)
       DBUG_ASSERT(false, "unknown type detected!");
     }
     
-    printf("Cast type: %s\n", tmp);
+    // Print cast
+    printf("(%s)\n", tmp);
 
     return node;
 }
@@ -149,10 +147,16 @@ node_st *PRTcast(node_st *node)
  */
 node_st *PRTfundefs(node_st *node)
 {
-    printf("\n-----------Printing FunDefs node--------------:\n");
-    char *bool_str = FUNDEFS_NEXT(node) != NULL ? "true" : "false";
-    printf("  Has next: %s\n", bool_str);
+    // printf("\n-----------Printing FunDefs node--------------:\n");
+    bool hasNext = FUNDEFS_NEXT(node) != NULL ? true : false;
+    // Go to the fundef
+    TRAVfundef(node);
 
+    if (hasNext) {
+      // Then go to the next
+      TRAVnext(node);
+    }
+    
     return node;
 }
 
@@ -160,8 +164,14 @@ node_st *PRTfundefs(node_st *node)
  * @fn PRTfundef
  */
 node_st *PRTfundef(node_st *node)
-{
-    printf("\n-----------Printing FunDef node--------------:\n");
+{    
+    bool isExported = FUNDEF_EXPORT(node) ? true : false;
+    if (isExported) {
+      // TODO: how to determine if it is export or extern????
+      printf("EXPORT");
+    }
+
+    // Print function type
     char *tmp = NULL;
 
     // Get the type
@@ -181,11 +191,26 @@ node_st *PRTfundef(node_st *node)
     case CT_NULL:
       DBUG_ASSERT(false, "unknown type detected!");
     }
-    
-    printf("Fundef name: %s\nFundef type: %s\n", FUNDEF_NAME(node), tmp);
 
-    char *bool_str = FUNDEF_EXPORT(node) ? "true" : "false";
-    printf("  Is exported: %s\n", bool_str);
+    // Print spaces and function type and then function name
+    printf(" %s %s", tmp, FUNDEF_NAME(node));
+
+    // If function has params, print params
+    if (FUNDEF_PARAMS(node) != NULL) {
+        printf("(");
+        // Print the params in between the fundef (no new lines)
+        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
+        TRAVparams(node);
+        // Close the params with a brace
+        printf(")");
+    } else {
+      printf("()");
+    }
+
+    // If function has funbody, print funbody
+    if (FUNDEF_BODY(node) != NULL) {
+      
+    }
 
     return node;
 }
@@ -315,7 +340,6 @@ node_st *PRTglobdef(node_st *node)
  */
 node_st *PRTparam(node_st *node)
 {
-    printf("\n-----------Printing Param node--------------:\n");
     char *tmp = NULL;
 
     // Get the type
@@ -335,11 +359,17 @@ node_st *PRTparam(node_st *node)
     case CT_NULL:
       DBUG_ASSERT(false, "unknown type detected!");
     }
-    
-    printf("Param name: %s\nParam type: %s\n", PARAM_NAME(node), tmp);
 
-    char *bool_str = PARAM_NEXT(node) != NULL ? "true" : "false";
-    printf("  Has next param: %s\n", bool_str);
+    // If param has next add a comma and a space for the next param
+    if (PARAM_NEXT(node) != NULL) {
+      printf("%s %s, ", tmp, PARAM_NAME(node));
+    } else {
+      // Print the param without a comma at the end and without a space at the end
+      printf("%s %s", tmp, PARAM_NAME(node));
+    }
+    
+    // Go to the next param and print that param
+    TRAVnext(node);
 
     return node;
 }

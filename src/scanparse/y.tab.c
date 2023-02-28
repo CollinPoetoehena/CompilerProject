@@ -741,15 +741,15 @@ static const yytype_int8 yytranslate[] =
 /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,   121,   121,   127,   133,   142,   149,   155,   167,   172,
-     178,   183,   189,   196,   205,   214,   220,   225,   230,   237,
-     243,   251,   256,   261,   267,   274,   280,   285,   291,   298,
-     302,   309,   313,   319,   325,   331,   338,   344,   353,   359,
-     366,   373,   380,   386,   394,   399,   407,   413,   421,   427,
-     436,   443,   449,   455,   461,   467,   473,   479,   485,   491,
-     497,   503,   509,   515,   521,   529,   536,   542,   548,   553,
-     561,   567,   574,   584,   585,   586,   587,   591,   599,   606,
-     611,   615,   621,   627,   633,   637
+       0,   120,   120,   126,   132,   140,   147,   153,   164,   169,
+     175,   180,   186,   193,   202,   211,   217,   222,   227,   234,
+     240,   248,   253,   258,   264,   271,   277,   282,   288,   295,
+     299,   306,   310,   316,   322,   328,   335,   341,   350,   356,
+     363,   370,   377,   383,   391,   396,   404,   410,   418,   424,
+     433,   440,   446,   452,   458,   464,   470,   476,   482,   488,
+     494,   500,   506,   512,   518,   526,   533,   539,   545,   550,
+     558,   564,   571,   581,   582,   583,   584,   588,   596,   603,
+     608,   612,   618,   624,   630,   634
 };
 #endif
 
@@ -1591,7 +1591,7 @@ yyreduce:
   switch (yyn)
     {
   case 2: /* program: decls  */
-#line 122 "parser.y"
+#line 121 "parser.y"
          {
            parseresult = ASTprogram((yyvsp[0].node));
          }
@@ -1599,7 +1599,7 @@ yyreduce:
     break;
 
   case 3: /* decls: decl decls  */
-#line 128 "parser.y"
+#line 127 "parser.y"
         {
           // $$ = means what you return to coconut
           (yyval.node) = ASTdecls((yyvsp[-1].node), (yyvsp[0].node));
@@ -1609,7 +1609,7 @@ yyreduce:
     break;
 
   case 4: /* decls: decl  */
-#line 134 "parser.y"
+#line 133 "parser.y"
         {
           // Next is NULL
           (yyval.node) = ASTdecls((yyvsp[0].node), NULL);
@@ -1619,7 +1619,7 @@ yyreduce:
     break;
 
   case 5: /* decl: fundef  */
-#line 143 "parser.y"
+#line 141 "parser.y"
         {
           //TODO: is this correct?
           (yyval.node) = (yyvsp[0].node);
@@ -1630,7 +1630,7 @@ yyreduce:
     break;
 
   case 6: /* decl: globdecl  */
-#line 150 "parser.y"
+#line 148 "parser.y"
         {
           //TODO: is this correct?
           (yyval.node) = (yyvsp[0].node);
@@ -1640,7 +1640,7 @@ yyreduce:
     break;
 
   case 7: /* decl: globdef  */
-#line 156 "parser.y"
+#line 154 "parser.y"
         {
           //TODO: is this correct?
           (yyval.node) = (yyvsp[0].node);
@@ -1650,7 +1650,7 @@ yyreduce:
     break;
 
   case 8: /* fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R  */
-#line 168 "parser.y"
+#line 165 "parser.y"
         {
           (yyval.node) = ASTfundef((yyvsp[-1].node), (yyvsp[-4].node), (yyvsp[-7].ctype), (yyvsp[-6].id), true);
           //printf("fun def including funheader param with export\n");
@@ -1659,7 +1659,7 @@ yyreduce:
     break;
 
   case 9: /* fundef: EXPORT type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R  */
-#line 173 "parser.y"
+#line 170 "parser.y"
         {
           // Empty param
           (yyval.node) = ASTfundef((yyvsp[-1].node), NULL, (yyvsp[-6].ctype), (yyvsp[-5].id), true);
@@ -1669,7 +1669,7 @@ yyreduce:
     break;
 
   case 10: /* fundef: type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R  */
-#line 179 "parser.y"
+#line 176 "parser.y"
         {
           (yyval.node) = ASTfundef((yyvsp[-1].node), (yyvsp[-4].node), (yyvsp[-7].ctype), (yyvsp[-6].id), false);
           //printf("fun def including funheader param without export\n");
@@ -1678,7 +1678,7 @@ yyreduce:
     break;
 
   case 11: /* fundef: type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R  */
-#line 184 "parser.y"
+#line 181 "parser.y"
         {
           // Empty param
           (yyval.node) = ASTfundef((yyvsp[-1].node), NULL, (yyvsp[-6].ctype), (yyvsp[-5].id), false);
@@ -1688,7 +1688,7 @@ yyreduce:
     break;
 
   case 12: /* fundef: EXTERN type ID BRACKET_L param BRACKET_R  */
-#line 190 "parser.y"
+#line 187 "parser.y"
         {
           // Empty funbody
           // No need to do anything with EXTERN for the FunDec because they are always external!
@@ -1699,7 +1699,7 @@ yyreduce:
     break;
 
   case 13: /* fundef: EXTERN type ID BRACKET_L BRACKET_R  */
-#line 197 "parser.y"
+#line 194 "parser.y"
         {
           // Empty param and empty funbody
           (yyval.node) = ASTfundef(NULL, NULL, (yyvsp[-3].ctype), (yyvsp[-2].id), true);
@@ -1710,7 +1710,7 @@ yyreduce:
     break;
 
   case 14: /* globdecl: EXTERN type ID SEMICOLON  */
-#line 206 "parser.y"
+#line 203 "parser.y"
          {
           // in ID zit de waarde die je lexer daarin heeft gezet met STRCopy(yytext)
            (yyval.node) = ASTglobdecl((yyvsp[-2].ctype), (yyvsp[-1].id));
@@ -1721,7 +1721,7 @@ yyreduce:
     break;
 
   case 15: /* globdef: EXPORT type ID LET expr SEMICOLON  */
-#line 215 "parser.y"
+#line 212 "parser.y"
         {
           // dims is NULL for now because it stands for array dimensions
           (yyval.node) = ASTglobdef(NULL, (yyvsp[-1].node), (yyvsp[-4].ctype), (yyvsp[-3].id), true);
@@ -1731,7 +1731,7 @@ yyreduce:
     break;
 
   case 16: /* globdef: type ID LET expr SEMICOLON  */
-#line 221 "parser.y"
+#line 218 "parser.y"
         {
           (yyval.node) = ASTglobdef(NULL, (yyvsp[-1].node), (yyvsp[-4].ctype), (yyvsp[-3].id), false);
           //printf("glob def type and assign\n");
@@ -1740,7 +1740,7 @@ yyreduce:
     break;
 
   case 17: /* globdef: EXPORT type ID SEMICOLON  */
-#line 226 "parser.y"
+#line 223 "parser.y"
         {
           (yyval.node) = ASTglobdef(NULL, NULL, (yyvsp[-2].ctype), (yyvsp[-1].id), true);
           //printf("glob def with export\n");
@@ -1749,7 +1749,7 @@ yyreduce:
     break;
 
   case 18: /* globdef: type ID SEMICOLON  */
-#line 231 "parser.y"
+#line 228 "parser.y"
         {
           (yyval.node) = ASTglobdef(NULL, NULL, (yyvsp[-2].ctype), (yyvsp[-1].id), false);
           //printf("glob def without export\n");
@@ -1758,7 +1758,7 @@ yyreduce:
     break;
 
   case 19: /* param: type ID COMMA param  */
-#line 238 "parser.y"
+#line 235 "parser.y"
       {
         //TODO: is this correct
         (yyval.node) = ASTparam(NULL, (yyvsp[0].node), (yyvsp[-2].id), (yyvsp[-3].ctype));
@@ -1768,7 +1768,7 @@ yyreduce:
     break;
 
   case 20: /* param: type ID  */
-#line 244 "parser.y"
+#line 241 "parser.y"
       {
         //TODO: is this correct
         (yyval.node) = ASTparam(NULL, NULL, (yyvsp[0].id), (yyvsp[-1].ctype));
@@ -1778,7 +1778,7 @@ yyreduce:
     break;
 
   case 21: /* funbody: vardecl stmts  */
-#line 252 "parser.y"
+#line 249 "parser.y"
         {
           (yyval.node) = ASTfunbody((yyvsp[-1].node), (yyvsp[0].node));
           //printf("fun body with 1 or infinite vardecl and statements\n");
@@ -1787,7 +1787,7 @@ yyreduce:
     break;
 
   case 22: /* funbody: vardecl  */
-#line 257 "parser.y"
+#line 254 "parser.y"
         {
           (yyval.node) = ASTfunbody((yyvsp[0].node), NULL);
           //printf("fun body with only 1 or infinite vardecl\n");
@@ -1796,7 +1796,7 @@ yyreduce:
     break;
 
   case 23: /* funbody: stmts  */
-#line 262 "parser.y"
+#line 259 "parser.y"
         {
           (yyval.node) = ASTfunbody(NULL, (yyvsp[0].node));
           //printf("fun body with only 1 or infinite statements\n");
@@ -1805,7 +1805,7 @@ yyreduce:
     break;
 
   case 24: /* funbody: %empty  */
-#line 267 "parser.y"
+#line 264 "parser.y"
         {
           //TODO: is this correct for an empty functionbody???
           (yyval.node) = ASTfunbody(NULL, NULL);
@@ -1815,7 +1815,7 @@ yyreduce:
     break;
 
   case 25: /* vardecl: type ID SEMICOLON  */
-#line 275 "parser.y"
+#line 272 "parser.y"
         {
           // dims expr is NULL, initial expr is NULL, next is NULL, name is ID, type is type
           (yyval.node) = ASTvardecl(NULL, NULL, NULL, (yyvsp[-1].id), (yyvsp[-2].ctype));
@@ -1825,7 +1825,7 @@ yyreduce:
     break;
 
   case 26: /* vardecl: type ID LET expr SEMICOLON  */
-#line 281 "parser.y"
+#line 278 "parser.y"
         {
           (yyval.node) = ASTvardecl(NULL, (yyvsp[-1].node), NULL, (yyvsp[-3].id), (yyvsp[-4].ctype));
           //printf("var decl with assign\n");
@@ -1834,7 +1834,7 @@ yyreduce:
     break;
 
   case 27: /* vardecl: type ID SEMICOLON vardecl  */
-#line 286 "parser.y"
+#line 283 "parser.y"
         {
           // dims expr is NULL, initial expr is NULL, next is NULL, name is ID, type is type
           (yyval.node) = ASTvardecl(NULL, NULL, (yyvsp[0].node), (yyvsp[-2].id), (yyvsp[-3].ctype));
@@ -1844,7 +1844,7 @@ yyreduce:
     break;
 
   case 28: /* vardecl: type ID LET expr SEMICOLON vardecl  */
-#line 292 "parser.y"
+#line 289 "parser.y"
         {
           (yyval.node) = ASTvardecl(NULL, (yyvsp[-2].node), (yyvsp[0].node), (yyvsp[-4].id), (yyvsp[-5].ctype));
           //printf("var decl with assign\n");
@@ -1853,7 +1853,7 @@ yyreduce:
     break;
 
   case 29: /* stmts: stmt stmts  */
-#line 299 "parser.y"
+#line 296 "parser.y"
         {
           (yyval.node) = ASTstmts((yyvsp[-1].node), (yyvsp[0].node));
         }
@@ -1861,7 +1861,7 @@ yyreduce:
     break;
 
   case 30: /* stmts: stmt  */
-#line 303 "parser.y"
+#line 300 "parser.y"
         {
           (yyval.node) = ASTstmts((yyvsp[0].node), NULL);
         }
@@ -1869,7 +1869,7 @@ yyreduce:
     break;
 
   case 31: /* stmt: assign  */
-#line 310 "parser.y"
+#line 307 "parser.y"
       {
          (yyval.node) = (yyvsp[0].node);
       }
@@ -1877,7 +1877,7 @@ yyreduce:
     break;
 
   case 32: /* stmt: ifelse  */
-#line 314 "parser.y"
+#line 311 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = (yyvsp[0].node);
@@ -1887,7 +1887,7 @@ yyreduce:
     break;
 
   case 33: /* stmt: while  */
-#line 320 "parser.y"
+#line 317 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = (yyvsp[0].node);
@@ -1897,7 +1897,7 @@ yyreduce:
     break;
 
   case 34: /* stmt: dowhile  */
-#line 326 "parser.y"
+#line 323 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = (yyvsp[0].node);
@@ -1907,7 +1907,7 @@ yyreduce:
     break;
 
   case 35: /* stmt: for  */
-#line 332 "parser.y"
+#line 329 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = (yyvsp[0].node);
@@ -1917,7 +1917,7 @@ yyreduce:
     break;
 
   case 36: /* stmt: return  */
-#line 339 "parser.y"
+#line 336 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = (yyvsp[0].node);
@@ -1927,7 +1927,7 @@ yyreduce:
     break;
 
   case 37: /* stmt: funcall SEMICOLON  */
-#line 345 "parser.y"
+#line 342 "parser.y"
       {
         //TODO: Is this correct???
         (yyval.node) = ASTexprstmt((yyvsp[-1].node));
@@ -1938,7 +1938,7 @@ yyreduce:
     break;
 
   case 38: /* ifelse: IF BRACKET_L expr BRACKET_R block  */
-#line 354 "parser.y"
+#line 351 "parser.y"
         {
           //TODO: is this correct with the blocks (always returns ASTstmts node)????
           (yyval.node) = ASTifelse((yyvsp[-2].node), (yyvsp[0].node), NULL);
@@ -1948,7 +1948,7 @@ yyreduce:
     break;
 
   case 39: /* ifelse: IF BRACKET_L expr BRACKET_R block ELSE block  */
-#line 360 "parser.y"
+#line 357 "parser.y"
         {
           //TODO: is this correct with the blocks (always returns ASTstmts node)????
           (yyval.node) = ASTifelse((yyvsp[-4].node), (yyvsp[-2].node), (yyvsp[0].node));
@@ -1958,7 +1958,7 @@ yyreduce:
     break;
 
   case 40: /* while: WHILE BRACKET_L expr BRACKET_R block  */
-#line 367 "parser.y"
+#line 364 "parser.y"
        {
         //TODO: is this correct with the blocks (always returns ASTstmts node)????
         (yyval.node) = ASTwhile((yyvsp[-2].node), (yyvsp[0].node));
@@ -1968,7 +1968,7 @@ yyreduce:
     break;
 
   case 41: /* dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON  */
-#line 374 "parser.y"
+#line 371 "parser.y"
           {
            //TODO: is this correct with the blocks (always returns ASTstmts node)????
            (yyval.node) = ASTdowhile((yyvsp[-2].node), (yyvsp[-5].node));
@@ -1978,7 +1978,7 @@ yyreduce:
     break;
 
   case 42: /* for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr COMMA expr BRACKET_R block  */
-#line 381 "parser.y"
+#line 378 "parser.y"
      {
       //TODO: is this correct with the blocks (always returns ASTstmts node)????
       (yyval.node) = ASTfor((yyvsp[-6].node), (yyvsp[-4].node), (yyvsp[-2].node), (yyvsp[0].node));
@@ -1988,7 +1988,7 @@ yyreduce:
     break;
 
   case 43: /* for: FOR BRACKET_L INTTYPE varlet LET expr COMMA expr BRACKET_R block  */
-#line 387 "parser.y"
+#line 384 "parser.y"
      {
       //TODO: is this correct with the blocks (always returns ASTstmts node)????
       //TODO: And how to code standard step +1, can it just be +1???
@@ -1999,7 +1999,7 @@ yyreduce:
     break;
 
   case 44: /* return: RETURN SEMICOLON  */
-#line 395 "parser.y"
+#line 392 "parser.y"
         {
           (yyval.node) = ASTreturn(NULL);
           //printf("RETURN statement without expr \n");
@@ -2008,7 +2008,7 @@ yyreduce:
     break;
 
   case 45: /* return: RETURN expr SEMICOLON  */
-#line 400 "parser.y"
+#line 397 "parser.y"
         {
           (yyval.node) = ASTreturn((yyvsp[-1].node));
           //printf("RETURN statement including expr \n");
@@ -2017,7 +2017,7 @@ yyreduce:
     break;
 
   case 46: /* block: CURLYBRACE_L stmts CURLYBRACE_R  */
-#line 408 "parser.y"
+#line 405 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = (yyvsp[-1].node);
@@ -2027,7 +2027,7 @@ yyreduce:
     break;
 
   case 47: /* block: stmt  */
-#line 414 "parser.y"
+#line 411 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = ASTstmts((yyvsp[0].node), NULL);
@@ -2037,7 +2037,7 @@ yyreduce:
     break;
 
   case 48: /* funcall: ID BRACKET_L BRACKET_R  */
-#line 422 "parser.y"
+#line 419 "parser.y"
         {
           // No arguments
           (yyval.node) = ASTfuncall(NULL, (yyvsp[-2].id));
@@ -2047,7 +2047,7 @@ yyreduce:
     break;
 
   case 49: /* funcall: ID BRACKET_L exprs BRACKET_R  */
-#line 428 "parser.y"
+#line 425 "parser.y"
         {
           (yyval.node) = ASTfuncall((yyvsp[-1].node), (yyvsp[-3].id));
           //printf("fun call with exprs with semicolon\n");
@@ -2056,7 +2056,7 @@ yyreduce:
     break;
 
   case 50: /* expr: BRACKET_L expr BRACKET_R  */
-#line 437 "parser.y"
+#line 434 "parser.y"
       {
         //TODO: is this correct???
         (yyval.node) = ASTexprstmt((yyvsp[-1].node));
@@ -2067,7 +2067,7 @@ yyreduce:
     break;
 
   case 51: /* expr: expr PLUS expr  */
-#line 444 "parser.y"
+#line 441 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_add);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2077,7 +2077,7 @@ yyreduce:
     break;
 
   case 52: /* expr: expr MINUS expr  */
-#line 450 "parser.y"
+#line 447 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_sub);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2087,7 +2087,7 @@ yyreduce:
     break;
 
   case 53: /* expr: expr SLASH expr  */
-#line 456 "parser.y"
+#line 453 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_div);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2097,7 +2097,7 @@ yyreduce:
     break;
 
   case 54: /* expr: expr STAR expr  */
-#line 462 "parser.y"
+#line 459 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_mul);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2107,7 +2107,7 @@ yyreduce:
     break;
 
   case 55: /* expr: expr PERCENT expr  */
-#line 468 "parser.y"
+#line 465 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_mod);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2117,7 +2117,7 @@ yyreduce:
     break;
 
   case 56: /* expr: expr LE expr  */
-#line 474 "parser.y"
+#line 471 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_le);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2127,7 +2127,7 @@ yyreduce:
     break;
 
   case 57: /* expr: expr LT expr  */
-#line 480 "parser.y"
+#line 477 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_lt);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2137,7 +2137,7 @@ yyreduce:
     break;
 
   case 58: /* expr: expr GE expr  */
-#line 486 "parser.y"
+#line 483 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_ge);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2147,7 +2147,7 @@ yyreduce:
     break;
 
   case 59: /* expr: expr GT expr  */
-#line 492 "parser.y"
+#line 489 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_gt);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2157,7 +2157,7 @@ yyreduce:
     break;
 
   case 60: /* expr: expr EQ expr  */
-#line 498 "parser.y"
+#line 495 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_eq);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2167,7 +2167,7 @@ yyreduce:
     break;
 
   case 61: /* expr: expr OR expr  */
-#line 504 "parser.y"
+#line 501 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_or);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2177,7 +2177,7 @@ yyreduce:
     break;
 
   case 62: /* expr: expr AND expr  */
-#line 510 "parser.y"
+#line 507 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_and);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2187,7 +2187,7 @@ yyreduce:
     break;
 
   case 63: /* expr: expr NE expr  */
-#line 516 "parser.y"
+#line 513 "parser.y"
       {
         (yyval.node) = ASTbinop((yyvsp[-2].node), (yyvsp[0].node), BO_ne);
         AddLocToNode((yyval.node), &(yylsp[-2]), &(yylsp[0]));
@@ -2197,7 +2197,7 @@ yyreduce:
     break;
 
   case 64: /* expr: MINUS expr  */
-#line 522 "parser.y"
+#line 519 "parser.y"
       {
         // This MINUS uses the MONOP_MINUS precedence rule
         // arithmetic negation, used for arithmetic values (=numbers, etc)
@@ -2209,7 +2209,7 @@ yyreduce:
     break;
 
   case 65: /* expr: EXCLAMATION expr  */
-#line 530 "parser.y"
+#line 527 "parser.y"
       {
         // logical negation, used for boolean values (true, false)
         (yyval.node) = ASTmonop((yyvsp[0].node), MO_not);
@@ -2220,7 +2220,7 @@ yyreduce:
     break;
 
   case 66: /* expr: BRACKET_L type BRACKET_R expr  */
-#line 537 "parser.y"
+#line 534 "parser.y"
       {
         // Type cast
         (yyval.node) = ASTcast((yyvsp[0].node), (yyvsp[-2].ctype));
@@ -2230,7 +2230,7 @@ yyreduce:
     break;
 
   case 67: /* expr: funcall  */
-#line 543 "parser.y"
+#line 540 "parser.y"
       {
         // Funcall belongs in expr and stmt, in expr it does not have a SEMICOLON
         (yyval.node) = (yyvsp[0].node);
@@ -2240,7 +2240,7 @@ yyreduce:
     break;
 
   case 68: /* expr: var  */
-#line 549 "parser.y"
+#line 546 "parser.y"
       {
         (yyval.node) = (yyvsp[0].node);
         //printf("ID expr \n");
@@ -2249,7 +2249,7 @@ yyreduce:
     break;
 
   case 69: /* expr: constant  */
-#line 554 "parser.y"
+#line 551 "parser.y"
       {
         (yyval.node) = (yyvsp[0].node);
         //printf("constant expr\n");
@@ -2258,7 +2258,7 @@ yyreduce:
     break;
 
   case 70: /* exprs: expr  */
-#line 562 "parser.y"
+#line 559 "parser.y"
       {
         //TODO: is this correct??
         (yyval.node) = ASTexprs((yyvsp[0].node), NULL);
@@ -2268,7 +2268,7 @@ yyreduce:
     break;
 
   case 71: /* exprs: exprs COMMA expr  */
-#line 568 "parser.y"
+#line 565 "parser.y"
       {
         (yyval.node) = ASTexprs((yyvsp[-2].node), (yyvsp[0].node));
         // //printf("assign without cast\n");
@@ -2277,7 +2277,7 @@ yyreduce:
     break;
 
   case 72: /* assign: varlet LET expr SEMICOLON  */
-#line 575 "parser.y"
+#line 572 "parser.y"
         {
           (yyval.node) = ASTassign((yyvsp[-3].node), (yyvsp[-1].node));
           //printf("assign without cast\n");
@@ -2286,31 +2286,31 @@ yyreduce:
     break;
 
   case 73: /* type: BOOLTYPE  */
-#line 584 "parser.y"
+#line 581 "parser.y"
                 { (yyval.ctype) = CT_bool; }
 #line 2292 "y.tab.c"
     break;
 
   case 74: /* type: FLOATTYPE  */
-#line 585 "parser.y"
+#line 582 "parser.y"
                 { (yyval.ctype) = CT_float; }
 #line 2298 "y.tab.c"
     break;
 
   case 75: /* type: INTTYPE  */
-#line 586 "parser.y"
+#line 583 "parser.y"
                 { (yyval.ctype) = CT_int; }
 #line 2304 "y.tab.c"
     break;
 
   case 76: /* type: VOIDTYPE  */
-#line 587 "parser.y"
+#line 584 "parser.y"
                 { (yyval.ctype) = CT_void; }
 #line 2310 "y.tab.c"
     break;
 
   case 77: /* varlet: ID  */
-#line 592 "parser.y"
+#line 589 "parser.y"
         {
           (yyval.node) = ASTvarlet((yyvsp[0].id));
           AddLocToNode((yyval.node), &(yylsp[0]), &(yylsp[0]));
@@ -2319,7 +2319,7 @@ yyreduce:
     break;
 
   case 78: /* var: ID  */
-#line 600 "parser.y"
+#line 597 "parser.y"
         {
           (yyval.node) = ASTvar((yyvsp[0].id));
           AddLocToNode((yyval.node), &(yylsp[0]), &(yylsp[0]));
@@ -2328,7 +2328,7 @@ yyreduce:
     break;
 
   case 79: /* constant: floatval  */
-#line 607 "parser.y"
+#line 604 "parser.y"
           {
             // Assign the value of the floatval grammar rule AST creation to this constant node type
             (yyval.node) = (yyvsp[0].node);
@@ -2337,7 +2337,7 @@ yyreduce:
     break;
 
   case 80: /* constant: intval  */
-#line 612 "parser.y"
+#line 609 "parser.y"
           {
             (yyval.node) = (yyvsp[0].node);
           }
@@ -2345,7 +2345,7 @@ yyreduce:
     break;
 
   case 81: /* constant: boolval  */
-#line 616 "parser.y"
+#line 613 "parser.y"
           {
             (yyval.node) = (yyvsp[0].node);
           }
@@ -2353,7 +2353,7 @@ yyreduce:
     break;
 
   case 82: /* floatval: FLOAT  */
-#line 622 "parser.y"
+#line 619 "parser.y"
            {
              (yyval.node) = ASTfloat((yyvsp[0].cflt));
            }
@@ -2361,7 +2361,7 @@ yyreduce:
     break;
 
   case 83: /* intval: NUM  */
-#line 628 "parser.y"
+#line 625 "parser.y"
         {
           (yyval.node) = ASTnum((yyvsp[0].cint));
         }
@@ -2369,7 +2369,7 @@ yyreduce:
     break;
 
   case 84: /* boolval: TRUEVAL  */
-#line 634 "parser.y"
+#line 631 "parser.y"
          {
            (yyval.node) = ASTbool(true);
          }
@@ -2377,7 +2377,7 @@ yyreduce:
     break;
 
   case 85: /* boolval: FALSEVAL  */
-#line 638 "parser.y"
+#line 635 "parser.y"
          {
            (yyval.node) = ASTbool(false);
          }
@@ -2583,7 +2583,7 @@ yyreturnlab:
   return yyresult;
 }
 
-#line 642 "parser.y"
+#line 639 "parser.y"
 
 
 /* Add location tracking information to a node in the parse tree */

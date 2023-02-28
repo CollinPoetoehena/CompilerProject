@@ -77,7 +77,7 @@ node ArrExpr {
     }
 };
 
-// TODO: Ids are .....
+// Ids are only used for array extensions (= arr[m,n] m and n are Ids), so not yet used
 node Ids {
     children {
         Ids next   
@@ -137,7 +137,7 @@ node FunDef {
     },
     attributes {
         Type type { constructor },
-        string name { constructor },
+        string name { constructor, mandatory },
         bool export { constructor }
         // No need to do anything with EXTERN for the FunDec because they are always external!
     }
@@ -222,7 +222,7 @@ node Param {
     },
 
     attributes {
-        string name { constructor },
+        string name { constructor, mandatory },
         Type type { constructor }
     }
 };
