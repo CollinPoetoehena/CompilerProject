@@ -20,6 +20,10 @@ node_st *PRTprogram(node_st *node)
     // Go to child and print it
     TRAVdecls(node);
 
+    // TODO: how to print newline at the end of the program
+    // Print new line at the end of the program
+    // printf("\n");
+
     //TODO: change everything to correctly TRAV to make a good representation. When you use TRAVnodechildren
     // It goes to the print function of that node, that way you can properly create the representation of the nodes
     // Remove TRAVchildren(node) and change it to TRAVchild(node) or TRAVchildren(node) for Decls for example
@@ -87,7 +91,8 @@ node_st *PRTids(node_st *node)
  */
 node_st *PRTexprstmt(node_st *node)
 {
-    // Go to the expr node
+    // Go to the expr node, will automatically go to the types of Expr 
+    // in main.ccn and print it with this traversal for that node type
     TRAVexpr(node);
     return node;
 }
@@ -137,7 +142,7 @@ node_st *PRTcast(node_st *node)
     }
     
     // Print cast
-    printf("(%s)\n", tmp);
+    printf("(%s)", tmp);
 
     return node;
 }
@@ -147,7 +152,6 @@ node_st *PRTcast(node_st *node)
  */
 node_st *PRTfundefs(node_st *node)
 {
-    // printf("\n-----------Printing FunDefs node--------------:\n");
     bool hasNext = FUNDEFS_NEXT(node) != NULL ? true : false;
     // Go to the fundef
     TRAVfundef(node);
@@ -197,19 +201,24 @@ node_st *PRTfundef(node_st *node)
 
     // If function has params, print params
     if (FUNDEF_PARAMS(node) != NULL) {
-        printf("(");
-        // Print the params in between the fundef (no new lines)
-        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
-        TRAVparams(node);
-        // Close the params with a brace
-        printf(")");
+      printf("(");
+      // Print the params in between the fundef (no new lines)
+      // No need for a for loop because Param is a LinkedList and the next is automatically printed there
+      TRAVparams(node);
+      // Close the params with a brace
+      printf(")");
     } else {
       printf("()");
     }
 
     // If function has funbody, print funbody
     if (FUNDEF_BODY(node) != NULL) {
-      
+      // Open funbody
+      printf(" {\n");
+      // Print funbody
+      TRAVbody(node);
+      // Close funbody
+      printf("\n}");
     }
 
     return node;
@@ -220,8 +229,19 @@ node_st *PRTfundef(node_st *node)
  */
 node_st *PRTfunbody(node_st *node)
 {
-    printf("\n-----------Printing FunBody node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
+    // If the funbody has vardecls, print them
+    if (FUNBODY_DECLS(node) != NULL) {
+      // Print vardecls
+      // No need for a for loop because Vardecl is a LinkedList and the next is automatically printed there
+      TRAVdecls(node);
+    }
+
+    // If the funbody has statements, print them
+    if (FUNBODY_DECLS(node) != NULL) {
+      // Print stmts
+      // No need for a for loop because Stmts is a LinkedList and the next is automatically printed there
+      TRAVstmts(node);
+    }
     
     return node;
 }
@@ -231,8 +251,36 @@ node_st *PRTfunbody(node_st *node)
  */
 node_st *PRTifelse(node_st *node)
 {
-    printf("\n-----------Printing IfElse node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
+    // Add the condition if the if statement has a condition
+    if (IFELSE_COND(node) != NULL) {
+      // Start the if statement
+      printf("if (");
+      // Print the expr condition
+      TRAVcond(node);
+      // End the if statement and start the then block
+      printf(") {\n");
+    } else {
+      // Print an if statement without a body and start the then block
+      printf("if () {\n");
+    }
+
+    // Check if it has a then block, if not do nothing (=print an empty block)
+    if (IFELSE_THEN(node) != NULL) {
+      TRAVthen(node);
+    }
+
+    // End the then block
+    printf("\n}");
+
+    // If it has an else block, print it
+    if (IFELSE_ELSE_BLOCK(node) != NULL) {
+      // Start the else block
+      printf("else {\n");
+      // Goes to the print traversal for the Stmts node type else_block
+      TRAVelse_block(node);
+      // End the else bock
+      printf("\n}");
+    }
 
     return node;
 }
@@ -363,13 +411,12 @@ node_st *PRTparam(node_st *node)
     // If param has next add a comma and a space for the next param
     if (PARAM_NEXT(node) != NULL) {
       printf("%s %s, ", tmp, PARAM_NAME(node));
+      // Go to the next param and print that param
+      TRAVnext(node);
     } else {
       // Print the param without a comma at the end and without a space at the end
       printf("%s %s", tmp, PARAM_NAME(node));
     }
-    
-    // Go to the next param and print that param
-    TRAVnext(node);
 
     return node;
 }
@@ -379,7 +426,6 @@ node_st *PRTparam(node_st *node)
  */
 node_st *PRTvardecl(node_st *node)
 {
-    printf("\n-----------Printing VarDecl node--------------:\n");
     char *tmp = NULL;
 
     // Get the type
@@ -400,7 +446,24 @@ node_st *PRTvardecl(node_st *node)
       DBUG_ASSERT(false, "unknown type detected!");
     }
 
-    printf("VarDecl name: %s\nVarDecl type: %s", VARDECL_NAME(node), tmp);
+    // TODO: how to print the expr init???
+    printf("%s %s", tmp, VARDECL_NAME(node));
+    // if init then = expr
+    if (VARDECL_INIT(node) != NULL) {
+      printf(" = ");
+      // Print the expr
+      TRAVinit(node);
+      // End the vardecl with a semicolon (;)
+      printf(";");
+    }
+
+    // If vardecl has next add a newline for the next vardecl
+    if (VARDECL_NEXT(node) != NULL) {
+      printf("\n");
+      // Go to the next vardcel and print that vardecl using their print traversal
+      TRAVnext(node);
+    }
+
     return node;
 }
 
@@ -409,12 +472,12 @@ node_st *PRTvardecl(node_st *node)
  */
 node_st *PRTstmts(node_st *node)
 {
+    // Print the statement, this will automatically go to the types of Stmt 
+    // in main.ccn and print it with this traversal for that node type
     TRAVstmt(node);
-    printf("\n-----------Printing Stmts node--------------:\n");
 
+    // If it has a next go to those statement(s) and print them
     TRAVnext(node);
-    char *bool_str = STMTS_NEXT(node) != NULL ? "true" : "false";
-    printf("  Has next statement: %s\n", bool_str);
 
     return node;
 }
@@ -424,16 +487,15 @@ node_st *PRTstmts(node_st *node)
  */
 node_st *PRTassign(node_st *node)
 {
-    printf("\n-----------Printing Assign node--------------:\n");
-
+    // Print the Varlet node type let if it is not NULL
     if (ASSIGN_LET(node) != NULL) {
-        TRAVlet(node);
-        printf( " = ");
+      TRAVlet(node);
     }
-    
-    TRAVexpr(node);
-    printf( ";\n");
-  
+
+    // Print the Expr node type exor if it is not NULL
+    if (ASSIGN_EXPR(node) != NULL) {
+      TRAVexpr(node);
+    }
 
     return node;
 }
