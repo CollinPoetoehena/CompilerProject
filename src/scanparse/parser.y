@@ -117,7 +117,6 @@ This will give warnings from useless grammars because they are not linked, but y
 
 %%
 // All the grammar rules are specified here
-// TODO: operator precedence in expr: https://canvas.uva.nl/courses/36019/discussion_topics/662306
 program: decls
          {
            parseresult = ASTprogram($1);
@@ -138,7 +137,6 @@ decls: decl decls
         }
       ;
 
-// TESTED
 decl: fundef
         {
           //TODO: is this correct?
@@ -160,7 +158,6 @@ decl: fundef
         }
       ;
 
-// TESTED
 // No FunHeader node in main.ccn because funHeader return type 
 // is encoded in the param, such as first param is return type
 // FunDec is also specified in FunDef node

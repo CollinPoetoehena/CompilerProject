@@ -323,4 +323,8 @@ node Bool {
 node Ste {
 
 }
+// basic heeft 2 scopes, global en in een funcall
+// LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
+// Alles die de AST ombouwt is een traversal
+// Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals
 */
