@@ -290,8 +290,21 @@ node_st *PRTifelse(node_st *node)
  */
 node_st *PRTwhile(node_st *node)
 {
-    printf("\n-----------Printing While node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
+    // Add the condition while the while statement has a condition
+    if (WHILE_COND(node) != NULL) {
+      // Start the while statement
+      printf("while (");
+      // Print the expr condition
+      TRAVcond(node);
+      // End the while statement and start the block
+      printf(") {\n");
+    } else {
+      // Print a while statement without a body and start the block
+      printf("while () {\n");
+    }
+
+    // End the block
+    printf("\n}");
 
     return node;
 }
@@ -301,8 +314,30 @@ node_st *PRTwhile(node_st *node)
  */
 node_st *PRTdowhile(node_st *node)
 {
-    printf("\n-----------Printing DoWhile node--------------:\n");
-    printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
+    // Start the do statement
+    printf("do {\n");
+
+    // Add the block if it has a block
+    if (DOWHILE_BLOCK(node) != NULL) {
+      // Print the Stmts block
+      TRAVblock(node);
+    }
+
+    // End the do statement
+    printf("\n} ");
+
+    // Add the while statement
+    if (WHILE_COND(node) != NULL) {
+      // Start the while statement
+      printf("while (");
+      // Print the expr condition
+      TRAVcond(node);
+      // End the while statement
+      printf(");");
+    } else {
+      // Print a while statement without a expr condition
+      printf("while ();");
+    }
 
     return node;
 }
