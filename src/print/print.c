@@ -17,28 +17,33 @@
  */
 node_st *PRTprogram(node_st *node)
 {
+    // You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
+    // Some programs print an extra new line for example, but it does not change anything about the functionality!
+
     // Go to child and print it
     TRAVdecls(node);
 
     // Print a new line at the end of the program
     printf("\n");
 
-    // TODO: test every basic program by running that file and see if the output is correct!
+    // TODO: float values are float types but rounded, why is that!?!?
+    //  ./civicc ../test/basic/check_success/boolop.cvc 
+
+    // TODO: do_while is not parsed well, see files with these commands:
+    // Possible problem: empty funbody does not seem to work with stmts, with a vardecl it works!
+    // ./civicc ../test/basic/check_success/parse_do_while.cvc
+
+    // TODO: these file is also not working, also funbody and block not working that is not working, also with vardecl it works!
+    // ./civicc ../test/basic/check_success/params_funcall.cvc
+    // ./civicc ../test/basic/check_success/parse_for.cvc 
+    // ./civicc ../test/basic/check_success/parse_funbody.cvc 
+    // ./civicc ../test/basic/check_success/parse_funcall.cvc
+
+    // This file is not working because of whitespace probably, why?? and same applies with the funbody, need to add vardecl, why???
+    // ./civicc ../test/basic/check_success/parse_if_else.cvc 
+    // The rest of the files are all working (maybe the print is not perfect sometimes with an extra new line, but that does not change anything!)
+    
     // TODO: add indentation global variable, add a function that has a parameter int tabs to print tabs!
-
-    // TODO: how to print newline at the end of the program
-    // Print new line at the end of the program
-    // printf("\n");
-
-    //TODO: change everything to correctly TRAV to make a good representation. When you use TRAVnodechildren
-    // It goes to the print function of that node, that way you can properly create the representation of the nodes
-    // Remove TRAVchildren(node) and change it to TRAVchild(node) or TRAVchildren(node) for Decls for example
-
-    // You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
-    //glob variable for indentation and function to prints indents
-
-    // printf("\n-----------Printing Program node--------------:\n");
-    // printf("This node does not have a representation to print, so it is empty, there is nothing going wrong in this part!\n");
     
     return node;
 }
@@ -48,14 +53,16 @@ node_st *PRTprogram(node_st *node)
  */
 node_st *PRTdecls(node_st *node)
 {
-
-
     // Print the declaration, this will automatically go to the types of Decl 
     // in main.ccn and print it with this traversal for that node type
     TRAVdecl(node);
 
     // Then, if it has a next go to those declaration(s) and print them
-    TRAVnext(node);
+    if (DECLS_NEXT(node) != NULL) {
+      // Print new line for next decl
+      printf("\n");
+      TRAVnext(node);
+    }
 
     return node;
 }
@@ -67,8 +74,11 @@ node_st *PRTexprs(node_st *node)
 {
     // Go to current expr
     TRAVexpr(node);
-    // Then go to the next expr
-    TRAVnext(node);
+
+    // Then go to the next expr, if there is a next
+    if (EXPRS_NEXT(node) != NULL) {
+      TRAVnext(node);
+    }
 
     return node;
 }
@@ -107,8 +117,18 @@ node_st *PRTexprstmt(node_st *node)
  */
 node_st *PRTreturn(node_st *node)
 {
-    // Go to the print traversal function for the expr child to print it
-    TRAVexpr(node);
+    // Print return
+    printf("return");
+
+    // Go to the print traversal function for the expr child to print it, if is not NULL
+    if (RETURN_EXPR(node) != NULL) {
+      // Start with a space
+      printf(" ");
+      TRAVexpr(node);
+    }
+
+    // End return statement
+    printf(";");
 
     return node;
 }
@@ -132,7 +152,8 @@ node_st *PRTfuncall(node_st *node)
       printf("()");
     }
 
-    // TODO: does a semicolon need to be added here??
+    // End funcall with a semicolon and a new line
+    printf(";\n");
 
     return node;
 }
@@ -165,6 +186,9 @@ node_st *PRTcast(node_st *node)
     // Print cast
     printf("(%s)", tmp);
 
+    // Print expression after type cast
+    TRAVexpr(node);
+
     return node;
 }
 
@@ -173,11 +197,10 @@ node_st *PRTcast(node_st *node)
  */
 node_st *PRTfundefs(node_st *node)
 {
-    bool hasNext = FUNDEFS_NEXT(node) != NULL ? true : false;
-    // Go to the fundef
+    // Go to the fundef print traversal function and print it
     TRAVfundef(node);
 
-    if (hasNext) {
+    if (FUNDEFS_NEXT(node) != NULL) {
       // Then go to the next
       TRAVnext(node);
     }
@@ -215,11 +238,12 @@ node_st *PRTfundef(node_st *node)
     if (FUNDEF_BODY(node) != NULL) {
       bool isExported = FUNDEF_EXPORT(node) ? true : false;
       if (isExported) {
-        printf("export");
+        // Print export with a space
+        printf("export ");
       }
 
       // Print spaces and function type and then function name
-      printf(" %s %s", tmp, FUNDEF_NAME(node));
+      printf("%s %s", tmp, FUNDEF_NAME(node));
 
       // If function has params, print params
       if (FUNDEF_PARAMS(node) != NULL) {
@@ -263,12 +287,14 @@ node_st *PRTfundef(node_st *node)
  * @fn PRTfunbody
  */
 node_st *PRTfunbody(node_st *node)
-{
+{   
     // If the funbody has vardecls, print them
     if (FUNBODY_DECLS(node) != NULL) {
       // Print vardecls
       // No need for a for loop because Vardecl is a LinkedList and the next is automatically printed there
       TRAVdecls(node);
+
+      printf("\n");
     }
 
     // If the funbody has statements, print them
@@ -276,6 +302,8 @@ node_st *PRTfunbody(node_st *node)
       // Print stmts
       // No need for a for loop because Stmts is a LinkedList and the next is automatically printed there
       TRAVstmts(node);
+
+      printf("\n");
     }
 
     // Print nothing if it is an empty function body
@@ -385,15 +413,18 @@ node_st *PRTdowhile(node_st *node)
 node_st *PRTfor(node_st *node)
 {
     // Start the for statement
-    printf("for (int %s", FOR_VAR(node));
+    printf("for (int %s = ", FOR_VAR(node));
     // Print the start expression
     TRAVstart_expr(node);
+
     // Print the stop expression
+    printf(", ");
     TRAVstop(node);
 
     // Print the step expression if it is present
     if (FOR_STEP(node) != NULL) {
       // Print step expression
+      printf(", ");
       TRAVstep(node);
     }
     
@@ -483,8 +514,8 @@ node_st *PRTglobdef(node_st *node)
       TRAVinit(node);
     }
 
-    // End the globdef with a semicolon (;)
-    printf(";");
+    // End the globdef with a semicolon (;) and a new line
+    printf(";\n");
 
     return node;
 }
@@ -580,10 +611,15 @@ node_st *PRTstmts(node_st *node)
 {
     // Print the statement, this will automatically go to the types of Stmt 
     // in main.ccn and print it with this traversal for that node type
+    // Print new line before statement
     TRAVstmt(node);
 
     // Then, if it has a next go to those statement(s) and print them
-    TRAVnext(node);
+    if (STMTS_NEXT(node) != NULL) {
+      // Print new line for next stmts
+      printf("\n");
+      TRAVnext(node);
+    }
 
     return node;
 }
@@ -598,10 +634,16 @@ node_st *PRTassign(node_st *node)
       TRAVlet(node);
     }
 
+    // Print the assignment operator
+    printf(" = ");
+
     // Print the Expr node type exor if it is not NULL
     if (ASSIGN_EXPR(node) != NULL) {
       TRAVexpr(node);
     }
+
+    // End assignment with a semicolon and a new line
+    printf(";\n");
 
     return node;
 }

@@ -158,7 +158,7 @@ node IfElse {
     children {
         Expr cond { constructor, mandatory },
         Stmts then { constructor },
-        Stmts else_block { constructor, mandatory }
+        Stmts else_block { constructor }
     }
 };
 
