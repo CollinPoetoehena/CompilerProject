@@ -320,13 +320,23 @@ node Bool {
     }
 };
 
-/* Symbol table entry
- * TODO: fill in.
+// Symbol table entry
 node Ste {
+    children {
+        // LinkedList data structure for next symbol table
+        Ste next {constructor }
+    }, 
 
+    attributes {
+        string name { constructor },
+        Type type { constructor },
+        int nesting_level { constructor }
+    }
 }
+// Each symbol table entry would feature the name of the variable as a character string, 
+// its type as well as its nesting level (starting with zero for the global context)
+
 // basic heeft 2 scopes, global en in een funcall
 // LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
 // Alles die de AST ombouwt is een traversal
 // Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals
-*/
