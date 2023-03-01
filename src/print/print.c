@@ -13,6 +13,14 @@
 #include "palm/dbug.h"
 
 /**
+ * @fn PRTste
+ */
+node_st *PRTste(node_st *node)
+{
+    return node;
+}
+
+/**
  * @fn PRTprogram
  */
 node_st *PRTprogram(node_st *node)
