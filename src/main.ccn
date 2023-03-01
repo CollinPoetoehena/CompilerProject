@@ -280,6 +280,7 @@ node Monop {
 // Variable in assignment.
 node VarLet {
     children {
+        // Indices is used for extensions, so leave it for now
         Exprs indices
     }, 
 

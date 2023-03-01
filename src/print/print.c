@@ -20,6 +20,9 @@ node_st *PRTprogram(node_st *node)
     // Go to child and print it
     TRAVdecls(node);
 
+    // Print a new line at the end of the program
+    printf("\n");
+
     // TODO: test every basic program by running that file and see if the output is correct!
     // TODO: add indentation global variable, add a function that has a parameter int tabs to print tabs!
 
@@ -45,11 +48,14 @@ node_st *PRTprogram(node_st *node)
  */
 node_st *PRTdecls(node_st *node)
 {
-    TRAVchildren(node);
 
-    // printf("\n-----------Printing Decls node--------------:\n");
-    // char *bool_str = DECLS_NEXT(node) ? "true" : "false";
-    // printf("  Has next decl: %s\n", bool_str);
+
+    // Print the declaration, this will automatically go to the types of Decl 
+    // in main.ccn and print it with this traversal for that node type
+    TRAVdecl(node);
+
+    // Then, if it has a next go to those declaration(s) and print them
+    TRAVnext(node);
 
     return node;
 }
@@ -59,14 +65,10 @@ node_st *PRTdecls(node_st *node)
  */
 node_st *PRTexprs(node_st *node)
 {
-  // Go to current expr
-  TRAVexpr(node);
-  // Then go to the next expr
-  TRAVnext(node);
-    // printf("\n-----------Printing Exprs node--------------:\n");
-
-    // char *bool_str = EXPRS_NEXT(node) ? "true" : "false";
-    // printf("  Has next expr: %s\n", bool_str);
+    // Go to current expr
+    TRAVexpr(node);
+    // Then go to the next expr
+    TRAVnext(node);
 
     return node;
 }
@@ -446,7 +448,6 @@ node_st *PRTglobdecl(node_st *node)
  */
 node_st *PRTglobdef(node_st *node)
 {
-    //TODO: left off here, so all these traversal functions under here and including this one need to be made + indentation functionality
     char *tmp = NULL;
 
     // Get the type
@@ -466,6 +467,24 @@ node_st *PRTglobdef(node_st *node)
     case CT_NULL:
       DBUG_ASSERT(false, "unknown type detected!");
     }
+
+    // Print export with a space if it is exported
+    if (GLOBDEF_EXPORT(node)) {
+      printf("export ");
+    }
+
+    // Print type and id
+    printf("%s %s", tmp, GLOBDEF_NAME(node));
+
+    // Print expression if there is any
+    if (GLOBDEF_INIT(node) != NULL) {
+      printf(" = ");
+      // Print the expr
+      TRAVinit(node);
+    }
+
+    // End the globdef with a semicolon (;)
+    printf(";");
 
     return node;
 }
@@ -533,16 +552,16 @@ node_st *PRTvardecl(node_st *node)
       DBUG_ASSERT(false, "unknown type detected!");
     }
 
-    // TODO: how to print the expr init???
     printf("%s %s", tmp, VARDECL_NAME(node));
-    // if init then = expr
+    // if init then print: "= expr"
     if (VARDECL_INIT(node) != NULL) {
       printf(" = ");
       // Print the expr
       TRAVinit(node);
-      // End the vardecl with a semicolon (;)
-      printf(";");
     }
+    
+    // End the vardecl with a semicolon (;)
+    printf(";");
 
     // If vardecl has next add a newline for the next vardecl
     if (VARDECL_NEXT(node) != NULL) {
@@ -563,7 +582,7 @@ node_st *PRTstmts(node_st *node)
     // in main.ccn and print it with this traversal for that node type
     TRAVstmt(node);
 
-    // If it has a next go to those statement(s) and print them
+    // Then, if it has a next go to those statement(s) and print them
     TRAVnext(node);
 
     return node;
@@ -592,12 +611,7 @@ node_st *PRTassign(node_st *node)
  */
 node_st *PRTbinop(node_st *node)
 {
-    printf("\n-----------Printing Binop node--------------:\n");
-
     char *tmp = NULL;
-    printf( "( ");
-
-    TRAVleft(node);
 
     // Type of the operator
     switch (BINOP_OP(node)) {
@@ -644,11 +658,23 @@ node_st *PRTbinop(node_st *node)
       DBUG_ASSERT(false, "unknown binop detected!");
     }
 
+    // Start binop
+    printf( "( ");
+
+    // Print left expression
+    TRAVleft(node);
+
+    // Print operator
     printf( " %s ", tmp);
     
+    // Print right expression
     TRAVright(node);
 
-    printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
+    // End binop
+    printf( " )");
+
+    // This prints it with the locations
+    // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
 
     return node;
 }
@@ -658,11 +684,7 @@ node_st *PRTbinop(node_st *node)
  */
 node_st *PRTmonop(node_st *node)
 {
-    printf("\n-----------Printing Monop node--------------:\n");
     char *tmp = NULL;
-    printf( "( ");
-
-    TRAVoperand(node);
 
     // Type of the operator
     switch (MONOP_OP(node)) {
@@ -676,9 +698,20 @@ node_st *PRTmonop(node_st *node)
       DBUG_ASSERT(false, "unknown monop detected!");
     }
 
+    // Start monop
+    printf( "( ");
+
+    // Print monop operator (in front of expression with a monop)
     printf( " %s ", tmp);
 
-    printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));    
+    // Print expression
+    TRAVoperand(node);
+    
+    // End monop
+    printf( " )");
+
+    // This prints it with the locations
+    // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));    
     
     return node;
 }
@@ -688,9 +721,11 @@ node_st *PRTmonop(node_st *node)
  */
 node_st *PRTvarlet(node_st *node)
 {
-    printf("\n-----------Printing Varlet node--------------:\n");
+    // Print varlet (variable in assignment)
+    printf("%s", VARLET_NAME(node));
 
-    printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
+    // This prints it with the locations
+    // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
     return node;
 }
 
@@ -699,8 +734,9 @@ node_st *PRTvarlet(node_st *node)
  */
 node_st *PRTvar(node_st *node)
 {
-    printf("\n-----------Printing Var node--------------:\n");
+    // Print var (variable in an expression)
     printf("%s", VAR_NAME(node));
+
     return node;
 }
 
@@ -709,8 +745,9 @@ node_st *PRTvar(node_st *node)
  */
 node_st *PRTnum(node_st *node)
 {
-    printf("\n-----------Printing Num node--------------:\n");
+    // Print num (= int) value
     printf("%d", NUM_VAL(node));
+
     return node;
 }
 
@@ -719,7 +756,7 @@ node_st *PRTnum(node_st *node)
  */
 node_st *PRTfloat(node_st *node)
 {
-    printf("\n-----------Printing Float node--------------:\n");
+    // Print float value
     printf("%f", FLOAT_VAL(node));
     return node;
 }
@@ -729,8 +766,9 @@ node_st *PRTfloat(node_st *node)
  */
 node_st *PRTbool(node_st *node)
 {
-    printf("\n-----------Printing Bool node--------------:\n");
+    // Print boolean value, represented by a string
     char *bool_str = BOOL_VAL(node) ? "true" : "false";
     printf("%s", bool_str);
+    
     return node;
 }
