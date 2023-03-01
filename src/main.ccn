@@ -11,9 +11,19 @@ traversal Print {
 };
 
 traversal ContextAnalysis {
-    uid = CA
-    //TODO: which nodes do you want the Symbol table traversal to go over???
-    // nodes = {Module, Binop}
+    uid = CA,
+    // Program and FunBody to build new symbol tables (new scopes)
+    // These nodes are above the others so will be traversed first
+    // Var, Varlet and FunCall to fill a symbol table
+    nodes = {Program, FunBody, Var, Varlet, FunCall}
+};
+
+enum SymbolTableType {
+    // Can have two types, variable or function
+    prefix = STT,
+    values {
+        var, varlet, fun
+    }
 };
 
 enum Type {
@@ -113,7 +123,6 @@ node FunCall {
     },
     attributes {
         string name { constructor },
-        // TODO: what is Link decl and what can and should you do with it????
         Link decl
     }
 };
@@ -329,6 +338,7 @@ node Bool {
 
 // Symbol table entry
 node Ste {
+    // variablen en functies
     children {
         // LinkedList data structure for next symbol table
         Ste next {constructor }
@@ -337,7 +347,8 @@ node Ste {
     attributes {
         string name { constructor },
         Type type { constructor },
-        int nesting_level { constructor }
+        int nesting_level { constructor },
+        SymbolTableType symbol_type { constructor }
     }
 }
 // Each symbol table entry would feature the name of the variable as a character string, 
