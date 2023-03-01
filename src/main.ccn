@@ -61,12 +61,9 @@ nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
 
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
-// Link you need to adapt.
-// In the old framework it points to node* (so can be everything).
-// You need to adapt it when working with the symbol tables.
-// I put it as a decl now, because an empty nodeset is not allowed.
-nodeset Link = Decl;
-// TODO: Simon said that Link is used for Context analysis, such as for the symbol table
+// Link is used for the Symbol table to link a node to the symbol table
+nodeset Link = Ste;
+// Link is voor na de symbol table om de symbol table entry te linken met de node (Var, Varlet, Funcall)
 
 root node Program {
     children {
@@ -123,7 +120,7 @@ node FunCall {
     },
     attributes {
         string name { constructor },
-        Link decl
+        Link ste_link
     }
 };
 
@@ -302,7 +299,7 @@ node VarLet {
 
     attributes {
         string name { constructor },
-        Link decl
+        Link ste_link
     }
 };
 
@@ -314,7 +311,7 @@ node Var {
 
     attributes {
         string name { constructor },
-        Link decl
+        Link ste_link
     }
 };
 
@@ -351,6 +348,7 @@ node Ste {
         SymbolTableType symbol_type { constructor }
     }
 }
+// TODO: milestone 5 symbol table
 // Each symbol table entry would feature the name of the variable as a character string, 
 // its type as well as its nesting level (starting with zero for the global context)
 
@@ -358,3 +356,9 @@ node Ste {
 // LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
 // Alles die de AST ombouwt is een traversal
 // Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals
+
+// TODO: milestone 6
+// This needs to be a separate traversal as well
+// int a = expr;
+// milestone 6 is loskoppelen van die expr van een VarDecl, je knipt hem dus van de boom after
+// en weer aan de boom, dit is handig uiteindelijk voor code generation

@@ -34,6 +34,7 @@ node_st *CAfunbody(node_st *node)
 node_st *CAfuncall(node_st *node)
 {
     // Create a function call symbol
+    // Also update the Link node attribute of this node to link it to the symbol table
     return node;
 }
 
@@ -43,6 +44,7 @@ node_st *CAfuncall(node_st *node)
 node_st *CAvar(node_st *node)
 {
     // Create a var call symbol
+    // Also update the Link node attribute of this node to link it to the symbol table
     return node;
 }
 
@@ -52,6 +54,7 @@ node_st *CAvar(node_st *node)
 node_st *CAvarlet(node_st *node)
 {
     // Create a varlet call symbol
+    // Also update the Link node attribute of this node to link it to the symbol table
     return node;
 }
 
