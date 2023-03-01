@@ -1,12 +1,19 @@
 start phase RootPhase {
     actions {
         pass SPdoScanParse;
+        // ContextAnalysis
         print;
     }
 };
 
 traversal Print {
     uid = PRT
+};
+
+traversal ContextAnalysis {
+    uid = CA
+    //TODO: which nodes do you want the Symbol table traversal to go over???
+    // nodes = {Module, Binop}
 };
 
 enum Type {

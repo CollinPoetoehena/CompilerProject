@@ -27,6 +27,8 @@ node_st *PRTprogram(node_st *node)
 {
     // You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
     // Some programs print an extra new line for example, but it does not change anything about the functionality!
+    // Some prints are not perfect, such as a funcall always ends with a ;, but it does not change anything to the 
+    // functionality so therefore it is not fixed because it would take a lot of time to fix with little result
 
     // Go to child and print it
     TRAVdecls(node);
@@ -40,12 +42,6 @@ node_st *PRTprogram(node_st *node)
     // TODO: do_while is not parsed well, see files with these commands:
     // Possible problem: empty funbody does not seem to work with stmts, with a vardecl it works!
     // ./civicc ../test/basic/check_success/parse_do_while.cvc
-
-    // TODO: these file is also not working, also funbody and block not working that is not working, also with vardecl it works!
-    // ./civicc ../test/basic/check_success/params_funcall.cvc
-    // ./civicc ../test/basic/check_success/parse_for.cvc 
-    // ./civicc ../test/basic/check_success/parse_funbody.cvc 
-    // ./civicc ../test/basic/check_success/parse_funcall.cvc
 
     // This file is not working because of whitespace probably, why?? and same applies with the funbody, need to add vardecl, why???
     // ./civicc ../test/basic/check_success/parse_if_else.cvc 
@@ -306,7 +302,7 @@ node_st *PRTfunbody(node_st *node)
     }
 
     // If the funbody has statements, print them
-    if (FUNBODY_DECLS(node) != NULL) {
+    if (FUNBODY_STMTS(node) != NULL) {
       // Print stmts
       // No need for a for loop because Stmts is a LinkedList and the next is automatically printed there
       TRAVstmts(node);

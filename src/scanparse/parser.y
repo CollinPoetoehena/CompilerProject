@@ -23,7 +23,9 @@ static int yyerror( char *errname); /* prints grammar violation message */
 extern FILE *yyin;
 void AddLocToNode(node_st *node, void *begin_loc, void *end_loc);
 
-
+// To define debuuging define these variables and do yydebug = 1 before yyparse() at the end
+// #define YYDEBUG 1
+// #define parse.trace
 %}
 
 /*  
@@ -579,6 +581,8 @@ node_st *SPdoScanParse(node_st *root)
         CTI(CTI_ERROR, true, "Cannot open file '%s'.", global.input_file);
         CTIabortOnError();
     }
+    // To allow debugging define yydebug = 1; and define variables at the top
+    // yydebug = 1;
     yyparse();
     return parseresult;
 }
