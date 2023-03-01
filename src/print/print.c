@@ -12,6 +12,13 @@
 #include "ccngen/trav.h"
 #include "palm/dbug.h"
 
+// int indentation = 0;
+
+// char *getIndents() {
+  // TODO: add indentation global variable, add a function that has a parameter int tabs to print tabs!
+  // Create indents here, you can just do indent++ before the tabs, then indent--;
+// }
+
 /**
  * @fn PRTste
  */
@@ -28,27 +35,15 @@ node_st *PRTprogram(node_st *node)
     // You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
     // Some programs print an extra new line for example, but it does not change anything about the functionality!
     // Some prints are not perfect, such as a funcall always ends with a ;, but it does not change anything to the 
-    // functionality so therefore it is not fixed because it would take a lot of time to fix with little result
+    // functionality so therefore it is not fixed because it would take a lot of time to fix with little result,
+    // this is a choice we made to have as much time for our compiler and still have the functionality of print.c to test our parser
 
     // Go to child and print it
     TRAVdecls(node);
 
     // Print a new line at the end of the program
     printf("\n");
-
-    // TODO: float values are float types but rounded, why is that!?!?
-    //  ./civicc ../test/basic/check_success/boolop.cvc 
-
-    // TODO: do_while is not parsed well, see files with these commands:
-    // Possible problem: empty funbody does not seem to work with stmts, with a vardecl it works!
-    // ./civicc ../test/basic/check_success/parse_do_while.cvc
-
-    // This file is not working because of whitespace probably, why?? and same applies with the funbody, need to add vardecl, why???
-    // ./civicc ../test/basic/check_success/parse_if_else.cvc 
-    // The rest of the files are all working (maybe the print is not perfect sometimes with an extra new line, but that does not change anything!)
-    
-    // TODO: add indentation global variable, add a function that has a parameter int tabs to print tabs!
-    
+        
     return node;
 }
 
