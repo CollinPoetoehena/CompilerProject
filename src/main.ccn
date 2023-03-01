@@ -1,12 +1,29 @@
 start phase RootPhase {
     actions {
         pass SPdoScanParse;
+        // ContextAnalysis
         print;
     }
 };
 
 traversal Print {
     uid = PRT
+};
+
+traversal ContextAnalysis {
+    uid = CA,
+    // Program and FunBody to build new symbol tables (new scopes)
+    // These nodes are above the others so will be traversed first
+    // Var, Varlet and FunCall to fill a symbol table
+    nodes = {Program, FunBody, Var, Varlet, FunCall}
+};
+
+enum SymbolTableType {
+    // Can have two types, variable or function
+    prefix = STT,
+    values {
+        var, varlet, fun
+    }
 };
 
 enum Type {
@@ -49,9 +66,8 @@ nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 // You need to adapt it when working with the symbol tables.
 // I put it as a decl now, because an empty nodeset is not allowed.
 nodeset Link = Decl;
+// TODO: Simon said that Link is used for Context analysis, such as for the symbol table
 
-//TODO: constructor and mandatory have to be specified yourself
-// https://canvas.uva.nl/courses/36019/discussion_topics/662838
 root node Program {
     children {
         Decls decls { constructor, mandatory }
@@ -72,7 +88,6 @@ node Exprs {
     }
 };
 
-// TODO: is this array expression??
 // This is for the array expression, which is extension 2 and 3
 node ArrExpr {
     children {
@@ -80,7 +95,7 @@ node ArrExpr {
     }
 };
 
-// TODO: Ids are .....
+// Ids are only used for array extensions (= arr[m,n] m and n are Ids), so not yet used
 node Ids {
     children {
         Ids next   
@@ -139,7 +154,7 @@ node FunDef {
     },
     attributes {
         Type type { constructor },
-        string name { constructor },
+        string name { constructor, mandatory },
         bool export { constructor }
         // No need to do anything with EXTERN for the FunDec because they are always external!
     }
@@ -158,22 +173,22 @@ node FunBody {
 node IfElse {
     children {
         Expr cond { constructor, mandatory },
-        Stmts then { constructor},
-        Stmts else_block { constructor, mandatory }
+        Stmts then { constructor },
+        Stmts else_block { constructor }
     }
 };
 
 node While {
     children {
         Expr cond { constructor, mandatory },
-        Stmts block { constructor}
+        Stmts block { constructor }
     }
 };
 
 node DoWhile {
     children {
         Expr cond { constructor, mandatory },
-        Stmts block { constructor}
+        Stmts block { constructor }
     }
 };
 
@@ -186,13 +201,13 @@ node For {
     },
 
     attributes {
-        string var
+        string var { constructor }
     }
 };
 
-// TODO: dims stands for dimensions????
 node GlobDecl {
     children {
+        // Dimensions for array extension 3, leave for now
         Ids dims
     },
 
@@ -204,6 +219,7 @@ node GlobDecl {
 
 node GlobDef {
     children {
+        // Dimensions for array extension 3, leave for now
         Exprs dims { constructor },
         Expr init { constructor }
     },
@@ -217,18 +233,20 @@ node GlobDef {
 
 node Param {
     children {
-        Ids dims,
+        // Dimensions for array extension 3, leave for now
+        Ids dims { constructor },
         Param next { constructor }
     },
 
     attributes {
-        string name { constructor },
+        string name { constructor, mandatory },
         Type type { constructor }
     }
 };
 
 node VarDecl {
     children {
+        // Dimensions for array extension 3, leave for now
         Exprs dims { constructor },
         Expr init { constructor },
         VarDecl next { constructor }
@@ -278,6 +296,7 @@ node Monop {
 // Variable in assignment.
 node VarLet {
     children {
+        // Indices is used for extensions, so leave it for now
         Exprs indices
     }, 
 
@@ -317,9 +336,25 @@ node Bool {
     }
 };
 
-/* Symbol table entry
- * TODO: fill in.
+// Symbol table entry
 node Ste {
+    // variablen en functies
+    children {
+        // LinkedList data structure for next symbol table
+        Ste next {constructor }
+    }, 
 
+    attributes {
+        string name { constructor },
+        Type type { constructor },
+        int nesting_level { constructor },
+        SymbolTableType symbol_type { constructor }
+    }
 }
-*/
+// Each symbol table entry would feature the name of the variable as a character string, 
+// its type as well as its nesting level (starting with zero for the global context)
+
+// basic heeft 2 scopes, global en in een funcall
+// LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
+// Alles die de AST ombouwt is een traversal
+// Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals

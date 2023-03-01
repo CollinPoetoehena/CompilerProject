@@ -1,4 +1,4 @@
-void testVarInits()
+void testVarInits(int b, int c)
 {
   int a = 3;
   int c = 5;

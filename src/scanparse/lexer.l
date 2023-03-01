@@ -121,7 +121,7 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
 {INTEGER}                  { yylval.cint=atoi(yytext);
                              FILTER( NUM);
                            }
-{FLOAT}                    { yylval.cflt=atoi(yytext);
+{FLOAT}                    { yylval.cflt=atof(yytext);
                              FILTER( FLOAT);
                            }
 
