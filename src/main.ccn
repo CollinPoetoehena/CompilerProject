@@ -1,7 +1,7 @@
 start phase RootPhase {
     actions {
         pass SPdoScanParse;
-        // ContextAnalysis
+        ContextAnalysis;
         print;
     }
 };
@@ -338,7 +338,7 @@ node Ste {
     // variablen en functies
     children {
         // LinkedList data structure for next symbol table
-        Ste next {constructor }
+        Ste next { constructor }
     }, 
 
     attributes {
