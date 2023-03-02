@@ -16,6 +16,10 @@
 node_st *CAprogram(node_st *node)
 {
     // Create a new symbol table with a new scope (program == global scope)
+    node_st *new = NULL;
+    
+
+    // Nothing is changed to the program node, so just return the node again
     return node;
 }
 

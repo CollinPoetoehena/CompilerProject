@@ -22,7 +22,7 @@ enum SymbolTableType {
     // Can have two types, variable or function
     prefix = STT,
     values {
-        var, varlet, fun
+        var, varlet, funcall
     }
 };
 
@@ -62,7 +62,7 @@ nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
 // Link is used for the Symbol table to link a node to the symbol table
-nodeset Link = Ste;
+nodeset Link = {Ste};
 // Link is voor na de symbol table om de symbol table entry te linken met de node (Var, Varlet, Funcall)
 
 root node Program {
@@ -347,7 +347,7 @@ node Ste {
         int nesting_level { constructor },
         SymbolTableType symbol_type { constructor }
     }
-}
+};
 // TODO: milestone 5 symbol table
 // Each symbol table entry would feature the name of the variable as a character string, 
 // its type as well as its nesting level (starting with zero for the global context)
