@@ -16,6 +16,7 @@ traversal ContextAnalysis {
     // These nodes are above the others so will be traversed first
     // Var, Varlet and FunCall to fill a symbol table
     nodes = {Program, FunBody, Var, Varlet, FunCall}
+    // VarDecl symbol table name, type. Dan Var link je hem, dus die nodes moet je nog toevoegen, zelfde voor als je in een funbody komt, etc
 };
 
 enum SymbolTableType {
