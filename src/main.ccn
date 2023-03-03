@@ -12,10 +12,15 @@ traversal Print {
 
 traversal ContextAnalysis {
     uid = CA,
-    // Program and FunBody to build new symbol tables (new scopes)
-    // These nodes are above the others so will be traversed first
-    // Var, Varlet and FunCall to fill a symbol table
-    nodes = {Program, FunBody, Var, Varlet, FunCall}
+        nodes = {
+             // Program, FunBody and IfElse, While, DoWhile and For to build new symbol tables scopes
+             // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
+             Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
+             // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
+             VarDecl, GlobDecl, GlobDef, FunDef, Param, 
+             // Var, Varlet and FunCall to link a symbol table entry with it's name
+             Var, Varlet, FunCall
+            }
     // VarDecl symbol table name, type. Dan Var link je hem, dus die nodes moet je nog toevoegen, zelfde voor als je in een funbody komt, etc
 };
 
@@ -23,6 +28,7 @@ enum SymbolTableType {
     // Can have two types, variable or function
     prefix = STT,
     values {
+        // TODO: is this correct, what about Param???
         var, varlet, funcall
     }
 };
