@@ -10,7 +10,9 @@
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
 
-// Global variable for the current Ste to use as next
+// Global variable for the first symbol table
+// Used to loop through from start to end via next
+node_st *firstSymbolTable = NULL;
 node_st *previousSymbolTable = NULL;
 int currentScope = 0; // Start at global scope
 
@@ -18,15 +20,34 @@ void updateCurrentScopeWithStatement() {
     // Simply increment the current scope by one to create a new scope for Stmts
     // There are no symnbol table entries that need to be created here
     currentScope++;
+
+    // Return nothing to avoid warning
+    return 0;
 }
 
-node_st *findSteLink(string name) {
+node_st *findSteLink(char *name) {
+    printf("Trying to find Ste for: %s\n", name);
+
     // return the Symbol table entry that is linked to this node (with name)
     // Use linear search to find the entry, stop when next is NULL
+    if (firstSymbolTable != NULL) {
+        node_st *symbolTable = firstSymbolTable;
+        do {
+            // Match found, return Ste node
+            if (STE_NAME(symbolTable) == name) {
+                printf("**********************Link found for %s\n", name);
+                return symbolTable;
+            }
+        } while (STE_NEXT(symbolTable) != NULL);
+    }
+
+    // No existing symbol found, return NULL
+    return NULL;
 }
 
-bool isSymbolUnique(string name) {
+bool isSymbolUnique(char *name) {
     // Check if the name is not already present in the symbol table entries (use linear search)
+    return false;
 }
 
 /**
@@ -132,14 +153,23 @@ node_st *CAglobdecl(node_st *node)
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     node_st *newSte = ASTste(NULL, GLOBDECL_NAME(node), GLOBDECL_TYPE(node), currentScope, STT_var);
 
-    // Update previous symbol table
-    if (previousSymbolTable != NULL) {
-        // Update previous symbol table next
+    // Update first symbol table if it is NULL 
+    if (firstSymbolTable == NULL) {
+        firstSymbolTable = newSte;
+        previousSymbolTable = newSte;
+    } else {
+        // Update next of previous symbol table
         STE_NEXT(previousSymbolTable) = newSte;
-    }   
+        previousSymbolTable = newSte;
+    }
 
-    // Update symbol table, if previous is NULL it would not have updated the next!
-    previousSymbolTable = newSte;
+    // if (firstSymbolTable != NULL) {
+    //     // Update previous symbol table next
+    //     STE_NEXT(firstSymbolTable) = newSte;
+    // }   
+
+    // // Update symbol table, if previous is NULL it would not have updated the next!
+    // firstSymbolTable = newSte;
 
     return node;
 }
@@ -190,7 +220,7 @@ node_st *CAvardecl(node_st *node)
 node_st *CAfuncall(node_st *node)
 {
     // Update this link from var to the Ste with the given name 
-    FUNCALL_STE_LINK(node) = newSte;     
+    //FUNCALL_STE_LINK(node) = newSte;     
 
     printf("*************************symbol table made\n");
 
