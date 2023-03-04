@@ -116,7 +116,7 @@ node_st *CAglobdecl(node_st *node)
     printf("decl version globdecl\n");
 
     // First check if the name is already present, if so, save it in errors
-    if (isSymbolUnique()) {
+    if (isSymbolUnique(GLOBDECL_NAME(node))) {
         // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
         node_st *newSte = ASTste(NULL, GLOBDECL_NAME(node), GLOBDECL_TYPE(node), currentScope, STT_var);
 
@@ -190,7 +190,7 @@ Here the FunDef part will be used to fill the next level of Symbol table entries
 node_st *CAparam(node_st *node)
 {
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    
+
     return node;
 }
 
