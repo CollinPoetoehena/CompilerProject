@@ -6,6 +6,11 @@ start phase RootPhase {
     }
 };
 
+//TODO: remove when done, these are common commands:
+// make
+// ./civicc ../test/basic/check_success/binops.cvc
+// yacc -Wcounterexamples parser.y
+
 traversal Print {
     uid = PRT
 };
