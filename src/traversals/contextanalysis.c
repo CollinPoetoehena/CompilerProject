@@ -54,7 +54,7 @@ node_st *findSteLink(char *name) {
         } while (symbolTable != NULL);
     }
 
-    printf("No link found!");
+    printf("No link found for linking an Ste to a Var, VarLet or FunCall!\n");
     // No existing symbol found, return NULL
     return NULL;
 }
@@ -86,22 +86,24 @@ bool isSymbolUnique(char *name) {
  */
 node_st *CAprogram(node_st *node)
 {
-    // TODO: why do they not come to the traversal of the node!???
+    //TODO: Good idea to save the first empty Ste in the attributes of the Program node
+    // to use for iterating over all the Ste's???
 
-    // TODO: remove after testing
-    // printf("current scope program: %d\n", currentScope);
-
+    printf("\n\n\n****************************************************************************************************************************************************************************** \
+        Start of context analysis\n");
     // Go to the decls traversal
     TRAVdecls(node);
 
-    // TODO: print errors at the end, how to do that???
+    // TODO: print errors at the end and stop compilation, how to do that???
     if (errors != NULL) {
-        // TODO:
         // Stop compilation and print errors
     } else {
         // Print all the symbol tables at the end of the traversal
         printSymbolTables();
     }
+
+    printf("\n\n\nEnd of context analysis\n****************************************************************************************************************************************************************************** \
+        \n");
 
     // Nothing is changed to the program node, so just return the node again
     return node;
@@ -135,7 +137,7 @@ Then after that the FunDef scope will be used to fill the next level of Symbol t
  */
 node_st *CAglobdecl(node_st *node)
 {
-    printf("decl version globdecl\n");
+    printf("globdecl\n");
 
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(GLOBDECL_NAME(node))) {
@@ -274,9 +276,6 @@ node_st *CAfunbody(node_st *node)
     // Update the scope to the old scope after the statements when you get back to this funbody
     currentScope = oldScope;
 
-    // TODO: remove after testing
-    // printf("current scope funbody: %d\n", currentScope);
-
     return node;
 }
 
@@ -382,7 +381,7 @@ node_st *CAfor(node_st *node)
 {
     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
 
-    //TODO: how to put for declaration in start in upper nesting level???
+    //TODO: how to put for variable declaration in start in upper nesting level???
     // For var declaration always has type int and name is saved in For node
     if (isSymbolUnique(FOR_VAR(node))) {
         // Create a symbol table entry
@@ -474,11 +473,6 @@ node_st *CAfuncall(node_st *node)
 
     // TODO: check if the arguments in the funcall match the paramaters of the called function, otherwise save error!
 
-    // TODO: is scope 1?? And what about statements (such as inside a funbody and inside a while statement????)
-
-    // TODO: remove after testing
-    // printf("current scope funcall: %d\n", currentScope);
-
     // No changes made to the node directly, so no need to return a new node here
     return node;
 }
@@ -488,8 +482,6 @@ node_st *CAfuncall(node_st *node)
  */
 node_st *CAvar(node_st *node)
 {
-    //TODO: it is not yet getting here via the Expr!
-
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteLink(VAR_NAME(node));
     if (steNode != NULL) {
@@ -502,9 +494,6 @@ node_st *CAvar(node_st *node)
     }
 
     printf("*************************symbol table link var\n");
-
-    // TODO: remove after testing
-    // printf("current scope var: %d\n", currentScope);
 
     return node;
 }
@@ -524,9 +513,6 @@ node_st *CAvarlet(node_st *node)
         // TODO
         printf("no matching declaration/definition for varlet found\n");
     }
-
-    // TODO: remove after testing
-    // printf("current scope varlet: %d\n", currentScope);
 
     printf("*************************symbol table link varlet\n");
 
