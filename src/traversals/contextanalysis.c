@@ -38,7 +38,10 @@ node_st *findSteLink(char *name) {
                 printf("**********************Link found for %s\n", name);
                 return symbolTable;
             }
-        } while (STE_NEXT(symbolTable) != NULL);
+
+            // Update symbolTable
+            symbolTable = STE_NEXT(symbolTable);
+        } while (symbolTable != NULL);
     }
 
     // No existing symbol found, return NULL
@@ -56,7 +59,10 @@ bool isSymbolUnique(char *name) {
                 printf("**********************Link found for %s\n", name);
                 return false;
             }
-        } while (STE_NEXT(symbolTable) != NULL);
+
+            // Update symbolTable
+            symbolTable = STE_NEXT(symbolTable);
+        } while (symbolTable != NULL);
     }
 
     // If the first symbol table is NULL or no match found, then the Ste is guarenteed unique
@@ -76,10 +82,13 @@ node_st *CAprogram(node_st *node)
     // TODO: why do they not come to the traversal of the node!???
 
     // TODO: remove after testing
-    printf("current scope program: %d\n", currentScope);
+    // printf("current scope program: %d\n", currentScope);
 
     // Go to the decls traversal
     TRAVdecls(node);
+
+    // TODO: print the made symbol table entries at the end by using the firstSymbol table and nexts
+    // printSymbolTables();
 
     // Nothing is changed to the program node, so just return the node again
     return node;
@@ -190,6 +199,7 @@ Here the FunDef part will be used to fill the next level of Symbol table entries
 node_st *CAparam(node_st *node)
 {
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    printf("param\n");
 
     return node;
 }
@@ -199,6 +209,8 @@ node_st *CAparam(node_st *node)
  */
 node_st *CAfunbody(node_st *node)
 {
+    printf("funbody\n");
+
     // Create a new symbol table with a new scope (funbody == one scope under global)
     //TODO: is the currentScope variable correct???
 
@@ -219,7 +231,7 @@ node_st *CAfunbody(node_st *node)
     currentScope = oldScope;
 
     // TODO: remove after testing
-    printf("current scope funbody: %d\n", currentScope);
+    // printf("current scope funbody: %d\n", currentScope);
 
     return node;
 }
@@ -239,7 +251,32 @@ This part can have VarDecls and/or Stmts.
  */
 node_st *CAvardecl(node_st *node)
 {
+    printf("vardecls\n");
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+     if (isSymbolUnique(VARDECL_NAME(node))) {
+        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        node_st *newSte = ASTste(NULL, VARDECL_NAME(node), VARDECL_TYPE(node), currentScope, STT_var);
+
+        // Update first symbol table if it is NULL 
+        if (firstSymbolTable == NULL) {
+            firstSymbolTable = newSte;
+            previousSymbolTable = newSte;
+        } else {
+            // Update next of previous symbol table
+            STE_NEXT(previousSymbolTable) = newSte;
+            previousSymbolTable = newSte;
+        }
+        printf("vardecls ste made\n");
+    } else {
+        // Save in errors, symbol already present
+        // TODO
+    }
+
+
+    // To perfom the traversal functions of the children use TRAVchildx(node)
+    TRAVnext(node);
+    // TRAVstmt(node);
+
 
     return node;
 }
@@ -249,10 +286,39 @@ node_st *CAvardecl(node_st *node)
  */
 node_st *CAstmts(node_st *node)
 {
-    printf("decls\n");
+    printf("statements\n");
     // To perfom the traversal functions of the children use TRAVchildx(node)
     TRAVstmt(node);
-    TRAVstmt(node);
+    TRAVnext(node);
+
+    return node;
+}
+
+/**
+ * @fn CAifelse
+ */
+node_st *CAifelse(node_st *node)
+{
+    updateCurrentScopeWithStatement();
+
+    // Go to stmts traversal functions
+    TRAVthen(node);
+    TRAVelse_block(node);
+    
+    // TODO: decrement scope again?????
+
+    return node;
+}
+
+/**
+ * @fn CAwhile
+ */
+node_st *CAwhile(node_st *node)
+{
+    updateCurrentScopeWithStatement();
+
+    // Go to stmts traversal functions
+    TRAVblock(node);
 
     return node;
 }
@@ -263,6 +329,11 @@ node_st *CAstmts(node_st *node)
 node_st *CAdowhile(node_st *node)
 {
     updateCurrentScopeWithStatement();
+
+    // Go to stmts traversal functions
+    TRAVblock(node);
+
+
     return node;
 }
 
@@ -275,24 +346,13 @@ node_st *CAfor(node_st *node)
 
     //TODO: how to put for declaration in start in upper nesting level???
 
-    return node;
-}
+    // remove the declaration part from for-loop induction variables and create corresponding 
+    // local variable declarations on the level of the (innermost) function definition
+    // TRAVstart_expr(node);
 
-/**
- * @fn CAifelse
- */
-node_st *CAifelse(node_st *node)
-{
-    updateCurrentScopeWithStatement();
-    return node;
-}
+    // Go to stmts traversal functions
+    TRAVblock(node);
 
-/**
- * @fn CAwhile
- */
-node_st *CAwhile(node_st *node)
-{
-    updateCurrentScopeWithStatement();
     return node;
 }
 
@@ -308,6 +368,38 @@ These traversals need to link the corresponding funcall, var or varlet with a St
 LinkedList of Ste's. It then needs to be 'linked' to the Link attribute in those nodes.
 */
 
+
+/**
+ * @fn CAassign
+ */
+node_st *CAassign(node_st *node)
+{
+    printf("Got to assign!\n");
+
+    // Go to varlet
+    TRAVlet(node);
+    // Go to the expr
+    TRAVexpr(node);
+    return node;
+
+}
+
+/**
+ * @fn CAexprs
+ */
+node_st *CAexprs(node_st *node)
+{
+    printf("Got to exprs!\n");
+
+    // Go to the traversal functions of exprs
+    if (EXPRS_EXPR(node) != NULL) {
+            TRAVdecl(node);
+    }
+    TRAVnext(node);
+    return node;
+
+}
+
 /**
  * @fn CAfuncall
  */
@@ -321,7 +413,7 @@ node_st *CAfuncall(node_st *node)
     // TODO: is scope 1?? And what about statements (such as inside a funbody and inside a while statement????)
 
     // TODO: remove after testing
-    printf("current scope funcall: %d\n", currentScope);
+    // printf("current scope funcall: %d\n", currentScope);
 
     // No changes made to the node directly, so no need to return a new node here
     return node;
@@ -340,7 +432,7 @@ node_st *CAvar(node_st *node)
     printf("*************************symbol table link\n");
 
     // TODO: remove after testing
-    printf("current scope var: %d\n", currentScope);
+    // printf("current scope var: %d\n", currentScope);
 
     return node;
 }
@@ -354,7 +446,7 @@ node_st *CAvarlet(node_st *node)
     // VARLET_STE_LINK(node) = newSte;
 
     // TODO: remove after testing
-    printf("current scope varlet: %d\n", currentScope);
+    // printf("current scope varlet: %d\n", currentScope);
 
     printf("*************************symbol table link\n");
 
@@ -364,3 +456,65 @@ node_st *CAvarlet(node_st *node)
 /*
 ******************************************************* END LINKING PART *******************************************************
 */
+
+// Print all symbol table entries using the linked list and firstSymbolTable
+void printSymbolTables()
+{    
+    // // Get the type
+    // char *type = NULL;
+    // switch (CAST_TYPE(node)) {
+    // case CT_int:
+    //   type = "int";
+    //   break;
+    // case CT_float:
+    //   type = "float";
+    //   break;
+    // case CT_bool:
+    //   type = "bool";
+    //   break;
+    // case CT_void:
+    //   type = "void";
+    //   break;
+    // case CT_NULL:
+    //   DBUG_ASSERT(false, "unknown type detected!");
+    // }
+
+    // // Get the SymbolTableType
+    // char *stType = NULL;
+    // switch (STE_SYMBOL_TYPE(node)) {
+    // case STT_var:
+    //   stType = "var";
+    //   break;
+    // case STT_varlet:
+    //   stType = "varlet";
+    //   break;
+    // case STT_funcall:
+    //   stType = "funcall";
+    //   break;
+    // case STT_NULL:
+    //   DBUG_ASSERT(false, "unknown SymbolTableType detected!");
+    // }
+
+    // // Print Symbol table entries
+    // printf("Symbol table entry: %s %s, nesting level: %d, symbol type: ", type, STE_NAME(node), STE_NESTING_LEVEL(node), stType);
+
+
+    // Print Ste's
+    // if (firstSymbolTable != NULL) {
+    //     node_st *symbolTable = firstSymbolTable;
+    //     do {
+    //         // Symbol already present, return not unique/false 
+    //         if (STE_NAME(symbolTable) == name) {
+    //             printf("**********************Link found for %s\n", name);
+    //             return false;
+    //         }
+
+    //         // Update symbolTable
+    //         symbolTable = STE_NEXT(symbolTable);
+    //     } while (symbolTable != NULL);
+    // } else {
+    //     printf(\n"No symbol tables found\n");
+    // }
+
+    return node;
+}

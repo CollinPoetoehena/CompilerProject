@@ -1,8 +1,7 @@
-void testVarInits(int b, int c)
-{
-  int a = 3;
-  int c = 5;
-  int d = a + c;
-  int b;
-  b = a+2;
+void foo() {
+int a;
+int b = 2;
+int c = 3 + 4;
+int d = 5;
+
 }

@@ -20,52 +20,6 @@
 // }
 
 /**
- * @fn PRTste
- */
-node_st *PRTste(node_st *node)
-{    
-    // Get the type
-    char *type = NULL;
-    switch (CAST_TYPE(node)) {
-    case CT_int:
-      type = "int";
-      break;
-    case CT_float:
-      type = "float";
-      break;
-    case CT_bool:
-      type = "bool";
-      break;
-    case CT_void:
-      type = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
-
-    // Get the SymbolTableType
-    char *stType = NULL;
-    switch (STE_SYMBOL_TYPE(node)) {
-    case STT_var:
-      stType = "var";
-      break;
-    case STT_varlet:
-      stType = "varlet";
-      break;
-    case STT_funcall:
-      stType = "funcall";
-      break;
-    case STT_NULL:
-      DBUG_ASSERT(false, "unknown SymbolTableType detected!");
-    }
-
-    // Print Symbol table entries
-    printf("Symbol table entry: %s %s, nesting level: %d, symbol type: ", type, STE_NAME(node), STE_NESTING_LEVEL(node), stType);
-
-    return node;
-}
-
-/**
  * @fn PRTprogram
  */
 node_st *PRTprogram(node_st *node)
