@@ -1,0 +1,16 @@
+void foo() {
+int a;
+int b = 2;
+int c = 3 + 4;
+int d = 5;
+
+// FunBody has VarDecls and Stmts in this order, see language, do not mix them!
+// VarLet link
+int e = d;
+
+// Var link
+a = 5;
+
+// FunCall link
+foo();
+}

@@ -779,6 +779,13 @@ node_st *PRTvar(node_st *node)
     // Print var (variable in an expression)
     printf("%s", VAR_NAME(node));
 
+    // Print link if it exists
+    if (VAR_STE_LINK(node) != NULL) {
+      printf("/* Var Link to Ste:\n");
+      printSte(VAR_STE_LINK(node));
+      printf("*\\ \n"); /* Escape a \ with a \ */
+    }
+
     return node;
 }
 
@@ -813,4 +820,74 @@ node_st *PRTbool(node_st *node)
     printf("%s", bool_str);
     
     return node;
+}
+
+void printSte(node_st *steNode) {
+  if (steNode != NULL) {
+    // Get the type
+    char *type = NULL;
+
+    switch (STE_TYPE(steNode)) {
+      case CT_int:
+      type = "int";
+      break;
+      case CT_float:
+      type = "float";
+      break;
+      case CT_bool:
+      type = "bool";
+      break;
+      case CT_void:
+      type = "void";
+      break;
+      case CT_NULL:
+      DBUG_ASSERT(false, "unknown type detected!");
+    }
+            
+    // Get the SymbolTableType
+    char *stType = NULL;
+    switch (STE_SYMBOL_TYPE(steNode)) {
+      case STT_var:
+      stType = "var";
+      break;
+      case STT_varlet:
+      stType = "varlet";
+      break;
+      case STT_function:
+      stType = "function";
+      break;
+      case STT_NULL:
+      DBUG_ASSERT(false, "unknown SymbolTableType detected!");
+    }
+
+    // Print the Ste
+    if (STE_SYMBOL_TYPE(steNode) == STT_function) {
+      // Print function Ste: "funName: returnType (param types)"
+      // TODO: how to get param types in the Ste and print them, ask Simon!!???
+      
+      // Declare a C string array with space for 5 strings of 20 characters each
+      char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"}; //TODO: change when implemented Ste new attribute!
+      // Get the length of the array
+      char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
+      int len = sizeof(strArr) / sizeof(strArr[0]);
+      for (int i = 1; i < len; ++i) {
+          strcat(params, strArr[i]);
+          // Add a comma after every value, except the last one
+          if (i < len - 1) {
+              strcat(params, ", ");
+          }
+      }
+
+      // Print the function symbol table
+      printf("\nSymbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
+          STE_NAME(steNode), type, params, stType, STE_NESTING_LEVEL(steNode));
+
+      // Free the params memory when done because it is not needed anymore
+      MEMfree(params);
+    } else {
+      // Print var Ste: "name, type"
+      printf("\nSymbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
+          STE_NAME(steNode), type, stType, STE_NESTING_LEVEL(steNode));
+    }
+  }
 }

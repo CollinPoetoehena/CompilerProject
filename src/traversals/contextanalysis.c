@@ -275,8 +275,6 @@ node_st *CAfunbody(node_st *node)
     // Create a new symbol table with a new scope (funbody == one scope under global)
     //TODO: is the currentScope variable correct???
 
-    //TODO: it only gets to the first node: Program, but the parser comes into the funbody from the print
-
     // Increment the current scope inside a function body for every function body 
     // (basic has global, funbody and statements (if, while, etc) scope)
     currentScope++;
@@ -313,6 +311,7 @@ This part can have VarDecls and/or Stmts.
 node_st *CAvardecl(node_st *node)
 {
     printf("vardecls\n");
+
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
      if (isSymbolUnique(VARDECL_NAME(node))) {
         // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
@@ -354,6 +353,7 @@ node_st *CAstmts(node_st *node)
  */
 node_st *CAifelse(node_st *node)
 {
+    // TODO: is this necessary or is a Stmts not a new scope?
     updateCurrentScopeWithStatement();
 
     // Go to stmts traversal functions
@@ -370,6 +370,7 @@ node_st *CAifelse(node_st *node)
  */
 node_st *CAwhile(node_st *node)
 {
+    // TODO: is this necessary or is a Stmts not a new scope?
     updateCurrentScopeWithStatement();
 
     // Go to stmts traversal functions
@@ -383,6 +384,7 @@ node_st *CAwhile(node_st *node)
  */
 node_st *CAdowhile(node_st *node)
 {
+    // TODO: is this necessary or is a Stmts not a new scope?
     updateCurrentScopeWithStatement();
 
     // Go to stmts traversal functions
@@ -397,6 +399,7 @@ node_st *CAdowhile(node_st *node)
  */
 node_st *CAfor(node_st *node)
 {
+    // TODO: is this necessary or is a Stmts not a new scope?
     updateCurrentScopeWithStatement();
 
     //TODO: how to put for declaration in start in upper nesting level???
@@ -431,7 +434,7 @@ node_st *CAassign(node_st *node)
 {
     printf("Got to assign!\n");
 
-    // Go to varlet
+    // Go to varlet traversal function
     TRAVlet(node);
     // Go to the expr
     TRAVexpr(node);
@@ -446,11 +449,12 @@ node_st *CAexprs(node_st *node)
 {
     printf("Got to exprs!\n");
 
-    // Go to the traversal functions of exprs
+    // Go to the traversal functions of exprs, which are funcall and var
     if (EXPRS_EXPR(node) != NULL) {
-            TRAVdecl(node);
+        TRAVdecl(node);
     }
     TRAVnext(node);
+
     return node;
 }
 
@@ -462,7 +466,7 @@ node_st *CAfuncall(node_st *node)
     // Update this link from var to the Ste with the given name 
     //FUNCALL_STE_LINK(node) = newSte;     
 
-    printf("*************************symbol table link\n");
+    printf("*************************symbol table link funcall\n");
 
     // TODO: check if the arguments in the funcall match the paramaters of the called function, otherwise save error!
 
@@ -480,14 +484,20 @@ node_st *CAfuncall(node_st *node)
  */
 node_st *CAvar(node_st *node)
 {
-    //TODO: how do i get to this part because the traversal function is not getting here
-
     // Update this link from var to the Ste with the given name 
-    // VAR_STE_LINK(node) = newSte;
+    node_st *steNode = findSteLink(VAR_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VAR_STE_LINK(node) = steNode;
+    } else {
+        // Save in errors, no matching declaration/definition!
+        // TODO
+        printf("no matching declaration/definition for var found\n");
+    }
 
     // TODO: check if the symbol exists, otherwise save error: no matching declaration/definition!
 
-    printf("*************************symbol table link\n");
+    printf("*************************symbol table link var\n");
 
     // TODO: remove after testing
     // printf("current scope var: %d\n", currentScope);
@@ -500,13 +510,21 @@ node_st *CAvar(node_st *node)
  */
 node_st *CAvarlet(node_st *node)
 {
-    // Update this link from varlet to the Ste with the given name 
-    // VARLET_STE_LINK(node) = newSte;
+    // Update this link from varlet to the Ste with the given name
+    node_st *steNode = findSteLink(VARLET_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VARLET_STE_LINK(node) = steNode;
+    } else {
+        // Save in errors, no matching declaration/definition!
+        // TODO
+        printf("no matching declaration/definition for varlet found\n");
+    }
 
     // TODO: remove after testing
     // printf("current scope varlet: %d\n", currentScope);
 
-    printf("*************************symbol table link\n");
+    printf("*************************symbol table link varlet\n");
 
     return node;
 }
@@ -567,7 +585,7 @@ void printSymbolTables()
                 // TODO: how to get param types in the Ste and print them, ask Simon!!???
                 
                 // Declare a C string array with space for 5 strings of 20 characters each
-                char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"};; //TODO: change when implemented Ste new attribute!
+                char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"}; //TODO: change when implemented Ste new attribute!
                 // Get the length of the array
                 char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
                 int len = sizeof(strArr) / sizeof(strArr[0]);

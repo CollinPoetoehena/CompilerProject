@@ -3,6 +3,6 @@ int a;
 int b = 2;
 int c = 3 + 4;
 int d = 5;
-int d = 6;
+a = 5;
 
 }

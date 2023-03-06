@@ -18,17 +18,18 @@ traversal Print {
 
 traversal ContextAnalysis {
     uid = CA,
-        nodes = {
-             // Program, FunBody and IfElse, While, DoWhile and For to build new symbol tables scopes
-             // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
-             Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
-             // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
-             VarDecl, GlobDecl, GlobDef, FunDef, Param,
-             // Exprs and Assign to go to the Var and Varlet nodes traversal function
-             Exprs, Assign,
-             // Var, Varlet and FunCall to link a symbol table entry with it's name
-             Var, Varlet, FunCall
-            }
+    // TODO: you cannot declare a variable inside a Statement, so only linking can occur there
+    nodes = {
+            // Program, FunBody and IfElse, While, DoWhile and For to build new symbol tables scopes
+            // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
+            Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
+            // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
+            VarDecl, GlobDecl, GlobDef, FunDef, Param,
+            // Exprs and Assign to go to the Var and Varlet nodes traversal function
+            Exprs, Assign,
+            // Var, Varlet and FunCall to link a symbol table entry with it's name
+            Var, Varlet, FunCall
+        }
     // VarDecl symbol table name, type. Dan Var link je hem, dus die nodes moet je nog toevoegen, zelfde voor als je in een funbody komt, etc
 };
 
@@ -137,6 +138,7 @@ node Return {
     }
 };
 
+// (= later on, same as Var and VarLet, such as void foo(){}; return foo();, foo in return is the FunCall)
 node FunCall {
     children {
         Exprs args { constructor }
@@ -313,7 +315,7 @@ node Monop {
     }
 };
 
-// Variable in assignment.
+// Variable in assignment (= later on, such as int a = 5; a = 7, a is the VarLet).
 node VarLet {
     children {
         // Indices is used for extensions, so leave it for now
@@ -326,7 +328,7 @@ node VarLet {
     }
 };
 
-// Variable in an expression.
+// Variable in an expression (= later on, such as int d = a * 5, a is the Var).
 node Var {
     children {
         Exprs indices
