@@ -11,6 +11,8 @@
 #include "ccngen/ast.h"
 #include "palm/dbug.h"
 #include "ccngen/trav.h"
+#include  <string.h>
+#include "palm/memory.h"
 
 // Global variable for the first symbol table
 // Used to loop through from start to end via next
@@ -23,9 +25,18 @@ void updateCurrentScopeWithStatement() {
     // Simply increment the current scope by one to create a new scope for Stmts
     // There are no symnbol table entries that need to be created here
     currentScope++;
+}
 
-    // Return nothing to avoid warning
-    return 0;
+void updateGlobSymbolTables(node_st *newSte) {
+    // Update first symbol table if it is NULL 
+    if (firstSymbolTable == NULL) {
+        firstSymbolTable = newSte;
+        previousSymbolTable = newSte;
+    } else {
+        // Update next of previous symbol table
+        STE_NEXT(previousSymbolTable) = newSte;
+        previousSymbolTable = newSte;
+    }
 }
 
 node_st *findSteLink(char *name) {
@@ -133,17 +144,10 @@ node_st *CAglobdecl(node_st *node)
         // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
         node_st *newSte = ASTste(NULL, GLOBDECL_NAME(node), GLOBDECL_TYPE(node), currentScope, STT_var);
 
-        // Update first symbol table if it is NULL 
-        if (firstSymbolTable == NULL) {
-            firstSymbolTable = newSte;
-            previousSymbolTable = newSte;
-        } else {
-            // Update next of previous symbol table
-            STE_NEXT(previousSymbolTable) = newSte;
-            previousSymbolTable = newSte;
-        }
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
     } else {
-        // Save in errors, symbol already present
+        // Save in errors, multiple matching declarations/definitions
         // TODO
     }
 
@@ -164,9 +168,21 @@ node_st *CAglobdecl(node_st *node)
  */
 node_st *CAglobdef(node_st *node)
 {
-    printf("decl version glob def\n");
+    printf("globdef\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    if (isSymbolUnique(VARDECL_NAME(node))) {
+        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        node_st *newSte = ASTste(NULL, VARDECL_NAME(node), VARDECL_TYPE(node), currentScope, STT_var);
+
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
+
+        printf("fundef ste made\n");
+    } else {
+        // Save in errors, multiple matching declarations/definitions
+        // TODO
+    }
 
     return node;
 }
@@ -176,12 +192,23 @@ node_st *CAglobdef(node_st *node)
  */
 node_st *CAfundef(node_st *node)
 {
-    printf("decl version fundef\n");
+    printf("fundef\n");
+
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    if (isSymbolUnique(FUNDEF_NAME(node))) {
+        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        node_st *newSte = ASTste(NULL, FUNDEF_NAME(node), FUNDEF_TYPE(node), currentScope, STT_function);
 
-    //TODO: how to get function param types in the STE?
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
 
-    // Go to the traversal function of the paramaters
+        printf("fundef ste made\n");
+    } else {
+        // Save in errors, multiple matching declarations/definitions
+        // TODO
+    }
+
+    // Then go to the traversal function of the paramaters, use current symbol table to update params
     TRAVparams(node);
 
     // Then go to the funbody after that to traverse that node
@@ -207,7 +234,28 @@ node_st *CAparam(node_st *node)
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     printf("param\n");
 
+    // TODO: use previousSymbolTable to update the params in that symbol table for the fundef that just created the new Ste!
+
     // TODO: See slides page 38 and 39, param needs to be in inner function
+    // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
+    currentScope++;
+    if (isSymbolUnique(VARDECL_NAME(node))) {
+        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        node_st *newSte = ASTste(NULL, PARAM_NAME(node), PARAM_TYPE(node), currentScope, STT_var);
+
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
+
+        printf("vardecls ste made\n");
+    } else {
+        // Save in errors, multiple matching declarations/definitions
+        // TODO
+    }
+    // Decrement scope again to let the funbody traversal apply the correct scope
+    currentScope--;
+
+    // If this param has a next, do the same for the next param in the function definition
+    TRAVnext(node);
 
     return node;
 }
@@ -265,18 +313,12 @@ node_st *CAvardecl(node_st *node)
         // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
         node_st *newSte = ASTste(NULL, VARDECL_NAME(node), VARDECL_TYPE(node), currentScope, STT_var);
 
-        // Update first symbol table if it is NULL 
-        if (firstSymbolTable == NULL) {
-            firstSymbolTable = newSte;
-            previousSymbolTable = newSte;
-        } else {
-            // Update next of previous symbol table
-            STE_NEXT(previousSymbolTable) = newSte;
-            previousSymbolTable = newSte;
-        }
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
+
         printf("vardecls ste made\n");
     } else {
-        // Save in errors, symbol already present
+        // Save in errors, multiple matching declarations/definitions
         // TODO
     }
 
@@ -417,6 +459,8 @@ node_st *CAfuncall(node_st *node)
 
     printf("*************************symbol table link\n");
 
+    // TODO: check if the arguments in the funcall match the paramaters of the called function, otherwise save error!
+
     // TODO: is scope 1?? And what about statements (such as inside a funbody and inside a while statement????)
 
     // TODO: remove after testing
@@ -435,6 +479,8 @@ node_st *CAvar(node_st *node)
 
     // Update this link from var to the Ste with the given name 
     // VAR_STE_LINK(node) = newSte;
+
+    // TODO: check if the symbol exists, otherwise save error: no matching declaration/definition!
 
     printf("*************************symbol table link\n");
 
@@ -506,17 +552,37 @@ void printSymbolTables()
                 case STT_varlet:
                 stType = "varlet";
                 break;
-                case STT_funcall:
-                stType = "funcall";
+                case STT_function:
+                stType = "function";
                 break;
                 case STT_NULL:
                 DBUG_ASSERT(false, "unknown SymbolTableType detected!");
             }
 
             // Print the Ste
-            if (STE_SYMBOL_TYPE(symbolTable) == STT_funcall) {
+            if (STE_SYMBOL_TYPE(symbolTable) == STT_function) {
                 // Print function Ste: "funName: returnType (param types)"
                 // TODO: how to get param types in the Ste and print them, ask Simon!!???
+                
+                // Declare a C string array with space for 5 strings of 20 characters each
+                char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"};; //TODO: change when implemented Ste new attribute!
+                // Get the length of the array
+                char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
+                int len = sizeof(strArr) / sizeof(strArr[0]);
+                for (int i = 1; i < len; ++i) {
+                    strcat(params, strArr[i]);
+                    // Add a comma after every value, except the last one
+                    if (i < len - 1) {
+                        strcat(params, ", ");
+                    }
+                }
+
+                // Print the function symbol table
+                printf("\nSymbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
+                type, STE_NAME(symbolTable), params, stType, STE_NESTING_LEVEL(symbolTable));
+
+                // Free the params memory when done because it is not needed anymore
+                MEMfree(params);
             } else {
                 // Print var Ste: "name, type"
                 printf("\nSymbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
@@ -532,7 +598,4 @@ void printSymbolTables()
     } else {
         printf("\nNo symbol tables found\n");
     }
-
-    // Return nothing to avoid warning
-    return 0;
 }

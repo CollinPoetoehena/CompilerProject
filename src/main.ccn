@@ -45,7 +45,7 @@ enum SymbolTableType {
     prefix = STT,
     values {
         // TODO: is this correct, what about Param???
-        var, varlet, funcall
+        var, varlet, function
     }
 };
 
