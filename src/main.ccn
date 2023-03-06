@@ -20,12 +20,12 @@ traversal ContextAnalysis {
     uid = CA,
     // TODO: you cannot declare a variable inside a Statement, so only linking can occur there
     nodes = {
-            // Program, FunBody and IfElse, While, DoWhile and For to build new symbol tables scopes
+            // Program, FunBody and IfElse, While, DoWhile, to go to the appropriate nodes' traversal functions
             // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
             Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
             // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
             VarDecl, GlobDecl, GlobDef, FunDef, Param,
-            // Exprs and Assign to go to the Var and Varlet nodes traversal function
+            // Exprs and Assign to go to the Var and Varlet nodes traversal functions
             Exprs, Assign,
             // Var, Varlet and FunCall to link a symbol table entry with it's name
             Var, Varlet, FunCall
@@ -36,9 +36,9 @@ traversal ContextAnalysis {
 traversal RegularAssignments {
     // This traversal should transform Variable Initialisations into Regular Assignments
     uid = RA,
-    // TODO: are these the nodes you need to traverse, Expr for the assignments??
+    // TODO: are these the nodes you need to traverse, Expr for the initialisations??
     // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
-    nodes = {VarDecl, GlobDef, For}
+    nodes = {VarDecl, GlobDef, For, Assign}
 };
 
 enum SymbolTableType {
