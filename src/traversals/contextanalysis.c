@@ -9,12 +9,15 @@
 
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
+#include "palm/dbug.h"
+#include "ccngen/trav.h"
 
 // Global variable for the first symbol table
 // Used to loop through from start to end via next
 node_st *firstSymbolTable = NULL;
 node_st *previousSymbolTable = NULL;
 int currentScope = 0; // Start at global scope
+char *errors;
 
 void updateCurrentScopeWithStatement() {
     // Simply increment the current scope by one to create a new scope for Stmts
@@ -74,11 +77,6 @@ bool isSymbolUnique(char *name) {
  */
 node_st *CAprogram(node_st *node)
 {
-    // Create a new symbol table with a new scope (program == global scope)
-    // node_st *new = ASTste();
-    // Update the current symbol table to use in the other traversals
-
-    //TODO: implement functions above and further implement this.
     // TODO: why do they not come to the traversal of the node!???
 
     // TODO: remove after testing
@@ -87,8 +85,14 @@ node_st *CAprogram(node_st *node)
     // Go to the decls traversal
     TRAVdecls(node);
 
-    // TODO: print the made symbol table entries at the end by using the firstSymbol table and nexts
-    // printSymbolTables();
+    // TODO: print errors at the end, how to do that???
+    if (errors != NULL) {
+        // TODO:
+        // Stop compilation and print errors
+    } else {
+        // Print all the symbol tables at the end of the traversal
+        printSymbolTables();
+    }
 
     // Nothing is changed to the program node, so just return the node again
     return node;
@@ -175,6 +179,8 @@ node_st *CAfundef(node_st *node)
     printf("decl version fundef\n");
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
 
+    //TODO: how to get function param types in the STE?
+
     // Go to the traversal function of the paramaters
     TRAVparams(node);
 
@@ -200,6 +206,8 @@ node_st *CAparam(node_st *node)
 {
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     printf("param\n");
+
+    // TODO: See slides page 38 and 39, param needs to be in inner function
 
     return node;
 }
@@ -271,7 +279,6 @@ node_st *CAvardecl(node_st *node)
         // Save in errors, symbol already present
         // TODO
     }
-
 
     // To perfom the traversal functions of the children use TRAVchildx(node)
     TRAVnext(node);
@@ -460,61 +467,72 @@ node_st *CAvarlet(node_st *node)
 // Print all symbol table entries using the linked list and firstSymbolTable
 void printSymbolTables()
 {    
-    // // Get the type
-    // char *type = NULL;
-    // switch (CAST_TYPE(node)) {
-    // case CT_int:
-    //   type = "int";
-    //   break;
-    // case CT_float:
-    //   type = "float";
-    //   break;
-    // case CT_bool:
-    //   type = "bool";
-    //   break;
-    // case CT_void:
-    //   type = "void";
-    //   break;
-    // case CT_NULL:
-    //   DBUG_ASSERT(false, "unknown type detected!");
-    // }
-
-    // // Get the SymbolTableType
-    // char *stType = NULL;
-    // switch (STE_SYMBOL_TYPE(node)) {
-    // case STT_var:
-    //   stType = "var";
-    //   break;
-    // case STT_varlet:
-    //   stType = "varlet";
-    //   break;
-    // case STT_funcall:
-    //   stType = "funcall";
-    //   break;
-    // case STT_NULL:
-    //   DBUG_ASSERT(false, "unknown SymbolTableType detected!");
-    // }
-
     // // Print Symbol table entries
     // printf("Symbol table entry: %s %s, nesting level: %d, symbol type: ", type, STE_NAME(node), STE_NESTING_LEVEL(node), stType);
 
-
     // Print Ste's
-    // if (firstSymbolTable != NULL) {
-    //     node_st *symbolTable = firstSymbolTable;
-    //     do {
-    //         // Symbol already present, return not unique/false 
-    //         if (STE_NAME(symbolTable) == name) {
-    //             printf("**********************Link found for %s\n", name);
-    //             return false;
-    //         }
+    if (firstSymbolTable != NULL) {
+        // Print a couple of new lines before printing the Ste's
+        printf("\n\n\n");
 
-    //         // Update symbolTable
-    //         symbolTable = STE_NEXT(symbolTable);
-    //     } while (symbolTable != NULL);
-    // } else {
-    //     printf(\n"No symbol tables found\n");
-    // }
+        node_st *symbolTable = firstSymbolTable;
+        do {
+            // Get the type
+            char *type = NULL;
 
-    return node;
+            switch (STE_TYPE(symbolTable)) {
+                case CT_int:
+                type = "int";
+                break;
+                case CT_float:
+                type = "float";
+                break;
+                case CT_bool:
+                type = "bool";
+                break;
+                case CT_void:
+                type = "void";
+                break;
+                case CT_NULL:
+                DBUG_ASSERT(false, "unknown type detected!");
+            }
+            
+            // Get the SymbolTableType
+            char *stType = NULL;
+            switch (STE_SYMBOL_TYPE(symbolTable)) {
+                case STT_var:
+                stType = "var";
+                break;
+                case STT_varlet:
+                stType = "varlet";
+                break;
+                case STT_funcall:
+                stType = "funcall";
+                break;
+                case STT_NULL:
+                DBUG_ASSERT(false, "unknown SymbolTableType detected!");
+            }
+
+            // Print the Ste
+            if (STE_SYMBOL_TYPE(symbolTable) == STT_funcall) {
+                // Print function Ste: "funName: returnType (param types)"
+                // TODO: how to get param types in the Ste and print them, ask Simon!!???
+            } else {
+                // Print var Ste: "name, type"
+                printf("\nSymbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
+                type, STE_NAME(symbolTable), stType, STE_NESTING_LEVEL(symbolTable));
+            }
+
+            // Update symbolTable
+            symbolTable = STE_NEXT(symbolTable);
+        } while (symbolTable != NULL);
+
+        // Print a couple of new lines before printing the Ste's
+        printf("\n\n\n");
+    } else {
+        printf("\nNo symbol tables found\n");
+    }
+
+    // Return nothing to avoid warning
+    return 0;
 }

@@ -9,6 +9,7 @@
 
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
+#include "ccngen/trav.h"
 
 /**
  * @fn RAvardecl
