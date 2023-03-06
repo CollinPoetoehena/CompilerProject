@@ -18,14 +18,9 @@
 // Used to loop through from start to end via next
 node_st *firstSymbolTable = NULL;
 node_st *previousSymbolTable = NULL;
+// Two scopes for basic: Program and FunBody
 int currentScope = 0; // Start at global scope
 char *errors;
-
-void updateCurrentScopeWithStatement() {
-    // Simply increment the current scope by one to create a new scope for Stmts
-    // There are no symnbol table entries that need to be created here
-    currentScope++;
-}
 
 void updateGlobSymbolTables(node_st *newSte) {
     // Update first symbol table if it is NULL 
@@ -47,9 +42,10 @@ node_st *findSteLink(char *name) {
     if (firstSymbolTable != NULL) {
         node_st *symbolTable = firstSymbolTable;
         do {
-            // Match found, return Ste node
-            if (STE_NAME(symbolTable) == name) {
-                printf("**********************Link found for %s\n", name);
+            // Match found, return Ste node. Use string comparison 
+            // to check for equality, 0 means equal. == only checks if memory references are equal
+            if (strcmp(STE_NAME(symbolTable), name) == 0) {
+                printf("**********************Link found for: %s\n", name);
                 return symbolTable;
             }
 
@@ -116,6 +112,7 @@ node_st *CAprogram(node_st *node)
 node_st *CAdecls(node_st *node)
 {
     printf("decls\n");
+
     // To perfom the traversal functions of the children use TRAVchildx(node)
     if (DECLS_DECL(node) != NULL) {
             TRAVdecl(node);
@@ -123,7 +120,6 @@ node_st *CAdecls(node_st *node)
     TRAVnext(node);
     // This will now go to the GlobDef, GlobDecl, FunDef traversals
 
-    //TODO: Decls is probably global level and Stmts on above, is that correct, ask Simon????
     return node;
 }
 
@@ -142,7 +138,7 @@ node_st *CAglobdecl(node_st *node)
 
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(GLOBDECL_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
         node_st *newSte = ASTste(NULL, GLOBDECL_NAME(node), GLOBDECL_TYPE(node), currentScope, STT_var);
 
         // Update global symbol tables in this traversal
@@ -152,15 +148,6 @@ node_st *CAglobdecl(node_st *node)
         // TODO
         printf("duplicate definition for a globdecl found\n");
     }
-
-    
-    // if (firstSymbolTable != NULL) {
-    //     // Update previous symbol table next
-    //     STE_NEXT(firstSymbolTable) = newSte;
-    // }   
-
-    // // Update symbol table, if previous is NULL it would not have updated the next!
-    // firstSymbolTable = newSte;
 
     return node;
 }
@@ -174,7 +161,7 @@ node_st *CAglobdef(node_st *node)
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     if (isSymbolUnique(GLOBDEF_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        // Create a symbol table entry
         node_st *newSte = ASTste(NULL, GLOBDEF_NAME(node), GLOBDEF_TYPE(node), currentScope, STT_var);
 
         // Update global symbol tables in this traversal
@@ -197,9 +184,9 @@ node_st *CAfundef(node_st *node)
 {
     printf("fundef\n");
 
-    // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
     if (isSymbolUnique(FUNDEF_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        // Create a symbol table entry
         node_st *newSte = ASTste(NULL, FUNDEF_NAME(node), FUNDEF_TYPE(node), currentScope, STT_function);
 
         // Update global symbol tables in this traversal
@@ -244,7 +231,7 @@ node_st *CAparam(node_st *node)
     // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
     currentScope++;
     if (isSymbolUnique(PARAM_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
         node_st *newSte = ASTste(NULL, PARAM_NAME(node), PARAM_TYPE(node), currentScope, STT_var);
 
         // Update global symbol tables in this traversal
@@ -271,9 +258,6 @@ node_st *CAparam(node_st *node)
 node_st *CAfunbody(node_st *node)
 {
     printf("funbody\n");
-
-    // Create a new symbol table with a new scope (funbody == one scope under global)
-    //TODO: is the currentScope variable correct???
 
     // Increment the current scope inside a function body for every function body 
     // (basic has global, funbody and statements (if, while, etc) scope)
@@ -313,8 +297,8 @@ node_st *CAvardecl(node_st *node)
     printf("vardecls\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-     if (isSymbolUnique(VARDECL_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    if (isSymbolUnique(VARDECL_NAME(node))) {
+        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
         node_st *newSte = ASTste(NULL, VARDECL_NAME(node), VARDECL_TYPE(node), currentScope, STT_var);
 
         // Update global symbol tables in this traversal
@@ -330,7 +314,6 @@ node_st *CAvardecl(node_st *node)
     // To perfom the traversal functions of the children use TRAVchildx(node)
     TRAVnext(node);
     // TRAVstmt(node);
-
 
     return node;
 }
@@ -353,15 +336,12 @@ node_st *CAstmts(node_st *node)
  */
 node_st *CAifelse(node_st *node)
 {
-    // TODO: is this necessary or is a Stmts not a new scope?
-    updateCurrentScopeWithStatement();
+    // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
 
     // Go to stmts traversal functions
     TRAVthen(node);
     TRAVelse_block(node);
     
-    // TODO: decrement scope again?????
-
     return node;
 }
 
@@ -370,8 +350,7 @@ node_st *CAifelse(node_st *node)
  */
 node_st *CAwhile(node_st *node)
 {
-    // TODO: is this necessary or is a Stmts not a new scope?
-    updateCurrentScopeWithStatement();
+    // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
 
     // Go to stmts traversal functions
     TRAVblock(node);
@@ -384,12 +363,10 @@ node_st *CAwhile(node_st *node)
  */
 node_st *CAdowhile(node_st *node)
 {
-    // TODO: is this necessary or is a Stmts not a new scope?
-    updateCurrentScopeWithStatement();
+    // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
 
     // Go to stmts traversal functions
     TRAVblock(node);
-
 
     return node;
 }
@@ -399,10 +376,23 @@ node_st *CAdowhile(node_st *node)
  */
 node_st *CAfor(node_st *node)
 {
-    // TODO: is this necessary or is a Stmts not a new scope?
-    updateCurrentScopeWithStatement();
+    // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
 
     //TODO: how to put for declaration in start in upper nesting level???
+    // For var declaration always has type int and name is saved in For node
+    if (isSymbolUnique(FOR_VAR(node))) {
+        // Create a symbol table entry
+        node_st *newSte = ASTste(NULL, FOR_VAR(node), CT_int, currentScope, STT_var);
+
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
+
+        printf("for var decl ste made\n");
+    } else {
+        // Save in errors, multiple matching declarations/definitions
+        // TODO
+        printf("duplicate definition for a for loop vardecl found\n");
+    }
 
     // remove the declaration part from for-loop induction variables and create corresponding 
     // local variable declarations on the level of the (innermost) function definition
@@ -463,7 +453,11 @@ node_st *CAexprs(node_st *node)
  */
 node_st *CAfuncall(node_st *node)
 {
-    // Update this link from var to the Ste with the given name 
+    // Update this link from var to the Ste with the given name. The link a Var, Varlet or FunCall node
+    // Only needs to be updated once they appear again. For example void foo() {int a;} == no link
+    // void foo() {int a; a = 5; foo();} == two links needs to be updated
+    
+    //TODO: update link
     //FUNCALL_STE_LINK(node) = newSte;     
 
     printf("*************************symbol table link funcall\n");

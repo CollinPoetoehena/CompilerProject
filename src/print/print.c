@@ -134,31 +134,6 @@ node_st *PRTreturn(node_st *node)
 }
 
 /**
- * @fn PRTfuncall
- */
-node_st *PRTfuncall(node_st *node)
-{
-    printf("%s", FUNCALL_NAME(node));
-
-    // IF the function call has arguments, print them, otherwise just use ()
-    if (FUNCALL_ARGS(node) != NULL) {
-      // Start the funcall arguments
-      printf("(");
-      // Print the arguments
-      TRAVargs(node);
-      // End the funcall arguments
-      printf(")");
-    } else {
-      printf("()");
-    }
-
-    // End funcall with a semicolon and a new line
-    printf(";\n");
-
-    return node;
-}
-
-/**
  * @fn PRTcast
  */
 node_st *PRTcast(node_st *node)
@@ -759,12 +734,53 @@ node_st *PRTmonop(node_st *node)
 }
 
 /**
+ * @fn PRTfuncall
+ */
+node_st *PRTfuncall(node_st *node)
+{
+    printf("%s", FUNCALL_NAME(node));
+
+    // IF the function call has arguments, print them, otherwise just use ()
+    if (FUNCALL_ARGS(node) != NULL) {
+      // Start the funcall arguments
+      printf("(");
+      // Print the arguments
+      TRAVargs(node);
+      // End the funcall arguments
+      printf(")");
+    } else {
+      printf("()");
+    }
+
+    // End funcall with a semicolon and a new line
+    printf(";\n");
+
+    // Print Ste link if it exists
+    if (VARLET_STE_LINK(node) != NULL) {
+      printf("\nVarLet has an Ste link\n");
+      printf("\n/* VarLet Link to Ste:\n");
+      printSte(VARLET_STE_LINK(node));
+      printf("*\\ \n"); /* Escape a \ with a \ */
+    }
+
+    return node;
+}
+
+/**
  * @fn PRTvarlet
  */
 node_st *PRTvarlet(node_st *node)
 {
     // Print varlet (variable in assignment)
     printf("%s", VARLET_NAME(node));
+
+    // Print Ste link if it exists
+    if (VARLET_STE_LINK(node) != NULL) {
+      printf("\nVarLet has an Ste link");
+      printf("\n/* VarLet Link to Ste:\n");
+      printSte(VARLET_STE_LINK(node));
+      printf("*\\ \n"); /* Escape a \ with a \ */
+    }
 
     // This prints it with the locations
     // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
@@ -779,9 +795,10 @@ node_st *PRTvar(node_st *node)
     // Print var (variable in an expression)
     printf("%s", VAR_NAME(node));
 
-    // Print link if it exists
+    // Print Ste link if it exists
     if (VAR_STE_LINK(node) != NULL) {
-      printf("/* Var Link to Ste:\n");
+      printf("\nVar has an Ste link\n");
+      printf("\n/* Var Link to Ste:\n");
       printSte(VAR_STE_LINK(node));
       printf("*\\ \n"); /* Escape a \ with a \ */
     }
@@ -879,14 +896,14 @@ void printSte(node_st *steNode) {
       }
 
       // Print the function symbol table
-      printf("\nSymbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
+      printf("Symbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
           STE_NAME(steNode), type, params, stType, STE_NESTING_LEVEL(steNode));
 
       // Free the params memory when done because it is not needed anymore
       MEMfree(params);
     } else {
       // Print var Ste: "name, type"
-      printf("\nSymbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
+      printf("Symbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
           STE_NAME(steNode), type, stType, STE_NESTING_LEVEL(steNode));
     }
   }
