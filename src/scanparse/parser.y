@@ -455,6 +455,7 @@ expr: BRACKET_L expr BRACKET_R
       }
     | var
       {
+        printf("*********************************parser var found!\n");
         $$ = $1;
       }
     | constant
@@ -500,6 +501,7 @@ varlet: ID
 // Variable in an expression.
 var: ID
         {
+          printf("*********************************parser var found: %s!\n", $1);
           $$ = ASTvar($1);
           AddLocToNode($$, &@1, &@1);
         }

@@ -756,10 +756,10 @@ node_st *PRTfuncall(node_st *node)
     printf(";\n");
 
     // Print Ste link if it exists
-    if (VARLET_STE_LINK(node) != NULL) {
-      printf("\nVarLet has an Ste link\n");
-      printf("\n/* VarLet Link to Ste:\n");
-      printSte(VARLET_STE_LINK(node));
+    if (FUNCALL_STE_LINK(node) != NULL) {
+      printf("FunCall has an Ste link");
+      printf("\n/* FunCall Link to Ste:\n");
+      printSte(FUNCALL_STE_LINK(node));
       printf("*\\ \n"); /* Escape a \ with a \ */
     }
 
@@ -797,7 +797,7 @@ node_st *PRTvar(node_st *node)
 
     // Print Ste link if it exists
     if (VAR_STE_LINK(node) != NULL) {
-      printf("\nVar has an Ste link\n");
+      printf("\nVar has an Ste link");
       printf("\n/* Var Link to Ste:\n");
       printSte(VAR_STE_LINK(node));
       printf("*\\ \n"); /* Escape a \ with a \ */
@@ -883,24 +883,10 @@ void printSte(node_st *steNode) {
       // TODO: how to get param types in the Ste and print them, ask Simon!!???
       
       // Declare a C string array with space for 5 strings of 20 characters each
-      char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"}; //TODO: change when implemented Ste new attribute!
-      // Get the length of the array
-      char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
-      int len = sizeof(strArr) / sizeof(strArr[0]);
-      for (int i = 1; i < len; ++i) {
-          strcat(params, strArr[i]);
-          // Add a comma after every value, except the last one
-          if (i < len - 1) {
-              strcat(params, ", ");
-          }
-      }
-
+      char *params = "Still to do";
       // Print the function symbol table
       printf("Symbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
           STE_NAME(steNode), type, params, stType, STE_NESTING_LEVEL(steNode));
-
-      // Free the params memory when done because it is not needed anymore
-      MEMfree(params);
     } else {
       // Print var Ste: "name, type"
       printf("Symbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 

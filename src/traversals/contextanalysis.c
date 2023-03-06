@@ -54,6 +54,7 @@ node_st *findSteLink(char *name) {
         } while (symbolTable != NULL);
     }
 
+    printf("No link found!");
     // No existing symbol found, return NULL
     return NULL;
 }
@@ -311,6 +312,9 @@ node_st *CAvardecl(node_st *node)
         printf("duplicate definition for a vardecl found\n");
     }
 
+    // Go to the traversal function of the expr to go to the Vars
+    TRAVinit(node);
+
     // To perfom the traversal functions of the children use TRAVchildx(node)
     TRAVnext(node);
     // TRAVstmt(node);
@@ -456,9 +460,15 @@ node_st *CAfuncall(node_st *node)
     // Update this link from var to the Ste with the given name. The link a Var, Varlet or FunCall node
     // Only needs to be updated once they appear again. For example void foo() {int a;} == no link
     // void foo() {int a; a = 5; foo();} == two links needs to be updated
-    
-    //TODO: update link
-    //FUNCALL_STE_LINK(node) = newSte;     
+    node_st *steNode = findSteLink(FUNCALL_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        FUNCALL_STE_LINK(node) = steNode;
+    } else {
+        // Save in errors, no matching declaration/definition!
+        // TODO
+        printf("no matching declaration/definition for funcall found\n");
+    }
 
     printf("*************************symbol table link funcall\n");
 
@@ -478,6 +488,8 @@ node_st *CAfuncall(node_st *node)
  */
 node_st *CAvar(node_st *node)
 {
+    //TODO: it is not yet getting here via the Expr!
+
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteLink(VAR_NAME(node));
     if (steNode != NULL) {
@@ -488,8 +500,6 @@ node_st *CAvar(node_st *node)
         // TODO
         printf("no matching declaration/definition for var found\n");
     }
-
-    // TODO: check if the symbol exists, otherwise save error: no matching declaration/definition!
 
     printf("*************************symbol table link var\n");
 
@@ -533,7 +543,8 @@ void printSymbolTables()
     // Print Ste's
     if (firstSymbolTable != NULL) {
         // Print a couple of new lines before printing the Ste's
-        printf("\n\n\n");
+        printf("\n\n\n****************************************************************************************************************************************************************************** \
+        \nSymbol Tables Entries created:\n");
 
         node_st *symbolTable = firstSymbolTable;
         do {
@@ -608,7 +619,8 @@ void printSymbolTables()
         } while (symbolTable != NULL);
 
         // Print a couple of new lines before printing the Ste's
-        printf("\n\n\n");
+        printf("\n\n\n****************************************************************************************************************************************************************************** \
+        \n");
     } else {
         printf("\nNo symbol tables found\n");
     }
