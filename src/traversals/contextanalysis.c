@@ -577,14 +577,14 @@ void printSymbolTables()
                 }
 
                 // Print the function symbol table
-                printf("\nSymbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
+                printf("\nSymbol table entry:\n %s : %s (%s) \nsymbol type: %s, nesting level: %d\n", 
                     STE_NAME(symbolTable), type, params, stType, STE_NESTING_LEVEL(symbolTable));
 
                 // Free the params memory when done because it is not needed anymore
                 MEMfree(params);
             } else {
                 // Print var Ste: "name, type"
-                printf("\nSymbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
+                printf("\nSymbol table entry:\n %s : %s\nsymbol type: %s, nesting level: %d\n", 
                     STE_NAME(symbolTable), type, stType, STE_NESTING_LEVEL(symbolTable));
             }
 

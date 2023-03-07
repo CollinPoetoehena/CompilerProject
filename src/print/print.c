@@ -10,6 +10,8 @@
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
 #include "ccngen/trav.h"
+#include "palm/memory.h"
+#include  <string.h>
 #include "palm/dbug.h"
 
 // int indentation = 0;
@@ -38,12 +40,17 @@ node_st *PRTprogram(node_st *node)
     // Some prints are not perfect, such as a funcall always ends with a ;, but it does not change anything to the 
     // functionality so therefore it is not fixed because it would take a lot of time to fix with little result,
     // this is a choice we made to have as much time for our compiler and still have the functionality of print.c to test our parser
+    
+    // Print a couple of new lines before printing the print traversal
+    printf("\n\n\n****************************************************************************************************************************************************************************** \
+    \nStart of the print traversal:\n\n");
 
     // Go to child and print it
     TRAVdecls(node);
 
-    // Print a new line at the end of the program
-    printf("\n");
+    // End the Print traversal
+    printf("\n\nEnd of the print traversal\n****************************************************************************************************************************************************************************** \
+    \n\n");
         
     return node;
 }
@@ -744,7 +751,7 @@ node_st *PRTfuncall(node_st *node)
     if (FUNCALL_ARGS(node) != NULL) {
       // Start the funcall arguments
       printf("(");
-      // Print the arguments
+      // Print the arguments, these are not printed with spaces, they are Exprs so keep that in mind!
       TRAVargs(node);
       // End the funcall arguments
       printf(")");
@@ -880,16 +887,55 @@ void printSte(node_st *steNode) {
     // Print the Ste
     if (STE_SYMBOL_TYPE(steNode) == STT_function) {
       // Print function Ste: "funName: returnType (param types)"
-      // TODO: how to get param types in the Ste and print them, ask Simon!!???
-      
       // Declare a C string array with space for 5 strings of 20 characters each
-      char *params = "Still to do";
+      char *paramsPrint = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
+      // Initialize with empty string to avoid weird memory address value being used at the start
+      strcpy(paramsPrint, "");
+      
+      if (STE_PARAMS(steNode) != NULL) {
+          // Get the first param from the Ste
+          node_st *paramIterator = STE_PARAMS(steNode);
+          do {
+              // Get the type
+              char *tmp = NULL;
+              switch (PARAM_TYPE(paramIterator)) {
+                  case CT_int:
+                  tmp = "int";
+                  break;
+                  case CT_float:
+                  tmp = "float";
+                  break;
+                  case CT_bool:
+                  tmp = "bool";
+                  break;
+                  case CT_void:
+                  tmp = "void";
+                  break;
+                  case CT_NULL:
+                  DBUG_ASSERT(false, "unknown type detected!");
+              }
+
+              // Add the param to the params string to print the fundef
+              strcat(paramsPrint, tmp);
+              // Add a comma after every value, except the last one
+              if (PARAM_NEXT(paramIterator) != NULL) {
+                  strcat(paramsPrint, ", ");
+              }
+
+              // Update symbolTable
+              paramIterator = PARAM_NEXT(paramIterator);
+          } while (paramIterator != NULL);
+      }
+
       // Print the function symbol table
-      printf("Symbol table entry:\n %s : %s (%s) \nstymbol type: %s, nesting level: %d\n", 
-          STE_NAME(steNode), type, params, stType, STE_NESTING_LEVEL(steNode));
+      printf("Symbol table entry:\n %s : %s (%s) \nsymbol type: %s, nesting level: %d\n", 
+          STE_NAME(steNode), type, paramsPrint, stType, STE_NESTING_LEVEL(steNode));
+
+      // Free the params memory when done because it is not needed anymore
+      MEMfree(paramsPrint);
     } else {
       // Print var Ste: "name, type"
-      printf("Symbol table entry:\n %s : %s\nstymbol type: %s, nesting level: %d\n", 
+      printf("Symbol table entry:\n %s : %s\nsymbol type: %s, nesting level: %d\n", 
           STE_NAME(steNode), type, stType, STE_NESTING_LEVEL(steNode));
     }
   }
