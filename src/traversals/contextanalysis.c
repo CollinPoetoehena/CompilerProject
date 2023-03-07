@@ -219,14 +219,22 @@ node_st *CAparam(node_st *node)
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     printf("param\n");
 
-    // TODO: use previousSymbolTable to update the params in that symbol table for the fundef that just created the new Ste!
-
     // TODO: See slides page 38 and 39, param needs to be in inner function
     // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
     currentScope++;
-    // createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), STT_var, NULL);
 
-    //TODO: maybe this can even be removed??
+    // Use the previousSymbolTable because that is the FunDef which contains the params
+    if (STE_PARAMS(previousSymbolTable) != NULL) {
+        // Get the first param from the Ste
+        node_st *paramIterator = STE_PARAMS(previousSymbolTable);
+        do {
+            // Create Ste for the param
+            createSymbolTableEntry(PARAM_NAME(paramIterator), PARAM_TYPE(paramIterator), STT_var, NULL);
+
+            // Update symbolTable
+            paramIterator = PARAM_NEXT(paramIterator);
+        } while (paramIterator != NULL);
+    }
 
     // Decrement scope again to let the funbody traversal apply the correct scope
     currentScope--;
@@ -286,7 +294,6 @@ node_st *CAvardecl(node_st *node)
 
     // To perfom the traversal functions of the children use TRAVchildx(node)
     TRAVnext(node);
-    // TRAVstmt(node);
 
     return node;
 }
@@ -297,6 +304,7 @@ node_st *CAvardecl(node_st *node)
 node_st *CAstmts(node_st *node)
 {
     printf("statements\n");
+
     // To perfom the traversal functions of the children use TRAVchildx(node)
     TRAVstmt(node);
     TRAVnext(node);
@@ -388,8 +396,8 @@ node_st *CAassign(node_st *node)
     TRAVlet(node);
     // Go to the expr
     TRAVexpr(node);
-    return node;
 
+    return node;
 }
 
 /**
@@ -530,28 +538,15 @@ void printSymbolTables()
             // Print the Ste
             if (STE_SYMBOL_TYPE(symbolTable) == STT_function) {
                 // Print function Ste: "funName: returnType (param types)"
-                // TODO: how to get param types in the Ste and print them, ask Simon!!???
-                
                 // Declare a C string array with space for 5 strings of 20 characters each
-                // char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"}; //TODO: change when implemented Ste new attribute!
-                // Get the length of the array
                 char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
-                // int len = sizeof(strArr) / sizeof(strArr[0]);
-                // for (int i = 1; i < len; ++i) {
-                    // strcat(params, strArr[i]);
-                    // // Add a comma after every value, except the last one
-                    // if (i < len - 1) {
-                    //     strcat(params, ", ");
-                    // }
-                // }
-
+                
                 if (STE_PARAMS(symbolTable) != NULL) {
                     // Get the first param from the Ste
                     node_st *paramIterator = STE_PARAMS(symbolTable);
                     do {
-                        char *tmp = NULL;
-
                         // Get the type
+                        char *tmp = NULL;
                         switch (PARAM_TYPE(paramIterator)) {
                             case CT_int:
                             tmp = "int";
@@ -569,9 +564,8 @@ void printSymbolTables()
                             DBUG_ASSERT(false, "unknown type detected!");
                         }
 
-                        // Match found, return Ste node. Use string comparison 
-                        // to check for equality, 0 means equal. == only checks if memory references are equal
-                        strcat(params, PARAM_NAME(node));
+                        // Add the param to the params string to print the fundef
+                        strcat(params, tmp);
                         // Add a comma after every value, except the last one
                         if (PARAM_NEXT(paramIterator) != NULL) {
                             strcat(params, ", ");
@@ -579,7 +573,7 @@ void printSymbolTables()
 
                         // Update symbolTable
                         paramIterator = PARAM_NEXT(paramIterator);
-                    } while (symbolTable != NULL);
+                    } while (paramIterator != NULL);
                 }
 
                 // Print the function symbol table
