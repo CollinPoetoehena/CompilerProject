@@ -224,7 +224,9 @@ node_st *CAparam(node_st *node)
     // TODO: See slides page 38 and 39, param needs to be in inner function
     // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
     currentScope++;
-    createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), STT_var, NULL);
+    // createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), STT_var, NULL);
+
+    //TODO: maybe this can even be removed??
 
     // Decrement scope again to let the funbody traversal apply the correct scope
     currentScope--;
@@ -531,16 +533,53 @@ void printSymbolTables()
                 // TODO: how to get param types in the Ste and print them, ask Simon!!???
                 
                 // Declare a C string array with space for 5 strings of 20 characters each
-                char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"}; //TODO: change when implemented Ste new attribute!
+                // char strArr[5][20] = {"Still", "To", "Do", "Ask", "Simon"}; //TODO: change when implemented Ste new attribute!
                 // Get the length of the array
                 char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
-                int len = sizeof(strArr) / sizeof(strArr[0]);
-                for (int i = 1; i < len; ++i) {
-                    strcat(params, strArr[i]);
-                    // Add a comma after every value, except the last one
-                    if (i < len - 1) {
-                        strcat(params, ", ");
-                    }
+                // int len = sizeof(strArr) / sizeof(strArr[0]);
+                // for (int i = 1; i < len; ++i) {
+                    // strcat(params, strArr[i]);
+                    // // Add a comma after every value, except the last one
+                    // if (i < len - 1) {
+                    //     strcat(params, ", ");
+                    // }
+                // }
+
+                if (STE_PARAMS(symbolTable) != NULL) {
+                    // Get the first param from the Ste
+                    node_st *paramIterator = STE_PARAMS(symbolTable);
+                    do {
+                        char *tmp = NULL;
+
+                        // Get the type
+                        switch (PARAM_TYPE(paramIterator)) {
+                            case CT_int:
+                            tmp = "int";
+                            break;
+                            case CT_float:
+                            tmp = "float";
+                            break;
+                            case CT_bool:
+                            tmp = "bool";
+                            break;
+                            case CT_void:
+                            tmp = "void";
+                            break;
+                            case CT_NULL:
+                            DBUG_ASSERT(false, "unknown type detected!");
+                        }
+
+                        // Match found, return Ste node. Use string comparison 
+                        // to check for equality, 0 means equal. == only checks if memory references are equal
+                        strcat(params, PARAM_NAME(node));
+                        // Add a comma after every value, except the last one
+                        if (PARAM_NEXT(paramIterator) != NULL) {
+                            strcat(params, ", ");
+                        }
+
+                        // Update symbolTable
+                        paramIterator = PARAM_NEXT(paramIterator);
+                    } while (symbolTable != NULL);
                 }
 
                 // Print the function symbol table
