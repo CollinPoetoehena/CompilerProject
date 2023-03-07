@@ -163,6 +163,7 @@ node_st *CAprogram(node_st *node)
     TRAVdecls(node);
 
     // TODO: print errors at the end and stop compilation, how to do that???
+    //TODO: remove errors, not necessary, see implementation of error funcall part
     if (errors != NULL) {
         // Stop compilation and print errors
     } else {

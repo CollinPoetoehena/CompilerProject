@@ -2,8 +2,7 @@ start phase RootPhase {
     // Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        // TODO: uncomment ContextAnalysis phase when done
-        // ContextAnalysis;
+        ContextAnalysis;
         // TODO: uncomment when that is done, otherwise it might cause an error!
         // RegularAssignments;
         print;
