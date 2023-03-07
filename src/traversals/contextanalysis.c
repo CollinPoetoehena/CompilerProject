@@ -17,6 +17,9 @@
 #include  <string.h>
 #include "palm/memory.h"
 
+// Include error functionality
+#include "palm/ctinfo.h"
+
 // Global variable for the first symbol table
 // Used to loop through from start to end via next
 node_st *firstSymbolTable = NULL;
@@ -248,7 +251,6 @@ node_st *CAfundef(node_st *node)
     // Update the scope to the old scope after the statements when you get back to this funbody
     currentScope = oldScope;
 
-
     return node;
 }
 
@@ -469,6 +471,11 @@ node_st *CAfuncall(node_st *node)
             } else {
                 // TODO: save error, argument numbers do not match parameter numbers
                  printf("argument numbers do not match parameter numbers\n");
+
+                 // Prints the error when it occurs, so in this line
+                 CTI(CTI_ERROR, true, "argument numbers for function '%s' do not match parameter numbers", FUNCALL_NAME(node));
+                // Create error action, will stop the current compilation after this Action (contextanalysis traversal)
+                 CCNerrorAction();
             }
         } else {
             // Save Ste node in link attribute

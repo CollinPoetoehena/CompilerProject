@@ -18,7 +18,7 @@ void faa(int a, int b, float c) {
     bool k = true;
 
     // FunCall link, check params success
-    faa(h, i, j);
+    faa(h, i);
 
     // FunCall link, check params failed
     // foo(h, j);
