@@ -51,6 +51,8 @@ phase ContextAnalysis {
                 // FunDef to use for creating a new SteFun 
                 // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
                 FunDef,
+                // Param node (= LinkedList) to link the params of a FunDef
+                Param,
                 // These nodes are used to update their link once they occur in a program
                 FunCall
             }
@@ -142,8 +144,9 @@ root node Program {
 
     attributes {
         // Contains first global symbol occuring (can be used for linking)
-        SteVar firstGlobalSymbolVar,
-        SteFun firstGlobalSymbolFun
+        // No need for constructor because it is set only later on in ContextAnalysis
+        SteVar first_ste_variables,
+        SteFun first_ste_functions
     }
 };
 
@@ -232,8 +235,8 @@ node FunDef {
         bool export { constructor },
         // Link to its own symbol table
         SteFun symbol_table,
-        // Link to first symbol table 
-        SteVar first_symbol_var
+        // Link to first symbol table of this functions scope
+        SteVar first_ste_variables
         // No need to do anything with EXTERN for the FunDec because they are always external!
     }
 };
