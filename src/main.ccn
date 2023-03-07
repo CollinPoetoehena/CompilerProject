@@ -2,7 +2,8 @@ start phase RootPhase {
     // Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        ContextAnalysis;
+        // TODO: uncomment ContextAnalysis phase when done
+        // ContextAnalysis;
         // TODO: uncomment when that is done, otherwise it might cause an error!
         // RegularAssignments;
         print;
@@ -18,28 +19,49 @@ traversal Print {
     uid = PRT
 };
 
-traversal ContextAnalysis {
-    uid = CA,
-    // TODO: you cannot declare a variable inside a Statement, so only linking can occur there
-    nodes = {
-            // Program, FunBody and IfElse, While, DoWhile, to go to the appropriate nodes' traversal functions
-            // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
-            Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
-            // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
-            VarDecl, GlobDecl, GlobDef, FunDef, Param,
-            // Exprs and Assign to go to the Var and Varlet nodes traversal functions
-            Exprs, Assign,
-            // Var, Varlet and FunCall to link a symbol table entry with it's name
-            Var, Varlet, FunCall
-        }
+// TODO later: Create separate traversal to convert for loop to while loop, easier after CA??
+
+// TODO: convert
+phase ContextAnalysis {
+    // TODO: convert CCNACTIONERROR to error on Phase, so at the end of the phase
+    actions { 
+        traversal CreateVariableSymbolTableEntries {
+            // Create Variable Symboltables
+            uid = CVS,
+            nodes = { Program, FunBody, GlobDecl, GlobDef, VarDecl, Param, For }
+        };
+
+        traversal CreateFunctionSymbolTableEntries {
+            // Create Function Symboltables
+            uid = CFS,
+            nodes = { Program, FunDef, FunCall }
+        };
+    }
 };
+
+// traversal ContextAnalysis {
+//     uid = CA,
+//     // TODO: you cannot declare a variable inside a Statement, so only linking can occur there
+//     nodes = {
+//             // Program, FunBody and IfElse, While, DoWhile, to go to the appropriate nodes' traversal functions
+//             // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
+//             Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
+//             // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
+//             VarDecl, GlobDecl, GlobDef, FunDef, Param,
+//             // Exprs and Assign to go to the Var and Varlet nodes traversal functions
+//             Exprs, Assign,
+//             // Var, Varlet and FunCall to link a symbol table entry with it's name
+//             Var, Varlet, FunCall
+//         }
+// };
 
 traversal RegularAssignments {
     // This traversal should transform Variable Initialisations into Regular Assignments
     uid = RA,
     // TODO: are these the nodes you need to traverse, Expr for the initialisations??
     // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
-    nodes = {VarDecl, GlobDef, For}
+    nodes = {FunBody, VarDecl, GlobDef, For}
+    // For 
 };
 
 // TODO: for type checking see slides Semantic analysis for implementation hint on type checking!
@@ -96,6 +118,12 @@ nodeset Link = {Ste};
 root node Program {
     children {
         Decls decls { constructor, mandatory }
+    },
+
+    attributes {
+        // Contains first global symbol occuring (can be used for linking)
+        SteVar firstGlobalSymbolVar,
+        SteFun firstGlobalSymbolFun
     }
 };
 
@@ -182,6 +210,10 @@ node FunDef {
         Type type { constructor },
         string name { constructor, mandatory },
         bool export { constructor }
+        // Link to its own symbol table
+        SteFun symbol_table
+        // Link to first symbol table 
+        SteVar first_symbol_var
         // No need to do anything with EXTERN for the FunDec because they are always external!
     }
 };
@@ -362,12 +394,41 @@ node Bool {
     }
 };
 
+
+//TODO: convert nodes
+node SteVar {
+    children {
+        // LinkedList data structure for next symbol table
+        Ste parent { constructor },
+        // TODO: een lijst per functie en 1 global
+        // Parent wijst naar hogere nesting level
+        Ste next { constructor }
+    }, 
+
+};
+
+node SteFun {
+
+};
+
 // Symbol table entry
 node Ste {
     // variablen en functies
     children {
         // LinkedList data structure for next symbol table
-        Ste next { constructor }
+        Ste next { constructor },
+        // TODO: een lijst per functie en 1 global
+        // Parent wijst naar hogere nesting level
+        Ste parent
+
+        // FunDef
+        // Traverse funbody
+        // travdata Ste
+
+        // Start with Ste's for the variables only
+        // Separate traversal for fundefs
+        // 2 losse tables, 1 voor vars, 1 voor functinos, allebei linkedlist
+        // 2 nodes, SteVar, SteFun
     }, 
 
     attributes {

@@ -1,8 +1,12 @@
 void foo() {
+    int j = 12;
     for (int i = 0, 10) {
+        // 0 10
         foo();
         foo();
     }
+    i // 12
+    // for hebben een eigen
 
     for (int i = 0, 10)
         foo();

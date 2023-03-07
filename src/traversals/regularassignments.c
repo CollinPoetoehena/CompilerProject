@@ -9,10 +9,12 @@
  *
  * Example:
  * int a = 5 * 6;
- * int b= 3;
- *  a= 6
+ * int b = 3;
+ * a = 6;
  * Should become (still with the equivalent code):
- * int a; int b; a = 5 * 6; b = 3; a=6;
+ * int a; int b; a = 5 * 6; b = 3; a = 6;
+ * 
+ * So, you should first only have declarations and then the statements
  *
  */
 
@@ -63,6 +65,7 @@ node_st *RAglobdef(node_st *node)
  */
 node_st *RAfor(node_st *node)
 {
+    //
     return node;
 }
 

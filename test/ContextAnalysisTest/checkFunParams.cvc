@@ -12,6 +12,8 @@ void foo(int a, int b, float c) {
 }
 
 void faa(int a, int b, float c) {
+    // Ste in de fundef
+    // 
     int h = 5;
     int i = 7;
     float j = 5.6;
