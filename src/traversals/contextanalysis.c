@@ -84,11 +84,11 @@ bool isSymbolUnique(char *name) {
     return true;
 }
 
-bool createSymbolTableEntry(char *name, enum Type type, enum SymbolTableType steType) {
+bool createSymbolTableEntry(char *name, enum Type type, enum SymbolTableType steType, node_st *params) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-        node_st *newSte = ASTste(NULL, name, type, currentScope, steType);
+        node_st *newSte = ASTste(NULL, name, type, currentScope, steType, params);
 
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
@@ -164,7 +164,7 @@ node_st *CAglobdecl(node_st *node)
     printf("globdecl\n");
 
     // Create a symbol table entry
-    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node), STT_var);
+    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node), STT_var, NULL);
 
     return node;
 }
@@ -177,7 +177,7 @@ node_st *CAglobdef(node_st *node)
     printf("globdef\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node), STT_var);
+    createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node), STT_var, NULL);
 
     return node;
 }
@@ -190,7 +190,8 @@ node_st *CAfundef(node_st *node)
     printf("fundef\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-    createSymbolTableEntry(FUNDEF_NAME(node), FUNDEF_TYPE(node), STT_function);
+    // Provide the first param of the FunDef to save as the params
+    createSymbolTableEntry(FUNDEF_NAME(node), FUNDEF_TYPE(node), STT_function, FUNDEF_PARAMS(node));
 
     // Then go to the traversal function of the paramaters, use current symbol table to update params
     TRAVparams(node);
@@ -223,7 +224,7 @@ node_st *CAparam(node_st *node)
     // TODO: See slides page 38 and 39, param needs to be in inner function
     // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
     currentScope++;
-    createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), STT_var);
+    createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), STT_var, NULL);
 
     // Decrement scope again to let the funbody traversal apply the correct scope
     currentScope--;
@@ -276,7 +277,7 @@ node_st *CAvardecl(node_st *node)
     printf("vardecls\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node), STT_var);
+    createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node), STT_var, NULL);
 
     // Go to the traversal function of the expr to go to the Vars
     TRAVinit(node);
@@ -351,7 +352,7 @@ node_st *CAfor(node_st *node)
     // remove the declaration part from for-loop induction variables and create corresponding 
     // local variable declarations on the level of the (innermost) function definition
     // For var declaration always has type int and name is saved in For node
-    createSymbolTableEntry(FOR_VAR(node), CT_int, STT_var);
+    createSymbolTableEntry(FOR_VAR(node), CT_int, STT_var, NULL);
 
     //TODO: multiple i's in one function scope should return an error right?
 

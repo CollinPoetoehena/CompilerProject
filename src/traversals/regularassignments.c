@@ -3,7 +3,14 @@
  *
  * Traversal: RegularAssignments
  * UID      : RA
+ * 
+ * This traversal should separate the declaration from the initilizations.
+ * This will be handy with code generation.
  *
+ * Example:
+ * int a = 5 * 6;
+ * Should become:
+ * int a; a = 5 * 6;
  *
  */
 
@@ -28,15 +35,6 @@ node_st *RAvardecl(node_st *node)
       CCNfree(node);
     }
     
-    return node;
-}
-
-
-/**
- * @fn RAassign
- */
-node_st *RAassign(node_st *node)
-{
     return node;
 }
 

@@ -40,7 +40,7 @@ traversal RegularAssignments {
     uid = RA,
     // TODO: are these the nodes you need to traverse, Expr for the initialisations??
     // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
-    nodes = {VarDecl, GlobDef, For, Assign}
+    nodes = {VarDecl, GlobDef, For}
 };
 
 enum SymbolTableType {
@@ -372,7 +372,10 @@ node Ste {
         string name { constructor },
         Type type { constructor },
         int nesting_level { constructor },
-        SymbolTableType symbol_type { constructor }
+        SymbolTableType symbol_type { constructor },
+        // Params is the LinkedList from the FunDef, should contain the first value of 
+        // the FunDef params. From the first value the LinkedList chain can be followed.
+        Param params { constructor }
     }
 };
 // TODO: milestone 5 symbol table
