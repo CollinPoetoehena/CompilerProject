@@ -21,9 +21,12 @@
 #include "palm/ctinfo.h"
 
 // Two scopes for basic: Program and FunBody
-int currentScope = 0; // Start at global scope
+int currentScopeFun = 0; // Start at global scope
 // Used to fill the Program symbol table for Functions
-node_st *firstSymbolTable = NULL;
+node_st *firstSymbolTableFun = NULL;
+
+// bool createSymbolTableEntry(char *name, enum Type type, node_st *params) 
+// node_st *newSte = ASTstefun(NULL, NULL, name, type, currentScopeFun, params);
 
 // Check for argument numbers matching parameter numbers
 bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
