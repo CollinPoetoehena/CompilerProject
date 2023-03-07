@@ -1,0 +1,12 @@
+void foo(int a, int b, float c) {
+    int d = 5;
+    int e = 7;
+    float f = 5.6;
+    bool g = true;
+
+    // FunCall link, check params success
+    foo(d, e, f);
+
+    // FunCall link, check params failed
+    // foo(g, e, f);
+}

@@ -213,6 +213,7 @@ globdef: EXPORT type ID LET expr SEMICOLON
 param: type ID COMMA param
       {
         $$ = ASTparam(NULL, $4, $2, $1);
+        printf("*********************************************param parsed");
       }
      | type ID
       {
@@ -455,7 +456,6 @@ expr: BRACKET_L expr BRACKET_R
       }
     | var
       {
-        printf("*********************************parser var found!\n");
         $$ = $1;
       }
     | constant
@@ -471,7 +471,8 @@ exprs: expr
       }
      | exprs COMMA expr
       {
-        $$ = ASTexprs($1, $3);
+        $$ = ASTexprs($3, $1);
+        // $$ = ASTexprs($1, $3);
       }
      ;
 
@@ -501,7 +502,6 @@ varlet: ID
 // Variable in an expression.
 var: ID
         {
-          printf("*********************************parser var found: %s!\n", $1);
           $$ = ASTvar($1);
           AddLocToNode($$, &@1, &@1);
         }
