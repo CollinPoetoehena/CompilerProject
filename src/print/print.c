@@ -922,7 +922,7 @@ void printSte(node_st *steNode) {
                   strcat(paramsPrint, ", ");
               }
 
-              // Update symbolTable
+              // Update parameter
               paramIterator = PARAM_NEXT(paramIterator);
           } while (paramIterator != NULL);
       }

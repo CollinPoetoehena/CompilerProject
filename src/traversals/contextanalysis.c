@@ -25,6 +25,7 @@ node_st *previousSymbolTable = NULL;
 int currentScope = 0; // Start at global scope
 char *errors;
 
+// Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
     // Update first symbol table if it is NULL 
     if (firstSymbolTable == NULL) {
@@ -37,6 +38,7 @@ void updateGlobSymbolTables(node_st *newSte) {
     }
 }
 
+// Find an Ste node that has the specified name
 node_st *findSteLink(char *name) {
     printf("Trying to find Ste for: %s\n", name);
 
@@ -62,6 +64,7 @@ node_st *findSteLink(char *name) {
     return NULL;
 }
 
+// Check if a symbol is unique
 bool isSymbolUnique(char *name) {
     // Check if the name is not already present in the symbol table entries (use linear search)
 
@@ -84,6 +87,7 @@ bool isSymbolUnique(char *name) {
     return true;
 }
 
+// Create a symbol table entry node
 bool createSymbolTableEntry(char *name, enum Type type, enum SymbolTableType steType, node_st *params) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
@@ -103,6 +107,43 @@ bool createSymbolTableEntry(char *name, enum Type type, enum SymbolTableType ste
 
     // Creation failed
     return false;
+}
+
+// Check for argument numbers matching parameter numbers
+bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
+    // Get the parameter count
+    int parameterCount = 0;
+    // Get the first param from the Ste
+    node_st *paramIterator = STE_PARAMS(steLink);
+    do {
+        // Increment parameter count
+        parameterCount++;
+
+        // Update parameter
+        paramIterator = PARAM_NEXT(paramIterator);
+    } while (paramIterator != NULL);
+
+    // Get the count of the arguments in the funcall node
+    int argumentsCount = 0;
+    if (FUNCALL_ARGS(funcallNode) != NULL) {
+        // Get the first param from the Ste
+        node_st *funcallArgsIterator = FUNCALL_ARGS(funcallNode);
+        do {
+            // Increment parameter count
+            argumentsCount++;
+
+            // Update parameter
+            funcallArgsIterator = EXPRS_NEXT(funcallArgsIterator);
+        } while (funcallArgsIterator != NULL);
+    }
+
+    if (parameterCount == argumentsCount) {
+        // Equal arguments and parameter numbers
+        return true;
+    } else {
+        // Not equal arguments and parameter numbers
+        return false;
+    }
 }
 
 /**
@@ -216,19 +257,18 @@ Here the FunDef part will be used to fill the next level of Symbol table entries
  */
 node_st *CAparam(node_st *node)
 {
-    // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     printf("param\n");
 
-    // TODO: See slides page 38 and 39, param needs to be in inner function
-    // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
+    // Create a new Ste for the param in the new scope and save name and type (not only type such as in function)
     currentScope++;
 
     // Use the previousSymbolTable because that is the FunDef which contains the params
+    // If it is not null it contains the LinkedList of type Param from the FunDef
     if (STE_PARAMS(previousSymbolTable) != NULL) {
         // Get the first param from the Ste
         node_st *paramIterator = STE_PARAMS(previousSymbolTable);
         do {
-            // Create Ste for the param
+            // Create a symbol table entry for param (link it later in the Var, Varlet and Funcall)
             createSymbolTableEntry(PARAM_NAME(paramIterator), PARAM_TYPE(paramIterator), STT_var, NULL);
 
             // Update symbolTable
@@ -426,8 +466,19 @@ node_st *CAfuncall(node_st *node)
     // void foo() {int a; a = 5; foo();} == two links needs to be updated
     node_st *steNode = findSteLink(FUNCALL_NAME(node));
     if (steNode != NULL) {
-        // Save Ste node in link attribute
-        FUNCALL_STE_LINK(node) = steNode;
+        if (STE_PARAMS(steNode) != NULL) {
+            // If the arguments and parameter numbers are not equal, then error
+            if (compareFunCallArgumentsLength(node, steNode)) {
+                // Save Ste node in link attribute
+                FUNCALL_STE_LINK(node) = steNode;
+            } else {
+                // TODO: save error, argument numbers do not match parameter numbers
+                 printf("argument numbers do not match parameter numbers\n");
+            }
+        } else {
+            // Save Ste node in link attribute
+            FUNCALL_STE_LINK(node) = steNode;
+        }
     } else {
         // Save in errors, no matching declaration/definition!
         // TODO
@@ -435,8 +486,6 @@ node_st *CAfuncall(node_st *node)
     }
 
     printf("*************************symbol table link funcall\n");
-
-    // TODO: check if the arguments in the funcall match the paramaters of the called function, otherwise save error!
 
     // No changes made to the node directly, so no need to return a new node here
     return node;
@@ -571,7 +620,7 @@ void printSymbolTables()
                             strcat(params, ", ");
                         }
 
-                        // Update symbolTable
+                        // Update parameter
                         paramIterator = PARAM_NEXT(paramIterator);
                     } while (paramIterator != NULL);
                 }

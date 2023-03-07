@@ -8,5 +8,5 @@ void foo(int a, int b, float c) {
     foo(d, e, f);
 
     // FunCall link, check params failed
-    // foo(g, e, f);
+    // foo(d, e);
 }
