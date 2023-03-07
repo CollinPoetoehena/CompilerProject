@@ -9,6 +9,9 @@
 
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
+// Include enums, for the Type and SymbolTableType
+#include "ccngen/enum.h"
+#include "ccn/ccn_types.h"
 #include "palm/dbug.h"
 #include "ccngen/trav.h"
 #include  <string.h>
@@ -81,6 +84,27 @@ bool isSymbolUnique(char *name) {
     return true;
 }
 
+bool createSymbolTableEntry(char *name, enum Type type, enum SymbolTableType steType) {
+    // First check if the name is already present, if so, save it in errors
+    if (isSymbolUnique(name)) {
+        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
+        node_st *newSte = ASTste(NULL, name, type, currentScope, steType);
+
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
+
+        // Ste creation succeeded
+        return true;
+    } else {
+        // Save in errors, multiple matching declarations/definitions
+        // TODO
+        printf("multiple matching declarations/definitions found\n");
+    }
+
+    // Creation failed
+    return false;
+}
+
 /**
  * @fn CAprogram
  */
@@ -139,18 +163,8 @@ node_st *CAglobdecl(node_st *node)
 {
     printf("globdecl\n");
 
-    // First check if the name is already present, if so, save it in errors
-    if (isSymbolUnique(GLOBDECL_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-        node_st *newSte = ASTste(NULL, GLOBDECL_NAME(node), GLOBDECL_TYPE(node), currentScope, STT_var);
-
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-    } else {
-        // Save in errors, multiple matching declarations/definitions
-        // TODO
-        printf("duplicate definition for a globdecl found\n");
-    }
+    // Create a symbol table entry
+    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node), STT_var);
 
     return node;
 }
@@ -163,19 +177,7 @@ node_st *CAglobdef(node_st *node)
     printf("globdef\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    if (isSymbolUnique(GLOBDEF_NAME(node))) {
-        // Create a symbol table entry
-        node_st *newSte = ASTste(NULL, GLOBDEF_NAME(node), GLOBDEF_TYPE(node), currentScope, STT_var);
-
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-
-        printf("fundef ste made\n");
-    } else {
-        // Save in errors, multiple matching declarations/definitions
-        // TODO
-        printf("duplicate definition for a globdef found\n");
-    }
+    createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node), STT_var);
 
     return node;
 }
@@ -188,19 +190,7 @@ node_st *CAfundef(node_st *node)
     printf("fundef\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-    if (isSymbolUnique(FUNDEF_NAME(node))) {
-        // Create a symbol table entry
-        node_st *newSte = ASTste(NULL, FUNDEF_NAME(node), FUNDEF_TYPE(node), currentScope, STT_function);
-
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-
-        printf("fundef ste made\n");
-    } else {
-        // Save in errors, multiple matching declarations/definitions
-        // TODO
-        printf("duplicate definition for a fundef found\n");
-    }
+    createSymbolTableEntry(FUNDEF_NAME(node), FUNDEF_TYPE(node), STT_function);
 
     // Then go to the traversal function of the paramaters, use current symbol table to update params
     TRAVparams(node);
@@ -233,19 +223,8 @@ node_st *CAparam(node_st *node)
     // TODO: See slides page 38 and 39, param needs to be in inner function
     // Then create a new Ste for the param in the new scope and save name and type (not only type such as in function)
     currentScope++;
-    if (isSymbolUnique(PARAM_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-        node_st *newSte = ASTste(NULL, PARAM_NAME(node), PARAM_TYPE(node), currentScope, STT_var);
+    createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), STT_var);
 
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-
-        printf("vardecls ste made\n");
-    } else {
-        // Save in errors, multiple matching declarations/definitions
-        // TODO
-        printf("duplicate definition for a param found\n");
-    }
     // Decrement scope again to let the funbody traversal apply the correct scope
     currentScope--;
 
@@ -297,19 +276,7 @@ node_st *CAvardecl(node_st *node)
     printf("vardecls\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    if (isSymbolUnique(VARDECL_NAME(node))) {
-        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-        node_st *newSte = ASTste(NULL, VARDECL_NAME(node), VARDECL_TYPE(node), currentScope, STT_var);
-
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-
-        printf("vardecls ste made\n");
-    } else {
-        // Save in errors, multiple matching declarations/definitions
-        // TODO
-        printf("duplicate definition for a vardecl found\n");
-    }
+    createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node), STT_var);
 
     // Go to the traversal function of the expr to go to the Vars
     TRAVinit(node);
@@ -383,19 +350,7 @@ node_st *CAfor(node_st *node)
 
     //TODO: how to put for variable declaration in start in upper nesting level???
     // For var declaration always has type int and name is saved in For node
-    if (isSymbolUnique(FOR_VAR(node))) {
-        // Create a symbol table entry
-        node_st *newSte = ASTste(NULL, FOR_VAR(node), CT_int, currentScope, STT_var);
-
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-
-        printf("for var decl ste made\n");
-    } else {
-        // Save in errors, multiple matching declarations/definitions
-        // TODO
-        printf("duplicate definition for a for loop vardecl found\n");
-    }
+    createSymbolTableEntry(FOR_VAR(node), CT_int, STT_var);
 
     // remove the declaration part from for-loop induction variables and create corresponding 
     // local variable declarations on the level of the (innermost) function definition

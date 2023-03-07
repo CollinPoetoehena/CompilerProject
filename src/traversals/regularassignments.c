@@ -31,6 +31,15 @@ node_st *RAvardecl(node_st *node)
     return node;
 }
 
+
+/**
+ * @fn RAassign
+ */
+node_st *RAassign(node_st *node)
+{
+    return node;
+}
+
 /**
  * @fn RAglobdef
  */
