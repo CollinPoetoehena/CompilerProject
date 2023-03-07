@@ -213,7 +213,6 @@ globdef: EXPORT type ID LET expr SEMICOLON
 param: type ID COMMA param
       {
         $$ = ASTparam(NULL, $4, $2, $1);
-        printf("*********************************************param parsed");
       }
      | type ID
       {
@@ -472,7 +471,6 @@ exprs: expr
      | exprs COMMA expr
       {
         $$ = ASTexprs($3, $1);
-        // $$ = ASTexprs($1, $3);
       }
      ;
 
