@@ -22,9 +22,27 @@
 // }
 
 /**
+ * @fn PRTstefun
+ */
+node_st *PRTstefun(node_st *node)
+{
+    // Nothing to print here, Ste's are printed at the end of the ContextAnalysis traversal
+    return node;
+}
+
+/**
  * @fn PRTste
  */
 node_st *PRTste(node_st *node)
+{
+    // Nothing to print here, Ste's are printed at the end of the ContextAnalysis traversal
+    return node;
+}
+
+/**
+ * @fn PRTstevar
+ */
+node_st *PRTstevar(node_st *node)
 {
     // Nothing to print here, Ste's are printed at the end of the ContextAnalysis traversal
     return node;

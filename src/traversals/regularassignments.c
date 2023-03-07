@@ -30,6 +30,16 @@
 // funbd\ody travdecls
 // daarna travstmts initalizaties normale stmts maken en prependen aan de bestaande stmts
 
+
+/**
+ * @fn RAfunbody
+ */
+node_st *RAfunbody(node_st *node)
+{
+    //
+    return node;
+}
+
 /**
  * @fn RAvardecl
  */
