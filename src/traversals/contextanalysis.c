@@ -347,14 +347,13 @@ node_st *CAdowhile(node_st *node)
 node_st *CAfor(node_st *node)
 {
     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-
-    //TODO: how to put for variable declaration in start in upper nesting level???
+    
+    // remove the declaration part from for-loop induction variables and create corresponding 
+    // local variable declarations on the level of the (innermost) function definition
     // For var declaration always has type int and name is saved in For node
     createSymbolTableEntry(FOR_VAR(node), CT_int, STT_var);
 
-    // remove the declaration part from for-loop induction variables and create corresponding 
-    // local variable declarations on the level of the (innermost) function definition
-    // TRAVstart_expr(node);
+    //TODO: multiple i's in one function scope should return an error right?
 
     // Go to stmts traversal functions
     TRAVblock(node);
