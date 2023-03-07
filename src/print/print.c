@@ -43,13 +43,13 @@ node_st *PRTprogram(node_st *node)
     
     // Print a couple of new lines before printing the print traversal
     printf("\n\n\n****************************************************************************************************************************************************************************** \
-    \nStart of the print traversal:\n\n");
+    \t\tStart of the print traversal:\n\n");
 
     // Go to child and print it
     TRAVdecls(node);
 
     // End the Print traversal
-    printf("\n\nEnd of the print traversal\n****************************************************************************************************************************************************************************** \
+    printf("\n\n\t\tEnd of the print traversal\n****************************************************************************************************************************************************************************** \
     \n\n");
         
     return node;

@@ -155,7 +155,7 @@ node_st *CAprogram(node_st *node)
     // to use for iterating over all the Ste's???
 
     printf("\n\n\n****************************************************************************************************************************************************************************** \
-        Start of context analysis\n");
+    \t\tStart of context analysis\n");
     // Go to the decls traversal
     TRAVdecls(node);
 
@@ -167,7 +167,7 @@ node_st *CAprogram(node_st *node)
         printSymbolTables();
     }
 
-    printf("\n\n\nEnd of context analysis\n****************************************************************************************************************************************************************************** \
+    printf("\n\n\n\t\tEnd of context analysis\n****************************************************************************************************************************************************************************** \
         \n");
 
     // Nothing is changed to the program node, so just return the node again
@@ -234,11 +234,20 @@ node_st *CAfundef(node_st *node)
     // Provide the first param of the FunDef to save as the params
     createSymbolTableEntry(FUNDEF_NAME(node), FUNDEF_TYPE(node), STT_function, FUNDEF_PARAMS(node));
 
+    // Save the oldScope
+    int oldScope = currentScope;
+    // Increment the current scope inside a function body for every function body 
+    // (basic has global, funbody and statements (if, while, etc) scope)
+    currentScope++;
+
     // Then go to the traversal function of the paramaters, use current symbol table to update params
     TRAVparams(node);
-
     // Then go to the funbody after that to traverse that node
     TRAVbody(node);
+
+    // Update the scope to the old scope after the statements when you get back to this funbody
+    currentScope = oldScope;
+
 
     return node;
 }
@@ -259,9 +268,6 @@ node_st *CAparam(node_st *node)
 {
     printf("param\n");
 
-    // Create a new Ste for the param in the new scope and save name and type (not only type such as in function)
-    currentScope++;
-
     // Use the previousSymbolTable because that is the FunDef which contains the params
     // If it is not null it contains the LinkedList of type Param from the FunDef
     if (STE_PARAMS(previousSymbolTable) != NULL) {
@@ -276,9 +282,6 @@ node_st *CAparam(node_st *node)
         } while (paramIterator != NULL);
     }
 
-    // Decrement scope again to let the funbody traversal apply the correct scope
-    currentScope--;
-
     // If this param has a next, do the same for the next param in the function definition
     TRAVnext(node);
 
@@ -292,19 +295,11 @@ node_st *CAfunbody(node_st *node)
 {
     printf("funbody\n");
 
-    // Increment the current scope inside a function body for every function body 
-    // (basic has global, funbody and statements (if, while, etc) scope)
-    currentScope++;
-
     // Go to the vardecls and create the symbol table entries
     TRAVdecls(node);
 
     // Then after that, go to the Stmts, wich are the IfElse, While, DoWhile and For 
-    // and create the symbol table entries there (a scope down in the function body)
-    int oldScope = currentScope;
     TRAVstmts(node);
-    // Update the scope to the old scope after the statements when you get back to this funbody
-    currentScope = oldScope;
 
     return node;
 }
@@ -544,7 +539,7 @@ void printSymbolTables()
     if (firstSymbolTable != NULL) {
         // Print a couple of new lines before printing the Ste's
         printf("\n\n\n****************************************************************************************************************************************************************************** \
-        \nSymbol Tables Entries created:\n");
+        \t\tSymbol Tables Entries created:\n");
 
         node_st *symbolTable = firstSymbolTable;
         do {
@@ -589,6 +584,8 @@ void printSymbolTables()
                 // Print function Ste: "funName: returnType (param types)"
                 // Declare a C string array with space for 5 strings of 20 characters each
                 char *params = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
+                // Initialize with empty string to avoid weird memory address value being used at the start
+                strcpy(params, "");
                 
                 if (STE_PARAMS(symbolTable) != NULL) {
                     // Get the first param from the Ste
