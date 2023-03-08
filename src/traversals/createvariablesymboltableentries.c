@@ -28,6 +28,8 @@ node_st *firstSymbolTableVar = NULL;
 node_st *previousSymbolTableVar = NULL;
 // tempSymbolTableVar global variable can be used for storing temporary Ste's for some usage reasons
 node_st *tempSymbolTableVar = NULL;
+// firstParam is used to save the first param to the fundef
+bool firstParam = true;
 
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
@@ -37,7 +39,7 @@ void updateGlobSymbolTables(node_st *newSte) {
         previousSymbolTableVar = newSte;
     } else {
         // Update next of previous symbol table
-        STE_NEXT(previousSymbolTableVar) = newSte;
+        STEVAR_NEXT(previousSymbolTableVar) = newSte;
         previousSymbolTableVar = newSte;
     }
 }
@@ -53,13 +55,13 @@ bool isSymbolUnique(char *name) {
         do {
             // Symbol already present, return not unique/false. Use string comparison 
             // to check for equality, 0 means equal. == only checks if memory references are equal
-            if (strcmp(STE_NAME(symbolTable), name) == 0) {
+            if (strcmp(STEVAR_NAME(symbolTable), name) == 0) {
                 printf("**********************Link found for %s\n", name);
                 return false;
             }
 
             // Update symbolTable
-            symbolTable = STE_NEXT(symbolTable);
+            symbolTable = STEVAR_NEXT(symbolTable);
         } while (symbolTable != NULL);
     }
 
@@ -91,7 +93,6 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
-        // printf("multiple matching declarations/definitions found\n");
     }
 
     // Creation failed
@@ -164,6 +165,11 @@ node_st *CVSprogram(node_st *node)
  */
 node_st *CVSglobdecl(node_st *node)
 {
+    printf("globdecl\n");
+
+    // Create a symbol table entry
+    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node));
+
     return node;
 }
 
@@ -172,6 +178,11 @@ node_st *CVSglobdecl(node_st *node)
  */
 node_st *CVSglobdef(node_st *node)
 {
+    printf("globdef\n");
+
+    // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
+
     return node;
 }
 
@@ -219,24 +230,20 @@ node_st *CVSparam(node_st *node)
     // Create a SteVar for the param
     createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node));
 
-    // Use the previousSymbolTableVar because that is the FunDef which contains the params
-    // If it is not null it contains the LinkedList of type Param from the FunDef
-    // if (STE_PARAMS(previousSymbolTableVar) != NULL) {
-    //     // Get the first param from the Ste
-    //     node_st *paramIterator = STE_PARAMS(previousSymbolTableVar);
-    //     do {
-    //         // Create a symbol table entry for param (link it later in the Var, Varlet and Funcall)
-
-    //         // Update symbolTable
-    //         paramIterator = PARAM_NEXT(paramIterator);
-    //     } while (paramIterator != NULL);
-    // }
-
-    // If this param has a next, do the same for the next param in the function definition
-    TRAVnext(node);
-
-
     // Save the first SteVar for a param in the tempSymbolTableVar to link to the FunDef node
+    if (firstParam) {
+        tempSymbolTableVar = previousSymbolTable;
+        // Update global variable to false because the coming params are not the first anymore
+        firstParam = false;
+    }
+
+    if (PARAM_NEXT(node) == NULL) {
+        // This is the last param, so update the global variable firstParam for the next fundef and its params
+        firstParam = true;
+    } else {
+        // If this param has a next, do the same for the next param in the function definition
+        TRAVnext(node);
+    }
 
     return node;
 }
@@ -261,14 +268,94 @@ node_st *CVSfunbody(node_st *node)
  */
 node_st *CVSvardecl(node_st *node)
 {
+    printf("vardecls\n");
+
+    // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
+
+    // TODO: this is probably not necessary anymore to travinit?? Test this thourougly!
+    // Go to the traversal function of the expr to go to the Vars
+    // TRAVinit(node);
+
+    // To perfom the traversal functions of the children (next vardecls) use TRAVchildx(node)
+    TRAVnext(node);
+
     return node;
 }
+
+// /**
+//  * @fn CVSstmts
+//  */
+// node_st *CVSstmts(node_st *node)
+// {
+//     printf("statements\n");
+
+//     // To perfom the traversal functions of the children use TRAVchildx(node)
+//     TRAVstmt(node);
+//     TRAVnext(node);
+
+//     return node;
+// }
+
+// /**
+//  * @fn CVSifelse
+//  */
+// node_st *CVSifelse(node_st *node)
+// {
+//     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
+
+//     // Go to stmts traversal functions
+//     TRAVthen(node);
+//     TRAVelse_block(node);
+    
+//     return node;
+// }
+
+// /**
+//  * @fn CVSwhile
+//  */
+// node_st *CVSwhile(node_st *node)
+// {
+//     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
+
+//     // Go to stmts traversal functions
+//     TRAVblock(node);
+
+//     return node;
+// }
+
+// /**
+//  * @fn CVSdowhile
+//  */
+// node_st *CVSdowhile(node_st *node)
+// {
+//     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
+
+//     // Go to stmts traversal functions
+//     TRAVblock(node);
+
+//     return node;
+// }
 
 /**
  * @fn CVSfor
  */
 node_st *CVSfor(node_st *node)
 {
+    // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
+    
+    // remove the declaration part from for-loop induction variables and create corresponding 
+    // local variable declarations on the level of the (innermost) function definition
+    // For var declaration always has type int and name is saved in For node
+    createSymbolTableEntry(FOR_VAR(node), CT_int);
+
+    //TODO: multiple i's in one function scope should return an error right because they are now in the same funbody?
+
+    // Go to stmts traversal functions
+    TRAVblock(node);
+
+    // TODO: while, ifelse, etc not necessary??? Test by creating a var, varlet and funcall and see if they get linked in the body!
+
     return node;
 }
 
@@ -277,6 +364,20 @@ node_st *CVSfor(node_st *node)
  */
 node_st *CVSvar(node_st *node)
 {
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteLink(VAR_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VAR_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s", VAR_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
+
+    printf("*************************symbol table link var\n");
+
     return node;
 }
 
@@ -285,6 +386,20 @@ node_st *CVSvar(node_st *node)
  */
 node_st *CVSvarlet(node_st *node)
 {
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteLink(VARLET_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VARLET_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
+    
+    printf("*************************symbol table link varlet\n");
+
     return node;
 }
 
