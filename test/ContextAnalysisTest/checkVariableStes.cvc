@@ -10,6 +10,8 @@ void faa(int a, int b, float c) {
     // int d = 5;
     // int e = 7;
     // int f = 9;
+    int h = 8;
+    int a = b;
 }
 
 //TODO: also test without a global scope of variables!

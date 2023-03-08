@@ -87,23 +87,23 @@ void updateGlobSymbolTables(node_st *newSte) {
                 lastSteVarGlobal = newSte;
             }
         } else {
-            // If a new chain needs to be created, then set the chain helper variables to NULL
+            // // If a new chain needs to be created, then set the chain helper variables to NULL
             if (newSteVarChain) {
                 // These pointers point to the helper variables for the correct chain now and will update them
-                firstSteVarCurrent = NULL;
-                lastSteVarCurrent = NULL;
-                // Then close the chain to use this chain from now on, until updated
-                newSteVarChain = false;
-            }
-
-            // Use non global SteVar's helper variables memory addresses
-            if (firstSteVarCurrent == NULL) {
                 firstSteVarCurrent = newSte;
                 lastSteVarCurrent = newSte;
+                // Then close the chain to use this chain from now on, until updated
+                newSteVarChain = false;
             } else {
-                // Update next of previous symbol table
-                STEVAR_NEXT(lastSteVarCurrent) = newSte;
-                lastSteVarCurrent = newSte;
+                // Use non global SteVar's helper variables memory addresses
+                if (firstSteVarCurrent == NULL) {
+                    firstSteVarCurrent = newSte;
+                    lastSteVarCurrent = newSte;
+                } else {
+                    // Update next of previous symbol table
+                    STEVAR_NEXT(lastSteVarCurrent) = newSte;
+                    lastSteVarCurrent = newSte;
+                }
             }
         }
     }
@@ -111,49 +111,52 @@ void updateGlobSymbolTables(node_st *newSte) {
 
 // Check if a symbol is unique
 bool isSymbolUnique(char *name) {
-    // TODO: convert to new information gathered and new scopes, so check for parent Ste and do next from there!
-
-    // Check if the name is not already present in the symbol table entries (use linear search)
-    node_st *symtbolTableChain = NULL;
-    // TODO: use get correct Ste, and do that for all the other calls to it
-    if (currentScopeVar == 0) {
-        // Avoid segmentation fault
-        if (firstSymbolTableVar != NULL) {
-            // Go through the global chain
-            symtbolTableChain = firstSymbolTableVar;
-        }
+    // If a new chain needs to be opened, then it is guarenteed to be a unique symbol in that scope
+    if (newSteVarChain) {
+        // If this code is not here, it will search in the previous chain and that can create bugs!
+        return true;
     } else {
-        if (firstSteVarCurrent != NULL) {
-            // Go through the current (non global) chain
-            symtbolTableChain = firstSteVarCurrent;
+        // Check if the name is not already present in the symbol table entries (use linear search)
+        node_st *symtbolTableChain = NULL;
+        if (currentScopeVar == 0) {
+            // Avoid segmentation fault
+            if (firstSymbolTableVar != NULL) {
+                // Go through the global chain
+                symtbolTableChain = firstSymbolTableVar;
+            }
+        } else {
+            if (firstSteVarCurrent != NULL) {
+                // Go through the current (non global) chain
+                symtbolTableChain = firstSteVarCurrent;
+            }
+        }
+
+        // Go through the current chain to check if it contains the symbol already
+        if (symtbolTableChain != NULL) {
+            // TODO: remove after debugging
+            // printf("\n\n\n\n\n\n\nPRINTING STE CHAIN IT IS SERACHING IN********************\n");
+            // printSteVarChain(symtbolTableChain);
+            do {
+                // Symbol already present, return not unique/false. Use string comparison 
+                // to check for equality, 0 means equal. == only checks if memory references are equal
+                if (strcmp(STEVAR_NAME(symtbolTableChain), name) == 0) {
+                    printf("**********************Link found for %s\n", name);
+                    printf("First stevar that occured is: %s\n", STEVAR_NAME(symtbolTableChain));
+                    return false;
+                }
+
+                // Update symbolTable
+                symtbolTableChain = STEVAR_NEXT(symtbolTableChain);
+            } while (symtbolTableChain != NULL);
         }
     }
-
-    // Go through the current chain to check if it contains the symbol already
-    if (symtbolTableChain != NULL) {
-        node_st *symbolTable = symtbolTableChain;
-        do {
-            // Symbol already present, return not unique/false. Use string comparison 
-            // to check for equality, 0 means equal. == only checks if memory references are equal
-            // if (strcmp(STEVAR_NAME(symbolTable), name) == 0) {
-            //     printf("**********************Link found for %s\n", name);
-            //     printf("First stevar that occured is: %s\n", STEVAR_NAME(symbolTable));
-            //     return false;
-            // }
-
-            // Update symbolTable
-            symbolTable = STEVAR_NEXT(symbolTable);
-        } while (symbolTable != NULL);
-    }
-
+    
     // If the first symbol table is NULL or no match found, then the Ste is guarenteed unique
     return true;
 }
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
 bool createSymbolTableEntry(char *name, enum Type type) {
-    //TODO: if currentScopeVar == 0 then append to last global Ste, othwerwise append to new scope
-
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         node_st *newSte = NULL;
@@ -168,8 +171,6 @@ bool createSymbolTableEntry(char *name, enum Type type) {
 
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
-
-        //TODO: problem with fundef Ste chains is that it does not get to update it because it says that it found a non unique symbol
 
         // printSteVar(newSte);
 
@@ -318,7 +319,7 @@ node_st *CVSfundef(node_st *node)
     currentScopeVar = oldScope;
 
     // Close this Ste chain 
-    newSteVarChain = false;
+    //newSteVarChain = false;
 
     // TODO: not correctly linking fundefs a next fundef has the same Ste's but that is not correct!
     // problem is that it only creates a new chain once and not with every new fundef!
