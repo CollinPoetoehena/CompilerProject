@@ -98,7 +98,6 @@ void updateGlobSymbolTables(node_st *newSte) {
 
             // Use non global SteVar's helper variables memory addresses
             if (firstSteVarCurrent == NULL) {
-                //TODO: this part gives a segmentation fault, but it is occuring in the symbolTableIsUnique function!!
                 firstSteVarCurrent = newSte;
                 lastSteVarCurrent = newSte;
             } else {
@@ -136,11 +135,11 @@ bool isSymbolUnique(char *name) {
         do {
             // Symbol already present, return not unique/false. Use string comparison 
             // to check for equality, 0 means equal. == only checks if memory references are equal
-            if (strcmp(STEVAR_NAME(symbolTable), name) == 0) {
-                printf("**********************Link found for %s\n", name);
-                printf("First stevar that occured is: %s\n", STEVAR_NAME(symbolTable));
-                return false;
-            }
+            // if (strcmp(STEVAR_NAME(symbolTable), name) == 0) {
+            //     printf("**********************Link found for %s\n", name);
+            //     printf("First stevar that occured is: %s\n", STEVAR_NAME(symbolTable));
+            //     return false;
+            // }
 
             // Update symbolTable
             symbolTable = STEVAR_NEXT(symbolTable);
@@ -169,6 +168,8 @@ bool createSymbolTableEntry(char *name, enum Type type) {
 
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
+
+        //TODO: problem with fundef Ste chains is that it does not get to update it because it says that it found a non unique symbol
 
         // printSteVar(newSte);
 
@@ -286,7 +287,7 @@ node_st *CVSglobdef(node_st *node)
  */
 node_st *CVSfundef(node_st *node)
 {
-    // printf("fundef\n");
+    printf("fundef\n");
 
     // Open a new Ste chain 
     newSteVarChain = true;
@@ -318,6 +319,9 @@ node_st *CVSfundef(node_st *node)
 
     // Close this Ste chain 
     newSteVarChain = false;
+
+    // TODO: not correctly linking fundefs a next fundef has the same Ste's but that is not correct!
+    // problem is that it only creates a new chain once and not with every new fundef!
 
     return node;
 }

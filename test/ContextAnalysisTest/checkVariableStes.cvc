@@ -7,9 +7,9 @@ void foo(int a, int b, float c) {
 }
 
 void faa(int a, int b, float c) {
-    int d = 5;
-    int e = 7;
-    int f = 9;
+    // int d = 5;
+    // int e = 7;
+    // int f = 9;
 }
 
 //TODO: also test without a global scope of variables!
