@@ -35,44 +35,15 @@ node_st *lastSteVarCurrent = NULL;
 
 // Helper variable to keep track of when to open a new chain
 bool newSteVarChain = false;
-// firstParam is used to save the first param to the fundef
-bool firstParam = true;
 
+// ************************************************************************************************************************************
+// TODO:
+// Fix types not working, maybe with parameter type???
+// Ask: milestone 6 is only first part right, other parts are for extensions???? 
+// For loop i's probably cannot have the same id right???
+// Ask explanation about milestones 7, 9 and 10.
+// Ask: milestones 8 and 11 are only for extensions right??
 
-// // previousSymbolTableVar global variable is used to update the previousSymbolTableVar's next variable
-// node_st *previousSymbolTableVar = NULL;
-// // tempSymbolTableVar global variable can be used for storing temporary Ste's for some usage reasons
-// // node_st *tempSymbolTableVar = NULL;
-// // currentScopeSteVar is used for linking (or chaining througout) a current chain of LinkedList SteVar's 
-// node_st *currentScopeFirstSteVar = NULL;
-
-
-// Helper function to return the appropriate current Ste
-// TODO: if it is not used it can be removed!
-node_st *getCurrentSteVar(bool firstSte) {
-    // TODO: convert to use scopes
-    if (currentScopeVar == 0) {
-        // Return an Ste from the global chain of Ste's
-        if (firstSte) {
-            // If the first Ste of the current scope is requested return first
-            return firstSymbolTableVar;
-        }
-
-        // Otherwise return the last Ste of the current scope is requested return the last 
-        return lastSteVarGlobal;
-    } else {
-        // Return an Ste from a non global chain of Ste's
-        if (firstSte) {
-            // If the first Ste of the current scope is requested return first
-            return firstSteVarCurrent;
-        }
-
-        // Otherwise return the last Ste of the current scope is requested return the last 
-        return lastSteVarCurrent;
-    }
-
-    return NULL;
-}
 
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
@@ -260,7 +231,7 @@ node_st *CVSprogram(node_st *node)
 
     printf("\n\n\n\t\tEnd of context analysis variables\n****************************************************************************************************************************************************************************** \
     \n");
-    
+
     return node;
 }
 
@@ -549,3 +520,30 @@ void printSteVar(node_st *steParentNode) {
     printf("\n\tEnd of SteVar chain\n**************************\n\n");
   }
 }
+
+// Helper function to return the appropriate current Ste
+// TODO: if it is not used it can be removed, but maybe this can be a helpful function (not yet tested, so needs to be tested and changed!)!
+// node_st *getCurrentSteVar(bool firstSte) {
+//     // TODO: convert to use scopes
+//     if (currentScopeVar == 0) {
+//         // Return an Ste from the global chain of Ste's
+//         if (firstSte) {
+//             // If the first Ste of the current scope is requested return first
+//             return firstSymbolTableVar;
+//         }
+
+//         // Otherwise return the last Ste of the current scope is requested return the last 
+//         return lastSteVarGlobal;
+//     } else {
+//         // Return an Ste from a non global chain of Ste's
+//         if (firstSte) {
+//             // If the first Ste of the current scope is requested return first
+//             return firstSteVarCurrent;
+//         }
+
+//         // Otherwise return the last Ste of the current scope is requested return the last 
+//         return lastSteVarCurrent;
+//     }
+
+//     return NULL;
+// }
