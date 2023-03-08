@@ -270,6 +270,7 @@ stmts: stmt stmts
 stmt: assign
       {
          $$ = $1;
+         printf("Assign\n");
       }
     | ifelse
       {
@@ -294,6 +295,7 @@ stmt: assign
       }
     | funcall SEMICOLON %prec FUNCTIONCALL
       {
+        printf("Funcall\n");
         $$ = ASTexprstmt($1);
         // Funcall belongs in expr and stmt, in stmt it has a SEMICOLON
       }
@@ -492,6 +494,7 @@ type: BOOLTYPE  { $$ = CT_bool; }
 // Variable in assignment.
 varlet: ID
         {
+          printf("varlet\n");
           $$ = ASTvarlet($1);
           AddLocToNode($$, &@1, &@1);
         }
@@ -500,6 +503,7 @@ varlet: ID
 // Variable in an expression.
 var: ID
         {
+          printf("var\n");
           $$ = ASTvar($1);
           AddLocToNode($$, &@1, &@1);
         }

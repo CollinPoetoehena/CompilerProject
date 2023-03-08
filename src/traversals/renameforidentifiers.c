@@ -56,23 +56,39 @@ node_st *RFIfor(node_st *node)
     // Update the counter
     counter++;
 
+    
+    TRAVblock(node);
+    // TRAVchildren(node);
+
+    // TODO: a block can consist of funcalls and assignments and they have vars and varlets, update those values as well!
+
     return node;
 }
 
 /**
- * @fn RFIvar
+ * @fn RFIfuncall
  */
-node_st *RFIvar(node_st *node)
+node_st *RFIfuncall(node_st *node)
 {
-    // TODO: also rename the occurrence of the for identifier
-    // Test if it is not renaming other occurrences of i
-    if (currentRenamedId != NULL && currentForNode != NULL) {
-        if (strcmp(FOR_VAR(currentForNode), VAR_NAME(node)) == 0) {
-            // Create a copy of the id to avoid pointing to the same id of the For node
-            char *newVarName = STRcpy(FOR_VAR(currentForNode));
-            VAR_NAME(node) = newVarName;
-        }
-    }
+    printf("coming to funcall\n");
+
+    // Will go to the traversal functions of the Exprs
+    TRAVargs(node);
+
+    return node;
+}
+
+/**
+ * @fn RFIassign
+ */
+node_st *RFIassign(node_st *node)
+{
+    printf("coming to assign\n");
+
+    // Will go to the traversal functions of the Exprs
+    TRAVexpr(node);
+    // Will go to the varlet traversal function
+    TRAVlet(node);
 
     return node;
 }
@@ -82,6 +98,8 @@ node_st *RFIvar(node_st *node)
  */
 node_st *RFIvarlet(node_st *node)
 {
+    printf("varlet occurrence\n");
+
     // TODO: also rename the occurrence of the for identifier
     // TODO: check if it does not rename other identifiers not from the for loop
     if (currentRenamedId != NULL && currentForNode != NULL) {
@@ -95,3 +113,22 @@ node_st *RFIvarlet(node_st *node)
     return node;
 }
 
+/**
+ * @fn RFIvar
+ */
+node_st *RFIvar(node_st *node)
+{
+    printf("Var occurrence\n");
+
+    // TODO: also rename the occurrence of the for identifier
+    // Test if it is not renaming other occurrences of i
+    if (currentRenamedId != NULL && currentForNode != NULL) {
+        if (strcmp(FOR_VAR(currentForNode), VAR_NAME(node)) == 0) {
+            // Create a copy of the id to avoid pointing to the same id of the For node
+            char *newVarName = STRcpy(FOR_VAR(currentForNode));
+            VAR_NAME(node) = newVarName;
+        }
+    }
+
+    return node;
+}

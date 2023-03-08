@@ -51,7 +51,7 @@ phase ContextAnalysis {
         traversal RenameForIdentifiers {
             uid = RFI,
             // Also rename all the occurrences of the for variable
-            nodes = { For, Var, VarLet }
+            nodes = { For, FunCall, Assign, Var, VarLet }
         };
 
         // traversal CreateVariableSymbolTableEntries {
