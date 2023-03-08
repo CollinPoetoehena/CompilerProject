@@ -121,28 +121,6 @@ bool isSymbolUnique(char *name) {
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
 bool createSymbolTableEntry(char *name, enum Type type) {
-    // TODO: remove after debugging:
-    // TODO: type is always int, but the type is working correctly, how????
-    // check types
-    char *typeTest = NULL;
-    switch (type) {
-        case CT_int:
-        typeTest = "int";
-        break;
-        case CT_float:
-        typeTest = "float";
-        break;
-        case CT_bool:
-        typeTest = "bool";
-        break;
-        case CT_void:
-        typeTest = "void";
-        break;
-        case CT_NULL:
-        DBUG_ASSERT(false, "unknown type detected!");
-    }
-    printf("type for creation is:%s*************************************\n", typeTest);
-
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         node_st *newSte = NULL;
@@ -176,6 +154,11 @@ bool createSymbolTableEntry(char *name, enum Type type) {
 // Find an Ste node that has the specified name
 node_st *findSteLink(char *name) {
     printf("Trying to find Ste for: %s\n", name);
+
+    //TODO: update this function to fix the finding, think of something smart to solve this, such as a list of 
+    // node_st *, with all the firstCurrentScopes of all the fundefs, then you can loop through them
+    // Or think of something else, you are free to decide, this may not be the best because you probably cannot
+    // make a list, so think of something else!
 
     // return the Symbol table entry that is linked to this node (with name)
     // Use linear search to find the entry, stop when next is NULL
@@ -414,6 +397,7 @@ node_st *CVSfor(node_st *node)
     // local variable declarations on the level of the (innermost) function definition
     // For var declaration always has type int and name is saved in For node
     createSymbolTableEntry(FOR_VAR(node), CT_int);
+    printf("For Var node: %s", FOR_VAR(node));
 
     // Go to stmts traversal functions
     TRAVblock(node);
