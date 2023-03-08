@@ -48,6 +48,7 @@ bool firstParam = true;
 
 
 // Helper function to return the appropriate current Ste
+// TODO: if it is not used it can be removed!
 node_st *getCurrentSteVar(bool firstSte) {
     // TODO: convert to use scopes
     if (currentScopeVar == 0) {
@@ -157,6 +158,28 @@ bool isSymbolUnique(char *name) {
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
 bool createSymbolTableEntry(char *name, enum Type type) {
+    // TODO: remove after debugging:
+    // TODO: type is always int, but the type is working correctly, how????
+    // check types
+    char *typeTest = NULL;
+    switch (type) {
+        case CT_int:
+        typeTest = "int";
+        break;
+        case CT_float:
+        typeTest = "float";
+        break;
+        case CT_bool:
+        typeTest = "bool";
+        break;
+        case CT_void:
+        typeTest = "void";
+        break;
+        case CT_NULL:
+        DBUG_ASSERT(false, "unknown type detected!");
+    }
+    printf("type for creation is:%s*************************************\n", typeTest);
+
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         node_st *newSte = NULL;
@@ -180,8 +203,7 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
-        // CCNerrorPhase();
-        // TODO: uncomment
+        CCNerrorPhase();
     }
 
     // Creation failed
@@ -225,15 +247,8 @@ node_st *CVSprogram(node_st *node)
     printf("\n\n\n****************************************************************************************************************************************************************************** \
     \t\tStart of context analysis variables\n");
 
-    // TODO: does this also work instead of TRAVdecls(node)??? Otherwise, link them again such as in the old traversal!
-    // TODO: Tested and works, still works, maybe error is coming from here then?
     // Go to the traversal functions of the children
     TRAVchildren(node);
-
-    // TODO: uncomment print and convert print function from old traversal to this one! Or: print in print traversal, 
-    // decide what is better with new attributes of the Ste's in the Program and other nodes!
-    // Print all the symbol tables at the end of the traversal
-    // printSymbolTables();
 
     // Update Ste first occurrence to put into the Program node
     if (firstSymbolTableVar != NULL) {
@@ -243,11 +258,9 @@ node_st *CVSprogram(node_st *node)
     }
     // If the firstSymbolTableVar is NULL, then no symbol tables are created, so nothing to update
 
-
-    // TODO: symbol tables can probably now be printed in the print traversal with the new implementation via firstsymbol.. of Program
-
     printf("\n\n\n\t\tEnd of context analysis variables\n****************************************************************************************************************************************************************************** \
     \n");
+    
     return node;
 }
 
@@ -306,7 +319,6 @@ node_st *CVSfundef(node_st *node)
     TRAVparams(node);
     // Create a pointer to the first steVar using the global temp symbol table variable
     if (firstSteVarCurrent != NULL) {
-        printf("LINKED FUNDEF TO A CHAIN!!********************\n");
         // Also, we are entering a new chain of Ste's for this fundef, so the temp
         FUNDEF_FIRST_STE_VARIABLES(node) = firstSteVarCurrent;
     }
@@ -317,12 +329,6 @@ node_st *CVSfundef(node_st *node)
 
     // Update the scope to the old scope after the statements when you get back to this fundef
     currentScopeVar = oldScope;
-
-    // Close this Ste chain 
-    //newSteVarChain = false;
-
-    // TODO: not correctly linking fundefs a next fundef has the same Ste's but that is not correct!
-    // problem is that it only creates a new chain once and not with every new fundef!
 
     return node;
 }
@@ -338,21 +344,8 @@ node_st *CVSparam(node_st *node)
     // Create a SteVar for the param
     createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node));
 
-    // Save the first SteVar for a param in the currentScopeFirstSteVar to link to the FunDef node
-    //TODO: firstParam probably not necessary
-    // if (firstParam) {
-    //     currentScopeFirstSteVar = previousSymbolTableVar;
-    //     // Update global variable to false because the coming params are not the first anymore
-    //     firstParam = false;
-    // }
-
-    if (PARAM_NEXT(node) == NULL) {
-        // This is the last param, so update the global variable firstParam for the next fundef and its params
-        //firstParam = true;
-    } else {
-        // If this param has a next, do the same for the next param in the function definition
-        TRAVnext(node);
-    }
+    // If this param has a next, do the same for the next param in the function definition
+    TRAVnext(node);
 
     return node;
 }
@@ -505,7 +498,7 @@ node_st *CVSvarlet(node_st *node)
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
-        //CCNerrorPhase();
+        CCNerrorPhase();
         // TODP: UNCOMMENT
     }
     
@@ -515,6 +508,7 @@ node_st *CVSvarlet(node_st *node)
 }
 
 // Prints a chain of SteVar's using the LinkedList structure
+// TODO: remove after debugging, this is handy to print a chain of Ste's
 void printSteVar(node_st *steParentNode) {
   if (steParentNode != NULL) {
     // Open the new SteVar chain

@@ -57,8 +57,9 @@ node_st *PRTprogram(node_st *node)
     printf("\n\n\n****************************************************************************************************************************************************************************** \
     \t\tStart of the print traversal:\n\n");
 
-    // TODO: print the ste's for the global variables and global fundefs here!
+    // Print the ste's for the global variables and global fundefs here on the top!
     printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
+    //TODO: FUNCTION STE'S
     // TRAVFIRST_STE_VARIABLES(node);
     // TRAVFIRST_STE_FUNCTIONS(node);
 
@@ -279,7 +280,7 @@ node_st *PRTfundef(node_st *node)
       }
     }
 
-    // TODO: print the ste's of the variables as a structured comment here (fundef itself can be found in global ste's, not here)!
+    // Print the ste's of the variables as a structured comment here (fundef itself can be found in global ste's, not here)!
     printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
 
     return node;
