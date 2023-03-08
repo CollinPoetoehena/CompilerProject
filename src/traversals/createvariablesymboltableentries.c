@@ -75,40 +75,78 @@ node_st *getCurrentSteVar(bool firstSte) {
 
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
-    // Pointers to the correct address can be used to update that variable
-    // This way we can take advantage of the pointer/memory system in C
-    node_st *firstCorrectSteMemAddr = NULL;
-    node_st *lastCorrectSteMemAddr = NULL;
+    if (newSte != NULL) {
+        if (currentScopeVar == 0) {
+            // Use global SteVar's helper variables memory addresses
+            if (firstSymbolTableVar == NULL) {
+                firstSymbolTableVar = newSte;
+                lastSteVarGlobal = newSte;
+            } else {
+                // Update next of previous symbol table
+                STEVAR_NEXT(lastSteVarGlobal) = newSte;
+                lastSteVarGlobal = newSte;
+            }
+        } else {
+            // If a new chain needs to be created, then set the chain helper variables to NULL
+            if (newSteVarChain) {
+                // These pointers point to the helper variables for the correct chain now and will update them
+                firstSteVarCurrent = NULL;
+                lastSteVarCurrent = NULL;
+                // Then close the chain to use this chain from now on, until updated
+                newSteVarChain = false;
+            }
 
-    //TODO: is the new chain always non global?? Yes, always non global because that new chain is not created
-    if (currentScopeVar == 0) {
-        // Use global SteVar's helper variables memory addresses
-        firstCorrectSteMemAddr = firstSymbolTableVar;
-        lastCorrectSteMemAddr = lastSteVarGlobal;
-    } else {
-        // Use non global SteVar's helper variables memory addresses
-        firstCorrectSteMemAddr = firstSteVarCurrent;
-        lastCorrectSteMemAddr = lastSteVarCurrent;
+            // Use non global SteVar's helper variables memory addresses
+            if (firstSteVarCurrent == NULL) {
+                //TODO: this part gives a segmentation fault, but it is occuring in the symbolTableIsUnique function!!
+                firstSteVarCurrent = newSte;
+                lastSteVarCurrent = newSte;
+            } else {
+                // Update next of previous symbol table
+                STEVAR_NEXT(lastSteVarCurrent) = newSte;
+                lastSteVarCurrent = newSte;
+            }
+        }
     }
+
+
+
+    // // Pointers to the correct address can be used to update that variable
+    // // This way we can take advantage of the pointer/memory system in C
+    // node_st *firstCorrectSteMemAddr = NULL;
+    // node_st *lastCorrectSteMemAddr = NULL;
+
+    // //TODO: is the new chain always non global?? Yes, always non global because that new chain is not created
+    // if (currentScopeVar == 0) {
+    //     // Use global SteVar's helper variables memory addresses
+    //     firstCorrectSteMemAddr = firstSymbolTableVar;
+    //     lastCorrectSteMemAddr = lastSteVarGlobal;
+    // } else {
+    //     // Use non global SteVar's helper variables memory addresses
+    //     firstCorrectSteMemAddr = firstSteVarCurrent;
+    //     lastCorrectSteMemAddr = lastSteVarCurrent;
+    // }
     
-    // If a new chain needs to be created, then set the chain helper variables to NULL
-    if (newSteVarChain) {
-        // These pointers point to the helper variables for the correct chain now and will update them
-        firstCorrectSteMemAddr = NULL;
-        lastCorrectSteMemAddr = NULL;
-        // Then close the chain to use this chain from now on, until updated
-        newSteVarChain = false;
-    }
+    // // If a new chain needs to be created, then set the chain helper variables to NULL
+    // if (newSteVarChain) {
+    //     // These pointers point to the helper variables for the correct chain now and will update them
+    //     firstCorrectSteMemAddr = NULL;
+    //     lastCorrectSteMemAddr = NULL;
+    //     // Then close the chain to use this chain from now on, until updated
+    //     newSteVarChain = false;
+    // }
 
-    // Finally, update the correct chain of Ste's
-    if (firstCorrectSteMemAddr == NULL) {
-        firstCorrectSteMemAddr = newSte;
-        lastCorrectSteMemAddr = newSte;
-    } else {
-        // Update next of previous symbol table
-        STEVAR_NEXT(lastCorrectSteMemAddr) = newSte;
-        lastCorrectSteMemAddr = newSte;
-    }
+    // //TODO: in the above it is NULL everytime, probably not updating correctly!
+
+    // // Finally, update the correct chain of Ste's
+    // if (firstCorrectSteMemAddr == NULL) {
+    //     firstCorrectSteMemAddr = newSte;
+    //     lastCorrectSteMemAddr = newSte;
+    // } else {
+    //     // Update next of previous symbol table
+    //     STEVAR_NEXT(lastCorrectSteMemAddr) = newSte;
+    //     lastCorrectSteMemAddr = newSte;
+    // }
 
 
     // if (currentScopeVar == 0) {
@@ -153,11 +191,16 @@ bool isSymbolUnique(char *name) {
     node_st *symtbolTableChain = NULL;
     // TODO: use get correct Ste, and do that for all the other calls to it
     if (currentScopeVar == 0) {
-        // Go through the global chain
-        symtbolTableChain = firstSymbolTableVar;
+        // Avoid segmentation fault
+        if (firstSymbolTableVar != NULL) {
+            // Go through the global chain
+            symtbolTableChain = firstSymbolTableVar;
+        }
     } else {
-        // Go through the current (non global) chain
-        symtbolTableChain = firstSteVarCurrent;
+        if (firstSteVarCurrent != NULL) {
+            // Go through the current (non global) chain
+            symtbolTableChain = firstSteVarCurrent;
+        }
     }
 
     // Go through the current chain to check if it contains the symbol already
@@ -168,7 +211,7 @@ bool isSymbolUnique(char *name) {
             // to check for equality, 0 means equal. == only checks if memory references are equal
             if (strcmp(STEVAR_NAME(symbolTable), name) == 0) {
                 printf("**********************Link found for %s\n", name);
-                printf("First stevar that occured is: %s\n", STEVAR_NAME(currentScopeFirstSteVar));
+                printf("First stevar that occured is: %s\n", STEVAR_NAME(symbolTable));
                 return false;
             }
 
@@ -184,7 +227,6 @@ bool isSymbolUnique(char *name) {
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
 bool createSymbolTableEntry(char *name, enum Type type) {
     //TODO: if currentScopeVar == 0 then append to last global Ste, othwerwise append to new scope
-    printf("creating symbol: %s\n", name);
 
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
@@ -201,7 +243,7 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        printSteVar(newSte);
+        // printSteVar(newSte);
 
         // Ste creation succeeded
         return true;
@@ -248,7 +290,7 @@ node_st *findSteLink(char *name) {
  */
 node_st *CVSprogram(node_st *node)
 {
-    printf("program\n");
+    // printf("program\n");
 
     // Print the start of the context analysis variables
     printf("\n\n\n****************************************************************************************************************************************************************************** \
@@ -285,7 +327,7 @@ node_st *CVSprogram(node_st *node)
  */
 node_st *CVSglobdecl(node_st *node)
 {
-    printf("globdecl\n");
+    // printf("globdecl\n");
 
     // Current scope is guarenteed to be global scope
     currentScopeVar = 0;
@@ -301,7 +343,7 @@ node_st *CVSglobdecl(node_st *node)
  */
 node_st *CVSglobdef(node_st *node)
 {
-    printf("globdef\n");
+    // printf("globdef\n");
 
     // Current scope is guarenteed to be global scope
     currentScopeVar = 0;
@@ -317,7 +359,7 @@ node_st *CVSglobdef(node_st *node)
  */
 node_st *CVSfundef(node_st *node)
 {
-    printf("fundef\n");
+    // printf("fundef\n");
 
     // Open a new Ste chain 
     newSteVarChain = true;
@@ -358,7 +400,7 @@ node_st *CVSfundef(node_st *node)
 node_st *CVSparam(node_st *node)
 {
     // Create ste for the param
-    printf("param\n");
+    // printf("param\n");
 
     // Create a SteVar for the param
     createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node));
@@ -402,7 +444,7 @@ node_st *CVSfunbody(node_st *node)
  */
 node_st *CVSvardecl(node_st *node)
 {
-    printf("vardecls\n");
+    // printf("vardecls\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
