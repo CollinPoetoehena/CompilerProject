@@ -1,0 +1,14 @@
+extern int a;
+export float b = 5;
+
+void foo(int a, int b, float c) {
+    int a = 5;
+    int b = 7;
+}
+
+void faa(int a, int b, float c) {
+    int d = 5;
+    int e = 7;
+}
+
+//TODO: also test without a global scope of variables!

@@ -41,22 +41,23 @@ phase ContextAnalysis {
                 Var, Varlet
             }
         };
-
-        traversal CreateFunctionSymbolTableEntries {
-            // Create Function Symboltables
-            uid = CFS,
-            nodes = {
-                // Program to link first symbol table entries of var and fun
-                Program,
-                // FunDef to use for creating a new SteFun 
-                // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
-                FunDef,
-                // Param node (= LinkedList) to link the params of a FunDef
-                Param,
-                // These nodes are used to update their link once they occur in a program
-                FunCall
-            }
-        };
+        
+        // TODO: uncomment when variables symbol tables are working and make this one!
+        // traversal CreateFunctionSymbolTableEntries {
+        //     // Create Function Symboltables
+        //     uid = CFS,
+        //     nodes = {
+        //         // Program to link first symbol table entries of var and fun
+        //         Program,
+        //         // FunDef to use for creating a new SteFun 
+        //         // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
+        //         FunDef,
+        //         // Param node (= LinkedList) to link the params of a FunDef
+        //         Param,
+        //         // These nodes are used to update their link once they occur in a program
+        //         FunCall
+        //     }
+        // };
     }
 };
 
@@ -134,7 +135,7 @@ nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
 // Link is used for the Symbol table to link a node to the symbol table
-nodeset Link = {Ste};
+nodeset Link = {SteVar, SteFun};
 // Link is voor na de symbol table om de symbol table entry te linken met de node (Var, Varlet, Funcall)
 
 root node Program {
@@ -460,35 +461,35 @@ node SteFun {
 };
 
 // Symbol table entry
-node Ste {
-    // variablen en functies
-    children {
-        // LinkedList data structure for next symbol table
-        Ste next { constructor },
-        // TODO: een lijst per functie en 1 global
-        // Parent wijst naar hogere nesting level
-        Ste parent
+// node Ste {
+//     // variablen en functies
+//     children {
+//         // LinkedList data structure for next symbol table
+//         Ste next { constructor },
+//         // TODO: een lijst per functie en 1 global
+//         // Parent wijst naar hogere nesting level
+//         Ste parent
 
-        // FunDef
-        // Traverse funbody
-        // travdata can be used for Ste
+//         // FunDef
+//         // Traverse funbody
+//         // travdata can be used for Ste
 
-        // Start with Ste's for the variables only
-        // Separate traversal for fundefs
-        // 2 losse tables, 1 voor vars, 1 voor functinos, allebei linkedlist
-        // 2 nodes, SteVar, SteFun
-    }, 
+//         // Start with Ste's for the variables only
+//         // Separate traversal for fundefs
+//         // 2 losse tables, 1 voor vars, 1 voor functinos, allebei linkedlist
+//         // 2 nodes, SteVar, SteFun
+//     }, 
 
-    attributes {
-        string name { constructor },
-        Type type { constructor },
-        int nesting_level { constructor },
-        SymbolTableType symbol_type { constructor },
-        // Params is the LinkedList from the FunDef, should contain the first value of 
-        // the FunDef params. From the first value the LinkedList chain can be followed.
-        Param params { constructor }
-    }
-};
+//     attributes {
+//         string name { constructor },
+//         Type type { constructor },
+//         int nesting_level { constructor },
+//         SymbolTableType symbol_type { constructor },
+//         // Params is the LinkedList from the FunDef, should contain the first value of 
+//         // the FunDef params. From the first value the LinkedList chain can be followed.
+//         Param params { constructor }
+//     }
+// };
 // Milestone 5 symbol table
 // Each symbol table entry would feature the name of the variable as a character string, 
 // its type as well as its nesting level (starting with zero for the global context)
