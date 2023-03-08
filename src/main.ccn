@@ -54,23 +54,23 @@ phase ContextAnalysis {
             nodes = { For, FunCall, Assign, Var, VarLet }
         };
 
-        // traversal CreateVariableSymbolTableEntries {
-        //     // Create Variable Symboltables
-        //     uid = CVS,
-        //     nodes = { 
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // FunDef to use for the linking to the first SteVar 
-        //         // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
-        //         FunDef,
-        //         // FunBody to traverse the VarDecls and Stmts
-        //         FunBody, 
-        //         // These nodes are used to create new Symbol Table entries
-        //         GlobDecl, GlobDef, VarDecl, Param, For,
-        //         // These nodes are used to update their link once they occur in a program
-        //         Var, Varlet
-        //     }
-        // };
+        traversal CreateVariableSymbolTableEntries {
+            // Create Variable Symboltables
+            uid = CVS,
+            nodes = { 
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for the linking to the first SteVar 
+                // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
+                FunDef,
+                // FunBody to traverse the VarDecls and Stmts
+                FunBody, 
+                // These nodes are used to create new Symbol Table entries
+                GlobDecl, GlobDef, VarDecl, Param, For,
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet
+            }
+        };
         
         // TODO: uncomment when variables symbol tables are working and make this one!
         // traversal CreateFunctionSymbolTableEntries {
