@@ -1,16 +1,2 @@
-void foo() {
+bool b;
 int a;
-int b = 2;
-int c = 3 + 4;
-int d = 5;
-
-// FunBody has VarDecls and Stmts in this order, see language, do not mix them!
-// Var link for d
-int e = d * 5;
-
-// VarLet link
-a = 5;
-
-// FunCall link
-foo();
-}

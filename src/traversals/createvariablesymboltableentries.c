@@ -36,15 +36,6 @@ node_st *lastSteVarCurrent = NULL;
 // Helper variable to keep track of when to open a new chain
 bool newSteVarChain = false;
 
-// ************************************************************************************************************************************
-// TODO:
-// Fix types not working, maybe with parameter type???
-// Ask: milestone 6 is only first part right, other parts are for extensions???? 
-// For loop i's probably cannot have the same id right???
-// Ask explanation about milestones 7, 9 and 10.
-// Ask: milestones 8 and 11 are only for extensions right??
-
-
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
     if (newSte != NULL) {
@@ -422,7 +413,12 @@ node_st *CVSfor(node_st *node)
     // For var declaration always has type int and name is saved in For node
     createSymbolTableEntry(FOR_VAR(node), CT_int);
 
+    // TODO
+    // makkelijker: eerst een traversal alleen op for loop en al die iterators renamen naar een counter met zoals hier
     //TODO: multiple i's in one function scope should return an error right because they are now in the same funbody?
+    // first i, gets _i1, second becomes _i2, can be done with a global counter. With a double forloop be careful with what i's 
+    // can be done in a separate traversal
+    // dan simpel gewoon hier uitvoern met Ste
 
     // Go to stmts traversal functions
     TRAVblock(node);
@@ -446,8 +442,7 @@ node_st *CVSvar(node_st *node)
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s", VAR_NAME(node));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
-        //CCNerrorPhase();
-        // TODP: UNCOMMENT
+        CCNerrorPhase();
     }
 
     printf("*************************symbol table link var\n");

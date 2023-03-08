@@ -872,6 +872,9 @@ node_st *PRTbool(node_st *node)
 
 // Prints a chain of SteVar's using the LinkedList structure
 void printSteVarChain(node_st *steParentNode) {
+  // TODO: convert to traversal
+
+
   if (steParentNode != NULL) {
     // Open the new SteVar chain
     printf("\n**************************\n\tNew SteVar chain:\n");
@@ -882,7 +885,7 @@ void printSteVarChain(node_st *steParentNode) {
         // Get the type
         char *type = NULL;
 
-        switch (STEVAR_TYPE(steParentNode)) {
+        switch (STEVAR_TYPE(steIterator)) {
           case CT_int:
           type = "int";
           break;
