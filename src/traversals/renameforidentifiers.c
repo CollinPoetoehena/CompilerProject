@@ -28,7 +28,7 @@ node_st *RFIfor(node_st *node)
     // TODO
     // makkelijker: eerst een traversal alleen op for loop en al die iterators renamen naar een counter met zoals hier
     //TODO: multiple i's in one function scope should return an error right because they are now in the same funbody?
-    // first i, gets _i1, second becomes _i2, can be done with a global counter. With a double forloop be careful with what i's 
+    // first i, gets i_, second becomes i__, can be done with a global counter. With a double forloop be careful with what i's 
     // can be done in a separate traversal
     // dan simpel gewoon hier uitvoern met Ste
 
@@ -36,10 +36,9 @@ node_st *RFIfor(node_st *node)
     currentRenamedId = FOR_VAR(node);
 
     // Rename the identifier of the For node (do not create a new node, this is much easier!)
-    // FOR_VAR(node) + counter + "_"
-
-    // Use for loop and concat an '_' for count times
+    // '_' because it is a valid identifier (see lexer)
     for( int i = 0; i < counter; i++ ){
+        // Use for loop and concat an '_' for count times
         FOR_VAR(node) = STRcat(FOR_VAR(node), "_");
     }
  
