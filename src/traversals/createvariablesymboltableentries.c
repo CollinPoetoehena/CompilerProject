@@ -35,6 +35,8 @@ node_st *lastSteVarCurrent = NULL;
 
 // Helper variable to keep track of when to open a new chain
 bool newSteVarChain = false;
+// firstParam is used to save the first param to the fundef
+bool firstParam = true;
 
 
 // previousSymbolTableVar global variable is used to update the previousSymbolTableVar's next variable
@@ -43,13 +45,12 @@ node_st *previousSymbolTableVar = NULL;
 // node_st *tempSymbolTableVar = NULL;
 // currentScopeSteVar is used for linking (or chaining througout) a current chain of LinkedList SteVar's 
 node_st *currentScopeFirstSteVar = NULL;
-// firstParam is used to save the first param to the fundef
-bool firstParam = true;
+
 
 // Helper function to return the appropriate current Ste
 node_st *getCurrentSteVar(bool firstSte) {
     // TODO: convert to use scopes
-    if (currentScope == 0) {
+    if (currentScopeVar == 0) {
         // Return an Ste from the global chain of Ste's
         if (firstSte) {
             // If the first Ste of the current scope is requested return first
@@ -74,33 +75,64 @@ node_st *getCurrentSteVar(bool firstSte) {
 
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
-    if (newSteVarChain) {
-        // New chain is always non global
-    }
+    // Pointers to the correct address can be used to update that variable
+    // This way we can take advantage of the pointer/memory system in C
+    node_st *firstCorrectSteMemAddr = NULL;
+    node_st *lastCorrectSteMemAddr = NULL;
 
-
-    if (currentScope == 0) {
-        // Update global Ste helper variables
-        // Update first symbol table if it is NULL 
-        if (firstSymbolTableVar == NULL) {
-            firstSymbolTableVar = newSte;
-            lastSteVarGlobal = newSte;
-        } else {
-            // Update next of previous symbol table
-            STEVAR_NEXT(lastSteVarGlobal) = newSte;
-            lastSteVarGlobal = newSte;
-        }
+    //TODO: is the new chain always non global?? Yes, always non global because that new chain is not created
+    if (currentScopeVar == 0) {
+        // Use global SteVar's helper variables memory addresses
+        firstCorrectSteMemAddr = firstSymbolTableVar;
+        lastCorrectSteMemAddr = lastSteVarGlobal;
     } else {
-        // Update non global Ste helper variables
-        if (firstSteVarCurrent == NULL) {
-            firstSteVarCurrent = newSte;
-            lastSteVarCurrent = newSte;
-        } else {
-            // Update next of previous symbol table
-            STEVAR_NEXT(lastSteVarCurrent) = newSte;
-            lastSteVarCurrent = newSte;
-        }
+        // Use non global SteVar's helper variables memory addresses
+        firstCorrectSteMemAddr = firstSteVarCurrent;
+        lastCorrectSteMemAddr = lastSteVarCurrent;
     }
+    
+    // If a new chain needs to be created, then set the chain helper variables to NULL
+    if (newSteVarChain) {
+        // These pointers point to the helper variables for the correct chain now and will update them
+        firstCorrectSteMemAddr = NULL;
+        lastCorrectSteMemAddr = NULL;
+        // Then close the chain to use this chain from now on, until updated
+        newSteVarChain = false;
+    }
+
+    // Finally, update the correct chain of Ste's
+    if (firstCorrectSteMemAddr == NULL) {
+        firstCorrectSteMemAddr = newSte;
+        lastCorrectSteMemAddr = newSte;
+    } else {
+        // Update next of previous symbol table
+        STEVAR_NEXT(lastCorrectSteMemAddr) = newSte;
+        lastCorrectSteMemAddr = newSte;
+    }
+
+
+    // if (currentScopeVar == 0) {
+    //     // Update global Ste helper variables
+    //     // Update first symbol table if it is NULL 
+    //     if (firstSymbolTableVar == NULL) {
+    //         firstSymbolTableVar = newSte;
+    //         lastSteVarGlobal = newSte;
+    //     } else {
+    //         // Update next of previous symbol table
+    //         STEVAR_NEXT(lastSteVarGlobal) = newSte;
+    //         lastSteVarGlobal = newSte;
+    //     }
+    // } else {
+    //     // Update non global Ste helper variables
+    //     if (firstSteVarCurrent == NULL) {
+    //         firstSteVarCurrent = newSte;
+    //         lastSteVarCurrent = newSte;
+    //     } else {
+    //         // Update next of previous symbol table
+    //         STEVAR_NEXT(lastSteVarCurrent) = newSte;
+    //         lastSteVarCurrent = newSte;
+    //     }
+    // }
 
     // // Update first symbol table if it is NULL 
     // if (firstSymbolTableVar == NULL) {
@@ -113,46 +145,14 @@ void updateGlobSymbolTables(node_st *newSte) {
     // }
 }
 
-// Create a symbol table entry node
-bool createSymbolTableEntry(char *name, enum Type type) {
-    //TODO: if currentScope == 0 then append to last global Ste, othwerwise append to new scope
-
-    // Get the parent symbol table, with basic it is the global ste or NULL if the scope is 0
-    node_st *parentSte = NULL;
-    if (currentScopeVar == 1 && STEVAR_NESTING_LEVEL(firstSymbolTableVar) == 0) {
-        // Global Ste is the parent if the firstSymbolTableVar is at nesting_level 0 (global), otherwise NULL
-        parentSte = firstSymbolTableVar;
-    }
-
-    // First check if the name is already present, if so, save it in errors
-    if (isSymbolUnique(name)) {
-        // Create a symbol table entry (link it later in the Var, Varlet or Funcall once it appears)
-        node_st *newSte = ASTstevar(parentSte, NULL, name, type, currentScopeVar);
-
-        // Update global symbol tables in this traversal
-        updateGlobSymbolTables(newSte);
-
-        // Ste creation succeeded
-        return true;
-    } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
-        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
-        // CCNerrorPhase();
-        // TODO: uncomment
-    }
-
-    // Creation failed
-    return false;
-}
-
 // Check if a symbol is unique
 bool isSymbolUnique(char *name) {
     // TODO: convert to new information gathered and new scopes, so check for parent Ste and do next from there!
 
     // Check if the name is not already present in the symbol table entries (use linear search)
     node_st *symtbolTableChain = NULL;
-    if (currentScope == 0) {
+    // TODO: use get correct Ste, and do that for all the other calls to it
+    if (currentScopeVar == 0) {
         // Go through the global chain
         symtbolTableChain = firstSymbolTableVar;
     } else {
@@ -179,6 +179,42 @@ bool isSymbolUnique(char *name) {
 
     // If the first symbol table is NULL or no match found, then the Ste is guarenteed unique
     return true;
+}
+
+// Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
+bool createSymbolTableEntry(char *name, enum Type type) {
+    //TODO: if currentScopeVar == 0 then append to last global Ste, othwerwise append to new scope
+    printf("creating symbol: %s\n", name);
+
+    // First check if the name is already present, if so, save it in errors
+    if (isSymbolUnique(name)) {
+        node_st *newSte = NULL;
+        // NULL check for firstSymbolTableVar in the condition avoid Segmentation fault
+        if (firstSymbolTableVar != NULL &&
+            currentScopeVar == 1 && STEVAR_NESTING_LEVEL(firstSymbolTableVar) == 0) {
+            // Global Ste is the parent if the firstSymbolTableVar is at nesting_level 0 (global), otherwise NULL
+            newSte = ASTstevar(firstSymbolTableVar, NULL, name, type, currentScopeVar);
+        } else {
+            newSte = ASTstevar(NULL, NULL, name, type, currentScopeVar);
+        }
+
+        // Update global symbol tables in this traversal
+        updateGlobSymbolTables(newSte);
+
+        printSteVar(newSte);
+
+        // Ste creation succeeded
+        return true;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        // CCNerrorPhase();
+        // TODO: uncomment
+    }
+
+    // Creation failed
+    return false;
 }
 
 // Find an Ste node that has the specified name
@@ -231,6 +267,8 @@ node_st *CVSprogram(node_st *node)
     // Update Ste first occurrence to put into the Program node
     if (firstSymbolTableVar != NULL) {
         PROGRAM_FIRST_STE_VARIABLES(node) = firstSymbolTableVar;
+    } else {
+        printf("NO STES CREATED IN TRAVERSAL!!\n");
     }
     // If the firstSymbolTableVar is NULL, then no symbol tables are created, so nothing to update
 
@@ -250,7 +288,7 @@ node_st *CVSglobdecl(node_st *node)
     printf("globdecl\n");
 
     // Current scope is guarenteed to be global scope
-    currentScope = 0;
+    currentScopeVar = 0;
 
     // Create a symbol table entry
     createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node));
@@ -266,7 +304,7 @@ node_st *CVSglobdef(node_st *node)
     printf("globdef\n");
 
     // Current scope is guarenteed to be global scope
-    currentScope = 0;
+    currentScopeVar = 0;
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
@@ -296,11 +334,11 @@ node_st *CVSfundef(node_st *node)
     // First traverse the params, because they come first in the symbol tables implementation
     TRAVparams(node);
     // Create a pointer to the first steVar using the global temp symbol table variable
-    if (currentScopeFirstSteVar != NULL) {
+    if (firstSteVarCurrent != NULL) {
         // Also, we are entering a new chain of Ste's for this fundef, so the temp
-        FUNDEF_FIRST_STE_VARIABLES(node) = currentScopeFirstSteVar;
+        FUNDEF_FIRST_STE_VARIABLES(node) = firstSteVarCurrent;
     }
-    // If the currentScopeFirstSteVar is NULL, then no symbol tables are created, so nothing to update
+    // If the firstSteVarCurrent is NULL, then no symbol tables are created, so nothing to update
 
     // Then traverse the funbody
     TRAVbody(node);
@@ -309,7 +347,7 @@ node_st *CVSfundef(node_st *node)
     currentScopeVar = oldScope;
 
     // Close this Ste chain 
-    newSteVarChain = true;
+    newSteVarChain = false;
 
     return node;
 }
@@ -326,15 +364,16 @@ node_st *CVSparam(node_st *node)
     createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node));
 
     // Save the first SteVar for a param in the currentScopeFirstSteVar to link to the FunDef node
-    if (firstParam) {
-        currentScopeFirstSteVar = previousSymbolTableVar;
-        // Update global variable to false because the coming params are not the first anymore
-        firstParam = false;
-    }
+    //TODO: firstParam probably not necessary
+    // if (firstParam) {
+    //     currentScopeFirstSteVar = previousSymbolTableVar;
+    //     // Update global variable to false because the coming params are not the first anymore
+    //     firstParam = false;
+    // }
 
     if (PARAM_NEXT(node) == NULL) {
         // This is the last param, so update the global variable firstParam for the next fundef and its params
-        firstParam = true;
+        //firstParam = true;
     } else {
         // If this param has a next, do the same for the next param in the function definition
         TRAVnext(node);
@@ -500,3 +539,44 @@ node_st *CVSvarlet(node_st *node)
     return node;
 }
 
+// Prints a chain of SteVar's using the LinkedList structure
+void printSteVar(node_st *steParentNode) {
+  if (steParentNode != NULL) {
+    // Open the new SteVar chain
+    printf("\n**************************\n\tNew SteVar chain:\n");
+
+    // Get the first param from the Ste
+    node_st *steIterator = steParentNode;
+    do {
+        // Get the type
+        char *type = NULL;
+
+        switch (STEVAR_TYPE(steParentNode)) {
+          case CT_int:
+          type = "int";
+          break;
+          case CT_float:
+          type = "float";
+          break;
+          case CT_bool:
+          type = "bool";
+          break;
+          case CT_void:
+          type = "void";
+          break;
+          case CT_NULL:
+          DBUG_ASSERT(false, "unknown type detected!");
+        }
+
+        // Print var Ste: "name, type"
+        printf("SteVar:\n %s : %s\nnesting level: %d\n", 
+            STEVAR_NAME(steIterator), type, STEVAR_NESTING_LEVEL(steIterator));
+
+        // Update iterator
+        steIterator = STEVAR_NEXT(steIterator);
+    } while (steIterator != NULL);
+
+    // End the current SteVar chain
+    printf("\n\tEnd of SteVar chain\n**************************\n\n");
+  }
+}

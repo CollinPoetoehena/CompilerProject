@@ -59,6 +59,9 @@ node_st *PRTprogram(node_st *node)
 
     // TODO: print the ste's for the global variables and global fundefs here!
     printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
+    if (PROGRAM_FIRST_STE_VARIABLES(node) == NULL) {
+      printf("NO STES CREATED!!\n");
+    }
     // TRAVFIRST_STE_VARIABLES(node);
     // TRAVFIRST_STE_FUNCTIONS(node);
 
