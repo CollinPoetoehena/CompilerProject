@@ -1,0 +1,20 @@
+int a;
+int b;
+
+void foo() {
+    int d = 5;
+    int e = 7;
+    float z = 5.345;
+    bool boolVal = true;
+}
+
+void faa() {
+    int d = 5;
+    int e = 7;
+    int f = 9;
+    int h = 8;
+    int g = 2 *6;
+    float i = 8.546;
+}
+
+//TODO: also test without a global scope of variables!

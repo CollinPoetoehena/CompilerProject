@@ -1,28 +1,144 @@
 start phase RootPhase {
+    // Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        // ContextAnalysis
+        ContextAnalysis;
+        // TODO: uncomment when that is done, otherwise it might cause an error!
+        // RegularAssignments;
         print;
     }
-};
+}; 
+
+//TODO: remove when done, these are common commands:
+// make
+// ./civicc ../test/basic/check_success/binops.cvc
+// yacc -Wcounterexamples parser.y
+
+// ************************************************************************************************************************************
+// TODO:
+// milestone 6 is only first part , other parts are for extensions, so not necessary
+// For loop i's can have the same id at the start, but rename them in a previous traversal
+// milestones 8 and 11 are only for extensions!
+
+// milestone 9:
+// || wordt lazy geevalueerd
+// voor bool operators een apart iets, dus || &&. Maak daar een ternary node voor
+// Dus eig die dingen omvormen in ternary statements
+// Example:
+// funcCallA() || funcallb()
+// Als funCallA() true returned dan zou funcallb() niet uitgevoerd hoeven worden (als die side effects heeft is dat slecht)
+// Traversal hoeft dan alleen over de binops te gaan en dan de logicoperators van Binop
+
+// milestone 10:
+// in assembly worden booleans anders afgehandeld
+// Er zijn geen assembly instructions om van en naar booleans te casten
+// Dit moet je dus zelf gaan doen met de cijfers
+// cast van int naar bool moet dan bijv een > 0 vergelijking, etc en andersom
+// traversal gaat over de Cast nodes
+
+//**********************************************************************************************************************************************
+// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
+// TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
+// TODO: when to create ExprStmt node in parser because this file does not compile: ./civicc ../test/basic/functional/typecheck.cvc 
+
 
 traversal Print {
     uid = PRT
 };
 
-traversal ContextAnalysis {
-    uid = CA,
-    // Program and FunBody to build new symbol tables (new scopes)
-    // These nodes are above the others so will be traversed first
-    // Var, Varlet and FunCall to fill a symbol table
-    nodes = {Program, FunBody, Var, Varlet, FunCall}
+// TODO: finish this CA phase
+phase ContextAnalysis {
+    actions {
+        // This traversal systematicly rename all the identifiers in for loops and save it to the node.
+        // This is very handy in the creation of symbol tables because you can then just
+        // create symbol table entries for the identifiers in for loops without special operations.
+        traversal RenameForIdentifiers {
+            uid = RFI,
+            // Also rename all the occurrences of the for variable
+            nodes = { For, FunCall, Assign, Var, VarLet }
+        };
+
+        // Create Variable Symboltables, linking will be done in a separate traversal
+        traversal CreateVariableSymbolTableEntries {
+            uid = CVS,
+            nodes = { 
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for the linking to the first SteVar 
+                FunDef,
+                // FunBody to traverse the VarDecls and Stmts
+                FunBody, 
+                // These nodes are used to create new Symbol Table entries
+                GlobDecl, GlobDef, VarDecl, Param, For
+            }
+        };
+        
+        // TODO: uncomment when variables symbol tables are working and make this one!
+        // Create Function Symboltables, linking will be done in a separate traversal
+        // traversal CreateFunctionSymbolTableEntries {
+        //     uid = CFS,
+        //     nodes = {
+        //         // Program to link first symbol table entries of var and fun
+        //         Program,
+        //         // FunDef to use for creating a new SteFun 
+        //         // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
+        //         FunDef,
+        //         // Param node (= LinkedList) to link the params of a FunDef
+        //         Param
+        //     }
+        // };
+
+        // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
+        // TODO: create a separate traversal for linking all the Var, VarLet and FunCall occurrences!
+        // traversal LinkSymbolTableEntries {
+        //     uid = LSTE,
+        //     nodes = { 
+        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+        //         Program,
+        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+        //         FunDef, FunBody,
+        //         // These nodes are used to update their link once they occur in a program
+        //         Var, Varlet, FunCall
+        //     }
+        // };
+    }
 };
+
+// traversal ContextAnalysis {
+//     uid = CA,
+//     // TODO: you cannot declare a variable inside a Statement, so only linking can occur there
+//     nodes = {
+//             // Program, FunBody and IfElse, While, DoWhile, to go to the appropriate nodes' traversal functions
+//             // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
+//             Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
+//             // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
+//             VarDecl, GlobDecl, GlobDef, FunDef, Param,
+//             // Exprs and Assign to go to the Var and Varlet nodes traversal functions
+//             Exprs, Assign,
+//             // Var, Varlet and FunCall to link a symbol table entry with it's name
+            // Var, Varlet, FunCall
+//         }
+// };
+
+traversal RegularAssignments {
+    // This traversal should transform Variable Initialisations into Regular Assignments
+    uid = RA,
+    // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
+    nodes = {FunBody, VarDecl, GlobDef, For}
+    // FunBody is used to first traverse the VarDecls and then the Stmts and append the 
+    // saved initializations to the stmts, these are filled after TRAVdecls(node) of FunBody
+    // For loop has something special to it, the above nodes are the correct nodes
+};
+
+// TODO: for type checking see slides Semantic analysis for implementation hint on type checking!
+// Explanation on type checking: 
 
 enum SymbolTableType {
     // Can have two types, variable or function
     prefix = STT,
     values {
-        var, varlet, fun
+        // TODO: is this correct, what about Param???
+        var, varlet, function
     }
 };
 
@@ -61,16 +177,20 @@ nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
 
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
-// Link you need to adapt.
-// In the old framework it points to node* (so can be everything).
-// You need to adapt it when working with the symbol tables.
-// I put it as a decl now, because an empty nodeset is not allowed.
-nodeset Link = Decl;
-// TODO: Simon said that Link is used for Context analysis, such as for the symbol table
+// Link is used for the Symbol table to link a node to the symbol table
+nodeset Link = {SteVar, SteFun};
+// Link is voor na de symbol table om de symbol table entry te linken met de node (Var, Varlet, Funcall)
 
 root node Program {
     children {
         Decls decls { constructor, mandatory }
+    },
+
+    attributes {
+        // Contains first global symbol occuring (can be used for linking)
+        // No need for constructor because it is set only later on in ContextAnalysis
+        SteVar first_ste_variables,
+        SteFun first_ste_functions
     }
 };
 
@@ -117,13 +237,14 @@ node Return {
     }
 };
 
+// (= later on, same as Var and VarLet, such as void foo(){}; return foo();, foo in return is the FunCall)
 node FunCall {
     children {
         Exprs args { constructor }
     },
     attributes {
         string name { constructor },
-        Link decl
+        Link ste_link
     }
 };
 
@@ -155,7 +276,11 @@ node FunDef {
     attributes {
         Type type { constructor },
         string name { constructor, mandatory },
-        bool export { constructor }
+        bool export { constructor },
+        // Link to its own symbol table
+        SteFun symbol_table,
+        // Link to first symbol table of this functions scope
+        SteVar first_ste_variables
         // No need to do anything with EXTERN for the FunDec because they are always external!
     }
 };
@@ -293,7 +418,7 @@ node Monop {
     }
 };
 
-// Variable in assignment.
+// Variable in assignment (= later on, such as int a = 5; a = 7, a is the VarLet).
 node VarLet {
     children {
         // Indices is used for extensions, so leave it for now
@@ -302,11 +427,11 @@ node VarLet {
 
     attributes {
         string name { constructor },
-        Link decl
+        Link ste_link
     }
 };
 
-// Variable in an expression.
+// Variable in an expression (= later on, such as int d = a * 5, a is the Var).
 node Var {
     children {
         Exprs indices
@@ -314,7 +439,7 @@ node Var {
 
     attributes {
         string name { constructor },
-        Link decl
+        Link ste_link
     }
 };
 
@@ -336,21 +461,79 @@ node Bool {
     }
 };
 
-// Symbol table entry
-node Ste {
-    // variablen en functies
+
+//TODO: convert nodes, reuse as much as possible from the old contextanalysis traversal
+// Also see the picture from the lesson (also send to Sandro, can be found there)
+node SteVar {
     children {
+        // Parent wijst naar hogere nesting level
+        SteVar parent { constructor },
         // LinkedList data structure for next symbol table
-        Ste next {constructor }
+        SteVar next { constructor }
     }, 
 
     attributes {
         string name { constructor },
         Type type { constructor },
-        int nesting_level { constructor },
-        SymbolTableType symbol_type { constructor }
+        int nesting_level { constructor }
+        //SymbolTableType symbol_type { constructor } //TODO: probably not necessary anymore
     }
-}
+};
+
+// Every function gets its own symbol table
+node SteFun {
+    children {
+        // Parent wijst naar hogere nesting level
+        SteFun parent { constructor },
+        // LinkedList data structure for next symbol table
+        SteFun next { constructor }
+    }, 
+
+    // TODO: functions have their own scope, so one func that has 'a' and another that has 'a' should not give an error!
+    // Check this in the isSymbolUnique function, so change that up a bit, maybe with parent you can check it!
+    // TODO: also, fundef foo(){int foo;} -> is a valid program in CiviC
+    attributes {
+        string name { constructor },
+        Type type { constructor },
+        int nesting_level { constructor },
+        // Params is the LinkedList from the FunDef, should contain the first value of 
+        // the FunDef params. From the first value the LinkedList chain can be followed.
+        Param params { constructor }
+        //SymbolTableType symbol_type { constructor }, //TODO: probably not necessary anymore
+    }
+};
+
+// Symbol table entry
+// node Ste {
+//     // variablen en functies
+//     children {
+//         // LinkedList data structure for next symbol table
+//         Ste next { constructor },
+//         // TODO: een lijst per functie en 1 global
+//         // Parent wijst naar hogere nesting level
+//         Ste parent
+
+//         // FunDef
+//         // Traverse funbody
+//         // travdata can be used for Ste
+
+//         // Start with Ste's for the variables only
+//         // Separate traversal for fundefs
+//         // 2 losse tables, 1 voor vars, 1 voor functinos, allebei linkedlist
+//         // 2 nodes, SteVar, SteFun
+//     }, 
+
+//     attributes {
+//         string name { constructor },
+//         Type type { constructor },
+//         int nesting_level { constructor },
+//         SymbolTableType symbol_type { constructor },
+//         // Params is the LinkedList from the FunDef, should contain the first value of 
+//         // the FunDef params. From the first value the LinkedList chain can be followed.
+//         Param params { constructor }
+//     }
+// };
+// Milestone 5 symbol table
 // Each symbol table entry would feature the name of the variable as a character string, 
 // its type as well as its nesting level (starting with zero for the global context)
 
@@ -358,3 +541,9 @@ node Ste {
 // LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
 // Alles die de AST ombouwt is een traversal
 // Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals
+
+// TODO: milestone 6
+// This needs to be a separate traversal as well
+// int a = expr;
+// milestone 6 is loskoppelen van die expr van een VarDecl, je knipt hem dus van de boom after
+// en weer aan de boom, dit is handig uiteindelijk voor code generation

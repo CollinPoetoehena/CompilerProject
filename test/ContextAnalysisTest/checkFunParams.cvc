@@ -1,0 +1,28 @@
+void foo(int a, int b, float c) {
+    int d = 5;
+    int e = 7;
+    float f = 5.6;
+    bool g = true;
+
+    // FunCall link, check params success
+    foo(d, e, f);
+
+    // FunCall link, check params failed
+    // foo(d, e);
+}
+
+void faa(int a, int b, float c) {
+    // Ste in de fundef
+    // 
+    int h = 5;
+    int i = 7;
+    float j = 5.6;
+    bool k = true;
+
+    // FunCall link, check params success
+    faa(h, i);
+
+    // FunCall link, check params failed
+    // foo(h, j);
+}
+

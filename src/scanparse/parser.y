@@ -171,17 +171,48 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
           // Empty param
           $$ = ASTfundef($6, NULL, $1, $2, false);
         }
-      | EXTERN type ID BRACKET_L param BRACKET_R
+      | EXTERN type ID BRACKET_L param BRACKET_R SEMICOLON
         {
-          // Empty funbody
+          // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, $5, $2, $3, true);
         }
-      | EXTERN type ID BRACKET_L BRACKET_R
+      | EXTERN type ID BRACKET_L BRACKET_R SEMICOLON
         {
-          // Empty param and empty funbody
+          // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, NULL, $2, $3, true);
+        }
+      // Rules with void type
+      | EXPORT VOIDTYPE ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          $$ = ASTfundef($8, $5, CT_void, $3, true);
+        }
+      | EXPORT VOIDTYPE ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          // Empty param
+          $$ = ASTfundef($7, NULL, CT_void, $3, true);
+        }
+      | VOIDTYPE ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          $$ = ASTfundef($7, $4, CT_void, $2, false);
+        }
+      | VOIDTYPE ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          // Empty param
+          $$ = ASTfundef($6, NULL, CT_void, $2, false);
+        }
+      | EXTERN VOIDTYPE ID BRACKET_L param BRACKET_R SEMICOLON
+        {
+          // Empty funbody. FunDec always starts with extern and ends with a ;
+          // No need to do anything with EXTERN for the FunDec because they are always external!
+          $$ = ASTfundef(NULL, $5, CT_void, $3, true);
+        }
+      | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R SEMICOLON
+        {
+          // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
+          // No need to do anything with EXTERN for the FunDec because they are always external!
+          $$ = ASTfundef(NULL, NULL, CT_void, $3, true);
         }
       ;
 
@@ -292,10 +323,10 @@ stmt: assign
       {
         $$ = $1;
       }
-    | funcall SEMICOLON %prec FUNCTIONCALL
+    | expr SEMICOLON
       {
+        // This is an expression in a statement, therefore the name Expr Statement, so does not belong in expr
         $$ = ASTexprstmt($1);
-        // Funcall belongs in expr and stmt, in stmt it has a SEMICOLON
       }
     ;
 // %prec LOWER_THAN_ELSE (== nonassoc) makes sure that the else belongs to the closest if statement
@@ -363,7 +394,7 @@ funcall: ID BRACKET_L BRACKET_R
 // For precedence of operators call them with the lexer token and not another rule such as binop
 expr: BRACKET_L expr BRACKET_R
       {
-        $$ = ASTexprstmt($2);
+        $$ = $2;
       }
     | expr[left] PLUS expr[right]
       {
@@ -445,12 +476,12 @@ expr: BRACKET_L expr BRACKET_R
       }
     | BRACKET_L type BRACKET_R expr %prec TYPECAST
       {
-        // Type cast
+        // Type cast (can be int, float and bool)
         $$ = ASTcast($4, $2);
       }
     | funcall %prec FUNCTIONCALL
       {
-        // Funcall belongs in expr and stmt, in expr it does not have a SEMICOLON
+        // Funcall only belongs in expr rule, then the funcall can be expr SEMICOLON in stmt rule
         $$ = $1;
       }
     | var
@@ -470,7 +501,7 @@ exprs: expr
       }
      | exprs COMMA expr
       {
-        $$ = ASTexprs($1, $3);
+        $$ = ASTexprs($3, $1);
       }
      ;
 
@@ -480,13 +511,12 @@ assign: varlet LET expr SEMICOLON
         }
       ;
 
-// type non-terminal
-// In the Typechecking traversal it checks the types because 
-// some nodes cannot have void type for example
+// type rule is for basic type: int, float and bool
+// Only FunDef can have VOIDTYPE, so therefore it will have a separate rule
+// to avoid conflicts by creating two type rules
 type: BOOLTYPE  { $$ = CT_bool; }
     | FLOATTYPE { $$ = CT_float; }
     | INTTYPE   { $$ = CT_int; }
-    | VOIDTYPE  { $$ = CT_void; }
     ;
 
 // Variable in assignment.
