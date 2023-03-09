@@ -506,9 +506,11 @@ node_st *PRTvardecl(node_st *node)
  */
 node_st *PRTstmts(node_st *node)
 {
-    // Print the statement, this will automatically go to the types of Stmt 
-    // in main.ccn and print it with this traversal for that node type
-    // Print new line before statement
+    /*
+    Print the statement, this will automatically go to the types of Stmt 
+    in main.ccn and print it with this traversal for that node type
+    Print new line before statement
+    */
     TRAVstmt(node);
 
     // Then, if it has a next go to those statement(s) and print them
@@ -791,23 +793,6 @@ void printOneSteVarLink(node_st *steVarNode) {
     // Get the type
     char *type = getPrintType(STEVAR_TYPE(steVarNode));
 
-    // switch (STEVAR_TYPE(steIterator)) {
-    //   case CT_int:
-    //   type = "int";
-    //   break;
-    //   case CT_float:
-    //   type = "float";
-    //   break;
-    //   case CT_bool:
-    //   type = "bool";
-    //   break;
-    //   case CT_void:
-    //   type = "void";
-    //   break;
-    //   case CT_NULL:
-    //   DBUG_ASSERT(false, "unknown type detected!");
-    // }
-
     // Print var Ste: "name, type"
     printf("SteVar:\n %s : %s\nnesting level: %d\n", 
         STEVAR_NAME(steVarNode), type, STEVAR_NESTING_LEVEL(steVarNode));
@@ -832,23 +817,6 @@ void printSteVarChain(node_st *steParentNode) {
     do {
         // Get the type
         char *type = getPrintType(STEVAR_TYPE(steIterator));
-
-        // switch (STEVAR_TYPE(steIterator)) {
-        //   case CT_int:
-        //   type = "int";
-        //   break;
-        //   case CT_float:
-        //   type = "float";
-        //   break;
-        //   case CT_bool:
-        //   type = "bool";
-        //   break;
-        //   case CT_void:
-        //   type = "void";
-        //   break;
-        //   case CT_NULL:
-        //   DBUG_ASSERT(false, "unknown type detected!");
-        // }
 
         // Print var Ste: "name, type"
         printf("SteVar:\n %s : %s\nnesting level: %d\n", 

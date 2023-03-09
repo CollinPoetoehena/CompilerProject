@@ -4,7 +4,7 @@
  * Traversal: ContextAnalysis
  * UID      : CA
  *
- *
+ * TODO: this is an old file, can be removed if it has no use for copying code anymore!
  */
 
 #include "ccn/ccn.h"

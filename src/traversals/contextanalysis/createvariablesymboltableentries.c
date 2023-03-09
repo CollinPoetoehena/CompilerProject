@@ -51,7 +51,7 @@ void updateGlobSymbolTables(node_st *newSte) {
                 lastSteVarGlobal = newSte;
             }
         } else {
-            // // If a new chain needs to be created, then set the chain helper variables to NULL
+            // If a new chain needs to be created, then set the chain helper variables to NULL
             if (newSteVarChain) {
                 // These pointers point to the helper variables for the correct chain now and will update them
                 firstSteVarCurrent = newSte;
@@ -136,11 +136,9 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        // TODO: binops and bool_op from basic check_success do not work!
-        // Creation of the Ste's is correctly done, but the chains are not linked well
-        // they are all separate entries and not linked
-        // New var chain is also working, the problem is with the params. If there are no params, then 
-        // it does not work, if there are params, it does work, so the problem is with the params that it links something
+        // TODO this file does not work: ./civicc ../test/basic/check_success/parse_funbody.cvc 
+        // it saves the previous symbol table to the next one if it does not have any entries
+        // probably has to do with not creating a new symbol, so newChain is not set to false
 
         // TODO: remove after debugging
         //printSteVar(newSte);
@@ -166,22 +164,20 @@ node_st *CVSprogram(node_st *node)
     // printf("program\n");
 
     // Print the start of the context analysis variables
-    printf("\n\n\n****************************************************************************************************************************************************************************** \
-    \t\tStart of context analysis variables\n");
+    // printf("\n\n\n****************************************************************************************************************************************************************************** \
+    // \t\tStart of context analysis variables\n");
 
     // Go to the traversal functions of the children
     TRAVchildren(node);
 
-    // Update Ste first occurrence to put into the Program node
+    // Update Ste first occurrence of a global symbolTableEntry to put into the Program node
     if (firstSymbolTableVar != NULL) {
         PROGRAM_FIRST_STE_VARIABLES(node) = firstSymbolTableVar;
-    } else {
-        printf("NO STES CREATED IN TRAVERSAL!!\n");
     }
-    // If the firstSymbolTableVar is NULL, then no symbol tables are created, so nothing to update
+    // If the firstSymbolTableVar is NULL, then no global symbol tables are created, fundefs may have a SteVar
 
-    printf("\n\n\n\t\tEnd of context analysis variables\n****************************************************************************************************************************************************************************** \
-    \n");
+    // printf("\n\n\n\t\tEnd of context analysis variables\n****************************************************************************************************************************************************************************** \
+    // \n");
 
     return node;
 }
@@ -223,13 +219,17 @@ node_st *CVSglobdef(node_st *node)
  */
 node_st *CVSfundef(node_st *node)
 {
-    printf("fundef\n");
-
-    // Open a new Ste chain 
-    newSteVarChain = true;
+    // printf("fundef\n");
 
     // No need to create a ste for the fundef here, that is done in the symbol tables for the functions
     // So, only create a pointer to the first SteVar in this functions scope
+
+    // Open a new Ste chain 
+    newSteVarChain = true;
+    // Update the first and lastCurrent Ste global helper variables to open a new chain
+    // This also avoids having a new fundef without Ste's linking to the previous SteVar chain
+    firstSteVarCurrent = NULL;
+    lastSteVarCurrent = NULL;
 
     // Save the oldScope
     int oldScope = currentScopeVar;
@@ -242,9 +242,11 @@ node_st *CVSfundef(node_st *node)
     // Then traverse the funbody
     TRAVbody(node);
 
-    // Create a pointer to the first steVar using the global temp symbol table variable
-    // Do this linking after the traversal functions of the params AND body because otherwise
-    // the SteVar chain can be empty still if there are no params!
+    /*
+    Create a pointer to the first steVar using the global temp symbol table variable
+    Do this linking after the traversal functions of the params AND body because otherwise
+    the SteVar chain can be empty still if there are no params!
+    */ 
     if (firstSteVarCurrent != NULL) {
         // This SteVar should contain the first param of first vardecl if the params are empty
         FUNDEF_FIRST_STE_VARIABLES(node) = firstSteVarCurrent;
@@ -254,6 +256,9 @@ node_st *CVSfundef(node_st *node)
     // Update the scope to the old scope after the statements when you get back to this fundef
     currentScopeVar = oldScope;
 
+    // Also, update the newSteVarChain if no entry is created for this fundef (normally updated in createSymbol())
+    newSteVarChain = false;
+
     return node;
 }
 
@@ -262,7 +267,6 @@ node_st *CVSfundef(node_st *node)
  */
 node_st *CVSparam(node_st *node)
 {
-    // Create ste for the param
     // printf("param\n");
 
     // Create a SteVar for the param
@@ -294,15 +298,14 @@ node_st *CVSfunbody(node_st *node)
  */
 node_st *CVSvardecl(node_st *node)
 {
-    printf("vardecls\n");
-    //TODO: all files from basic check_success do not get a Ste, why???
+    //printf("vardecls\n");
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
 
     // TODO: this is probably not necessary anymore to travinit?? Test this thourougly!
     // Go to the traversal function of the expr to go to the Vars
-    // TRAVinit(node);
+    //TRAVinit(node);
 
     // To perfom the traversal functions of the children (next vardecls) use TRAVchildx(node)
     TRAVnext(node);
@@ -312,15 +315,17 @@ node_st *CVSvardecl(node_st *node)
 
 /**
  * @fn CVSfor
+ *
+ * Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
+   Renaming of for loop identifiers has been done in a separate traversal
  */
 node_st *CVSfor(node_st *node)
 {
-    // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-    // Renaming of for loop identifiers has been done in a separate traversal
-    
-    // remove the declaration part from for-loop induction variables and create corresponding 
-    // local variable declarations on the level of the (innermost) function definition
-    // For var declaration always has type int and name is saved in For node
+    /*
+    remove the declaration part from for-loop induction variables and create corresponding 
+    local variable declarations on the level of the (innermost) function definition
+    For var declaration always has type int and name is saved in For node
+    */
     createSymbolTableEntry(FOR_VAR(node), CT_int);
     printf("For Var node: %s", FOR_VAR(node));
 
