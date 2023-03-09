@@ -36,13 +36,13 @@ start phase RootPhase {
 // cast van int naar bool moet dan bijv een > 0 vergelijking, etc en andersom
 // traversal gaat over de Cast nodes
 
+// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
+
 traversal Print {
     uid = PRT
 };
 
-// TODO later: Create separate traversal to convert for loop to while loop, easier after CA??
-
-// TODO: convert to new solution explained by TA
+// TODO: finish this CA phase
 phase ContextAnalysis {
     actions {
         // This traversal systematicly rename all the identifiers in for loops and save it to the node.
@@ -54,27 +54,24 @@ phase ContextAnalysis {
             nodes = { For, FunCall, Assign, Var, VarLet }
         };
 
+        // Create Variable Symboltables, linking will be done in a separate traversal
         traversal CreateVariableSymbolTableEntries {
-            // Create Variable Symboltables
             uid = CVS,
             nodes = { 
                 // Program to link first symbol table entries of var and fun
                 Program,
                 // FunDef to use for the linking to the first SteVar 
-                // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
                 FunDef,
                 // FunBody to traverse the VarDecls and Stmts
                 FunBody, 
                 // These nodes are used to create new Symbol Table entries
-                GlobDecl, GlobDef, VarDecl, Param, For,
-                // These nodes are used to update their link once they occur in a program
-                Var, Varlet
+                GlobDecl, GlobDef, VarDecl, Param, For
             }
         };
         
         // TODO: uncomment when variables symbol tables are working and make this one!
+        // Create Function Symboltables, linking will be done in a separate traversal
         // traversal CreateFunctionSymbolTableEntries {
-        //     // Create Function Symboltables
         //     uid = CFS,
         //     nodes = {
         //         // Program to link first symbol table entries of var and fun
@@ -83,9 +80,21 @@ phase ContextAnalysis {
         //         // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
         //         FunDef,
         //         // Param node (= LinkedList) to link the params of a FunDef
-        //         Param,
+        //         Param
+        //     }
+        // };
+
+        // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
+        // TODO: create a separate traversal for linking all the Var, VarLet and FunCall occurrences!
+        // traversal LinkSymbolTableEntries {
+        //     uid = LSTE,
+        //     nodes = { 
+        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+        //         Program,
+        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+        //         FunDef, FunBody,
         //         // These nodes are used to update their link once they occur in a program
-        //         FunCall
+        //         Var, Varlet, FunCall
         //     }
         // };
     }

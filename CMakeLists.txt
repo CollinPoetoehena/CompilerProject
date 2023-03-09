@@ -31,9 +31,13 @@ include(./coconut/coconut.cmake)
 add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/main.c src/print/print.c src/scanparse/scanParse.c
     src/global/globals.c src/global/globals.h
-    src/traversals/renameforidentifiers.c
-    src/traversals/createvariablesymboltableentries.c 
-    src/traversals/createfunctionsymboltableentries.c
+    # Context Analysis traversals
+    src/traversals/contextanalysis/renameforidentifiers.c
+    src/traversals/contextanalysis/createvariablesymboltableentries.c 
+    src/traversals/contextanalysis/createfunctionsymboltableentries.c
+    src/traversals/contextanalysis/linksymboltableentries.c
+
+    # Convert variable initializations into regular assignments traversal
     src/traversals/regularassignments.c
 )
 

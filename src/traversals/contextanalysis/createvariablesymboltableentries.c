@@ -154,37 +154,6 @@ bool createSymbolTableEntry(char *name, enum Type type) {
     return false;
 }
 
-// Find an Ste node that has the specified name
-node_st *findSteLink(char *name) {
-    printf("Trying to find Ste for: %s\n", name);
-
-    //TODO: update this function to fix the finding, think of something smart to solve this, such as a list of 
-    // node_st *, with all the firstCurrentScopes of all the fundefs, then you can loop through them
-    // Or think of something else, you are free to decide, this may not be the best because you probably cannot
-    // make a list, so think of something else!
-
-    // return the Symbol table entry that is linked to this node (with name)
-    // Use linear search to find the entry, stop when next is NULL
-    if (firstSymbolTableVar != NULL) {
-        node_st *symbolTable = firstSymbolTableVar;
-        do {
-            // Match found, return Ste node. Use string comparison 
-            // to check for equality, 0 means equal. == only checks if memory references are equal
-            if (strcmp(STEVAR_NAME(symbolTable), name) == 0) {
-                printf("**********************Link found for: %s\n", name);
-                return symbolTable;
-            }
-
-            // Update symbolTable
-            symbolTable = STEVAR_NEXT(symbolTable);
-        } while (symbolTable != NULL);
-    }
-
-    printf("No link found for linking an Ste to a Var, VarLet or FunCall!\n");
-    // No existing symbol found, return NULL
-    return NULL;
-}
-
 /**
  * @fn CVSprogram
  */
@@ -335,60 +304,6 @@ node_st *CVSvardecl(node_st *node)
     return node;
 }
 
-// /**
-//  * @fn CVSstmts
-//  */
-// node_st *CVSstmts(node_st *node)
-// {
-//     printf("statements\n");
-
-//     // To perfom the traversal functions of the children use TRAVchildx(node)
-//     TRAVstmt(node);
-//     TRAVnext(node);
-
-//     return node;
-// }
-
-// /**
-//  * @fn CVSifelse
-//  */
-// node_st *CVSifelse(node_st *node)
-// {
-//     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-
-//     // Go to stmts traversal functions
-//     TRAVthen(node);
-//     TRAVelse_block(node);
-    
-//     return node;
-// }
-
-// /**
-//  * @fn CVSwhile
-//  */
-// node_st *CVSwhile(node_st *node)
-// {
-//     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-
-//     // Go to stmts traversal functions
-//     TRAVblock(node);
-
-//     return node;
-// }
-
-// /**
-//  * @fn CVSdowhile
-//  */
-// node_st *CVSdowhile(node_st *node)
-// {
-//     // Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-
-//     // Go to stmts traversal functions
-//     TRAVblock(node);
-
-//     return node;
-// }
-
 /**
  * @fn CVSfor
  */
@@ -407,51 +322,6 @@ node_st *CVSfor(node_st *node)
     TRAVblock(node);
 
     // TODO: while, ifelse, etc not necessary??? Test by creating a var, varlet and funcall and see if they get linked in the body!
-
-    return node;
-}
-
-/**
- * @fn CVSvar
- */
-node_st *CVSvar(node_st *node)
-{
-    // Update this link from var to the Ste with the given name 
-    node_st *steNode = findSteLink(VAR_NAME(node));
-    if (steNode != NULL) {
-        // Save Ste node in link attribute
-        VAR_STE_LINK(node) = steNode;
-    } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s", VAR_NAME(node));
-        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
-        CCNerrorPhase();
-    }
-
-    printf("*************************symbol table link var\n");
-
-    return node;
-}
-
-/**
- * @fn CVSvarlet
- */
-node_st *CVSvarlet(node_st *node)
-{
-    // Update this link from var to the Ste with the given name 
-    node_st *steNode = findSteLink(VARLET_NAME(node));
-    if (steNode != NULL) {
-        // Save Ste node in link attribute
-        VARLET_STE_LINK(node) = steNode;
-    } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
-        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
-        CCNerrorPhase();
-        // TODP: UNCOMMENT
-    }
-    
-    printf("*************************symbol table link varlet\n");
 
     return node;
 }

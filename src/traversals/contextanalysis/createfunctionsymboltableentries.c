@@ -28,43 +28,6 @@ node_st *firstSymbolTableFun = NULL;
 // bool createSymbolTableEntry(char *name, enum Type type, node_st *params) 
 // node_st *newSte = ASTstefun(NULL, NULL, name, type, currentScopeFun, params);
 
-// Check for argument numbers matching parameter numbers
-// bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
-//     // Get the parameter count
-//     int parameterCount = 0;
-//     // Get the first param from the Ste
-//     node_st *paramIterator = STE_PARAMS(steLink);
-//     do {
-//         // Increment parameter count
-//         parameterCount++;
-
-//         // Update parameter
-//         paramIterator = PARAM_NEXT(paramIterator);
-//     } while (paramIterator != NULL);
-
-//     // Get the count of the arguments in the funcall node
-//     int argumentsCount = 0;
-//     if (FUNCALL_ARGS(funcallNode) != NULL) {
-//         // Get the first param from the Ste
-//         node_st *funcallArgsIterator = FUNCALL_ARGS(funcallNode);
-//         do {
-//             // Increment parameter count
-//             argumentsCount++;
-
-//             // Update parameter
-//             funcallArgsIterator = EXPRS_NEXT(funcallArgsIterator);
-//         } while (funcallArgsIterator != NULL);
-//     }
-
-//     if (parameterCount == argumentsCount) {
-//         // Equal arguments and parameter numbers
-//         return true;
-//     } else {
-//         // Not equal arguments and parameter numbers
-//         return false;
-//     }
-// }
-
 /**
  * @fn CFSprogram
  */
@@ -108,14 +71,6 @@ node_st *CFSparam(node_st *node)
     // // If this param has a next, do the same for the next param in the function definition
     // TRAVnext(node);
 
-    return node;
-}
-
-/**
- * @fn CFSfuncall
- */
-node_st *CFSfuncall(node_st *node)
-{
     return node;
 }
 
