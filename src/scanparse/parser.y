@@ -323,10 +323,10 @@ stmt: assign
       {
         $$ = $1;
       }
-    | funcall SEMICOLON %prec FUNCTIONCALL
+    | expr SEMICOLON
       {
+        // This is an expression in a statement, therefore the name Expr Statement, so does not belong in expr
         $$ = ASTexprstmt($1);
-        // Funcall belongs in expr and stmt, in stmt it has a SEMICOLON
       }
     ;
 // %prec LOWER_THAN_ELSE (== nonassoc) makes sure that the else belongs to the closest if statement
@@ -394,7 +394,7 @@ funcall: ID BRACKET_L BRACKET_R
 // For precedence of operators call them with the lexer token and not another rule such as binop
 expr: BRACKET_L expr BRACKET_R
       {
-        $$ = ASTexprstmt($2);
+        $$ = $2;
       }
     | expr[left] PLUS expr[right]
       {
@@ -481,7 +481,7 @@ expr: BRACKET_L expr BRACKET_R
       }
     | funcall %prec FUNCTIONCALL
       {
-        // Funcall belongs in expr and stmt, in expr it does not have a SEMICOLON
+        // Funcall only belongs in expr rule, then the funcall can be expr SEMICOLON in stmt rule
         $$ = $1;
       }
     | var

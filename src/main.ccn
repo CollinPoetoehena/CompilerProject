@@ -36,7 +36,11 @@ start phase RootPhase {
 // cast van int naar bool moet dan bijv een > 0 vergelijking, etc en andersom
 // traversal gaat over de Cast nodes
 
+//**********************************************************************************************************************************************
 // TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
+// TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
+// TODO: when to create ExprStmt node in parser because this file does not compile: ./civicc ../test/basic/functional/typecheck.cvc 
+
 
 traversal Print {
     uid = PRT

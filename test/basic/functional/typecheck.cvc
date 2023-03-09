@@ -48,7 +48,7 @@ void bar() {
 }
 
 export int main() {
-    fun();
+    fun() + bar();
     bar();
     return 0;
 }

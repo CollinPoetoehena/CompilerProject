@@ -28,7 +28,9 @@ node_st *RFIfor(node_st *node)
     // TODO this file does not work correctly: ./civicc ../test/basic/functional/for_to_while.cvc
     // nested for loops and its i do not work correctly
     // the i from the previous for loop is not renamed in the nested for loop, fix that
-
+    // The problem is because it first goes in to the block part, wich is a new for loop first, and
+    // then after that the vars occur that are not renamed because the identifier is from the new for loop
+    // TODO: skip for now, but ask in the lesson next week!
 
 
 

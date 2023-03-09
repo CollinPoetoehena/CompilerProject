@@ -327,7 +327,6 @@ node_st *CVSfor(node_st *node)
     For var declaration always has type int and name is saved in For node
     */
     createSymbolTableEntry(FOR_VAR(node), CT_int);
-    printf("For Var node: %s", FOR_VAR(node));
 
     // Go to stmts traversal functions
     TRAVblock(node);
