@@ -25,6 +25,13 @@ node_st *currentForNode = NULL;
  */
 node_st *RFIfor(node_st *node)
 {
+    // TODO this file does not work correctly: ./civicc ../test/basic/functional/for_to_while.cvc
+    // nested for loops and its i do not work correctly
+    // the i from the previous for loop is not renamed in the nested for loop, fix that
+
+
+
+
     // This will rename all the iterators from the for loop to xCountUnderscores (with count x underscore)
     // such as: 'i__'
 
