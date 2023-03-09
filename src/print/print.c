@@ -810,7 +810,7 @@ void printOneSteVarLink(node_st *steVarNode) {
 void printSteVarChain(node_st *steParentNode) {
   if (steParentNode != NULL) {
     // Open the new SteVar chain
-    printf("\n**************************\n\tNew SteVar chain:\n");
+    printf("\n****************************************************\n\tNew SteVar chain:\n");
 
     // Get the first param from the Ste
     node_st *steIterator = steParentNode;
@@ -827,7 +827,7 @@ void printSteVarChain(node_st *steParentNode) {
     } while (steIterator != NULL);
 
     // End the current SteVar chain
-    printf("\n\tEnd of SteVar chain\n**************************\n\n");
+    printf("\n\tEnd of SteVar chain\n****************************************************\n\n");
   }
 }
 
