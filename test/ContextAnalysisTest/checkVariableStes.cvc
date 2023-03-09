@@ -1,14 +1,11 @@
-extern int a;
-export float b = 5;
-
-void foo(int a, int b, float c) {
+void foo() {
     int d = 5;
     int e = 7;
     float z = 5.345;
     bool boolVal = true;
 }
 
-void faa(int a, int b, float c) {
+void faa() {
     int d = 5;
     int e = 7;
     int f = 9;

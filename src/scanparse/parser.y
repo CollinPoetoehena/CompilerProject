@@ -171,15 +171,15 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
           // Empty param
           $$ = ASTfundef($6, NULL, $1, $2, false);
         }
-      | EXTERN type ID BRACKET_L param BRACKET_R
+      | EXTERN type ID BRACKET_L param BRACKET_R SEMICOLON
         {
-          // Empty funbody
+          // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, $5, $2, $3, true);
         }
-      | EXTERN type ID BRACKET_L BRACKET_R
+      | EXTERN type ID BRACKET_L BRACKET_R SEMICOLON
         {
-          // Empty param and empty funbody
+          // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, NULL, $2, $3, true);
         }
@@ -202,15 +202,15 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
           // Empty param
           $$ = ASTfundef($6, NULL, CT_void, $2, false);
         }
-      | EXTERN VOIDTYPE ID BRACKET_L param BRACKET_R
+      | EXTERN VOIDTYPE ID BRACKET_L param BRACKET_R SEMICOLON
         {
-          // Empty funbody
+          // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, $5, CT_void, $3, true);
         }
-      | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R
+      | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R SEMICOLON
         {
-          // Empty param and empty funbody
+          // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, NULL, CT_void, $3, true);
         }

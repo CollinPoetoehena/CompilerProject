@@ -3,7 +3,11 @@
  *
  * This file contains the code for the Print traversal.
  * The traversal has the uid: PRT
- *
+ * You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
+ * Some programs print an extra new line for example, but it does not change anything about the functionality!
+ * Some prints are not perfect, such as a funcall always ends with a ;, but it does not change anything to the 
+ * functionality so therefore it is not fixed because it would take a lot of time to fix with little result,
+ * this is a choice we made to have as much time for our compiler and still have the functionality of print.c to test our parser
  *
  */
 
@@ -14,45 +18,42 @@
 #include  <string.h>
 #include "palm/dbug.h"
 // Include enums, for the Type 
-// #include "ccngen/enum.h"
-// #include "ccn/ccn_types.h"
+#include "ccngen/enum.h"
+#include "ccn/ccn_types.h"
 
-// int indentation = 0;
+// Helper function to get the string type of the enum Type
+// Define at the top to avoid C return type error
+char *getPrintType(enum Type type) {
+  // Get the type
+  char *printType = NULL;
 
-// char *getIndents() {
-  // TODO: add indentation global variable, add a function that has a parameter int tabs to print tabs!
-  // Create indents here, you can just do indent++ before the tabs, then indent--;
-// }
+  switch (type) {
+    case CT_int:
+    printType = "int";
+    break;
+    case CT_float:
+    printType = "float";
+    break;
+    case CT_bool:
+    printType = "bool";
+    break;
+    case CT_void:
+    printType = "void";
+    break;
+    case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
 
-/**
- * @fn PRTstefun
- */
-node_st *PRTstefun(node_st *node)
-{
-    // Nothing to print here, printing Ste's are handled by a different function
-    return node;
-}
+  return printType;
 
-/**
- * @fn PRTstevar
- */
-node_st *PRTstevar(node_st *node)
-{
-    // Nothing to print here, printing Ste's are handled by a different function
-    return node;
 }
 
 /**
  * @fn PRTprogram
+ *
  */
 node_st *PRTprogram(node_st *node)
-{
-    // You want to print the program to look almost exactly the same like the run file, but then with the AST nodes
-    // Some programs print an extra new line for example, but it does not change anything about the functionality!
-    // Some prints are not perfect, such as a funcall always ends with a ;, but it does not change anything to the 
-    // functionality so therefore it is not fixed because it would take a lot of time to fix with little result,
-    // this is a choice we made to have as much time for our compiler and still have the functionality of print.c to test our parser
-    
+{ 
     // Print a couple of new lines before printing the print traversal
     printf("\n\n\n****************************************************************************************************************************************************************************** \
     \t\tStart of the print traversal:\n\n");
@@ -134,6 +135,7 @@ node_st *PRTexprstmt(node_st *node)
     // Go to the expr node, will automatically go to the types of Expr 
     // in main.ccn and print it with this traversal for that node type
     TRAVexpr(node);
+
     return node;
 }
 
@@ -163,25 +165,7 @@ node_st *PRTreturn(node_st *node)
  */
 node_st *PRTcast(node_st *node)
 {
-    char *tmp = NULL;
-
-    // Get the type
-    switch (CAST_TYPE(node)) {
-    case CT_int:
-      tmp = "int";
-      break;
-    case CT_float:
-      tmp = "float";
-      break;
-    case CT_bool:
-      tmp = "bool";
-      break;
-    case CT_void:
-      tmp = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
+    char *tmp = getPrintType(CAST_TYPE(node));
     
     // Print cast
     printf("(%s)", tmp);
@@ -214,25 +198,7 @@ node_st *PRTfundefs(node_st *node)
 node_st *PRTfundef(node_st *node)
 {    
     // Get function type
-    char *tmp = NULL;
-
-    // Get the type
-    switch (FUNDEF_TYPE(node)) {
-    case CT_int:
-      tmp = "int";
-      break;
-    case CT_float:
-      tmp = "float";
-      break;
-    case CT_bool:
-      tmp = "bool";
-      break;
-    case CT_void:
-      tmp = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
+    char *tmp = getPrintType(FUNDEF_TYPE(node));
 
     // No funBody means that it is a FunDeclaration, so print that, else print FunDefinition
     if (FUNDEF_BODY(node) != NULL) {
@@ -451,25 +417,7 @@ node_st *PRTfor(node_st *node)
  */
 node_st *PRTglobdecl(node_st *node)
 {
-    char *tmp = NULL;
-
-    // Get the type
-    switch (GLOBDECL_TYPE(node)) {
-    case CT_int:
-      tmp = "int";
-      break;
-    case CT_float:
-      tmp = "float";
-      break;
-    case CT_bool:
-      tmp = "bool";
-      break;
-    case CT_void:
-      tmp = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
+    char *tmp = getPrintType(GLOBDECL_TYPE(node));
 
     // Print Global declaration
     printf("extern %s %s;", tmp, GLOBDECL_NAME(node));
@@ -482,25 +430,7 @@ node_st *PRTglobdecl(node_st *node)
  */
 node_st *PRTglobdef(node_st *node)
 {
-    char *tmp = NULL;
-
-    // Get the type
-    switch (GLOBDEF_TYPE(node)) {
-    case CT_int:
-      tmp = "int";
-      break;
-    case CT_float:
-      tmp = "float";
-      break;
-    case CT_bool:
-      tmp = "bool";
-      break;
-    case CT_void:
-      tmp = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
+    char *tmp = getPrintType(GLOBDEF_TYPE(node));
 
     // Print export with a space if it is exported
     if (GLOBDEF_EXPORT(node)) {
@@ -528,25 +458,7 @@ node_st *PRTglobdef(node_st *node)
  */
 node_st *PRTparam(node_st *node)
 {
-    char *tmp = NULL;
-
-    // Get the type
-    switch (PARAM_TYPE(node)) {
-    case CT_int:
-      tmp = "int";
-      break;
-    case CT_float:
-      tmp = "float";
-      break;
-    case CT_bool:
-      tmp = "bool";
-      break;
-    case CT_void:
-      tmp = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
+    char *tmp = getPrintType(PARAM_TYPE(node));
 
     // If param has next add a comma and a space for the next param
     if (PARAM_NEXT(node) != NULL) {
@@ -566,25 +478,7 @@ node_st *PRTparam(node_st *node)
  */
 node_st *PRTvardecl(node_st *node)
 {
-    char *tmp = NULL;
-
-    // Get the type
-    switch (VARDECL_TYPE(node)) {
-    case CT_int:
-      tmp = "int";
-      break;
-    case CT_float:
-      tmp = "float";
-      break;
-    case CT_bool:
-      tmp = "bool";
-      break;
-    case CT_void:
-      tmp = "void";
-      break;
-    case CT_NULL:
-      DBUG_ASSERT(false, "unknown type detected!");
-    }
+    char *tmp = getPrintType(VARDECL_TYPE(node));
 
     printf("%s %s", tmp, VARDECL_NAME(node));
     // if init then print: "= expr"
@@ -811,6 +705,7 @@ node_st *PRTvarlet(node_st *node)
     //   printSte(VARLET_STE_LINK(node));
     //   printf("*\\ \n"); /* Escape a \ with a \ */
     // }
+    // TODO: print one SteVar en print one SteFun function!
 
     // This prints it with the locations
     // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
@@ -870,11 +765,64 @@ node_st *PRTbool(node_st *node)
     return node;
 }
 
-// Prints a chain of SteVar's using the LinkedList structure
+/**
+ * @fn PRTstefun
+ */
+node_st *PRTstefun(node_st *node)
+{
+    // Nothing to print here, printing Ste's are handled by a different function
+    return node;
+}
+
+/**
+ * @fn PRTstevar
+ */
+node_st *PRTstevar(node_st *node)
+{
+    // Nothing to print here, printing Ste's are handled by a different function
+    return node;
+}
+
+void printOneSteVarLink(node_st *steVarNode) {
+  if (steVarNode != NULL) {
+    // Open the new SteVar node
+    printf("\n**************************\n\tNew SteVar link:\n");
+
+    // Get the type
+    char *type = getPrintType(STEVAR_TYPE(steVarNode));
+
+    // switch (STEVAR_TYPE(steIterator)) {
+    //   case CT_int:
+    //   type = "int";
+    //   break;
+    //   case CT_float:
+    //   type = "float";
+    //   break;
+    //   case CT_bool:
+    //   type = "bool";
+    //   break;
+    //   case CT_void:
+    //   type = "void";
+    //   break;
+    //   case CT_NULL:
+    //   DBUG_ASSERT(false, "unknown type detected!");
+    // }
+
+    // Print var Ste: "name, type"
+    printf("SteVar:\n %s : %s\nnesting level: %d\n", 
+        STEVAR_NAME(steVarNode), type, STEVAR_NESTING_LEVEL(steVarNode));
+
+    // End the current SteVar chain
+    printf("\n\tEnd of SteVar link\n**************************\n");
+  }
+}
+
+/*
+  Prints a chain of SteVar's using the LinkedList structure.
+  This is easier to use then printing it in the traversal functions of the SteVar
+  because this allows to have the chain printed in one function, this is for clarity and readability.
+*/ 
 void printSteVarChain(node_st *steParentNode) {
-  // TODO: convert to traversal
-
-
   if (steParentNode != NULL) {
     // Open the new SteVar chain
     printf("\n**************************\n\tNew SteVar chain:\n");
@@ -883,24 +831,24 @@ void printSteVarChain(node_st *steParentNode) {
     node_st *steIterator = steParentNode;
     do {
         // Get the type
-        char *type = NULL;
+        char *type = getPrintType(STEVAR_TYPE(steIterator));
 
-        switch (STEVAR_TYPE(steIterator)) {
-          case CT_int:
-          type = "int";
-          break;
-          case CT_float:
-          type = "float";
-          break;
-          case CT_bool:
-          type = "bool";
-          break;
-          case CT_void:
-          type = "void";
-          break;
-          case CT_NULL:
-          DBUG_ASSERT(false, "unknown type detected!");
-        }
+        // switch (STEVAR_TYPE(steIterator)) {
+        //   case CT_int:
+        //   type = "int";
+        //   break;
+        //   case CT_float:
+        //   type = "float";
+        //   break;
+        //   case CT_bool:
+        //   type = "bool";
+        //   break;
+        //   case CT_void:
+        //   type = "void";
+        //   break;
+        //   case CT_NULL:
+        //   DBUG_ASSERT(false, "unknown type detected!");
+        // }
 
         // Print var Ste: "name, type"
         printf("SteVar:\n %s : %s\nnesting level: %d\n", 

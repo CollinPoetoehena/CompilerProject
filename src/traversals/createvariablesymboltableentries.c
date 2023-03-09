@@ -316,7 +316,8 @@ node_st *CVSfunbody(node_st *node)
  */
 node_st *CVSvardecl(node_st *node)
 {
-    // printf("vardecls\n");
+    printf("vardecls\n");
+    //TODO: all files from basic check_success do not get a Ste, why???
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
