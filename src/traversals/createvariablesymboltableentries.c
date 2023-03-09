@@ -136,6 +136,9 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
+        printf("***************Name created: %s\n", STEVAR_NAME(newSte));
+        // TODO: binops and bool_op from basic check_success do not work!
+
         // printSteVar(newSte);
 
         // Ste creation succeeded
