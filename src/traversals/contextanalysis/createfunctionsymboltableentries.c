@@ -9,7 +9,7 @@
 
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
-// Include enums, for the Type and SymbolTableType
+// Include enums, for the Type
 #include "ccngen/enum.h"
 #include "ccn/ccn_types.h"
 #include "palm/dbug.h"

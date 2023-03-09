@@ -1,3 +1,6 @@
+int a;
+int b;
+
 void foo() {
     int d = 5;
     int e = 7;

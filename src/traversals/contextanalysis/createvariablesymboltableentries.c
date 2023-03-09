@@ -136,10 +136,14 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        printf("***************Name created: %s\n", STEVAR_NAME(newSte));
         // TODO: binops and bool_op from basic check_success do not work!
+        // Creation of the Ste's is correctly done, but the chains are not linked well
+        // they are all separate entries and not linked
+        // New var chain is also working, the problem is with the params. If there are no params, then 
+        // it does not work, if there are params, it does work, so the problem is with the params that it links something
 
-        // printSteVar(newSte);
+        // TODO: remove after debugging
+        //printSteVar(newSte);
 
         // Ste creation succeeded
         return true;
@@ -235,15 +239,17 @@ node_st *CVSfundef(node_st *node)
 
     // First traverse the params, because they come first in the symbol tables implementation
     TRAVparams(node);
+    // Then traverse the funbody
+    TRAVbody(node);
+
     // Create a pointer to the first steVar using the global temp symbol table variable
+    // Do this linking after the traversal functions of the params AND body because otherwise
+    // the SteVar chain can be empty still if there are no params!
     if (firstSteVarCurrent != NULL) {
-        // Also, we are entering a new chain of Ste's for this fundef, so the temp
+        // This SteVar should contain the first param of first vardecl if the params are empty
         FUNDEF_FIRST_STE_VARIABLES(node) = firstSteVarCurrent;
     }
     // If the firstSteVarCurrent is NULL, then no symbol tables are created, so nothing to update
-
-    // Then traverse the funbody
-    TRAVbody(node);
 
     // Update the scope to the old scope after the statements when you get back to this fundef
     currentScopeVar = oldScope;
@@ -327,7 +333,7 @@ node_st *CVSfor(node_st *node)
 }
 
 // Prints a chain of SteVar's using the LinkedList structure
-// TODO: remove after debugging, this is handy to print a chain of Ste's
+// TODO: remove at the end of the compiler project, this is handy to print a chain of Ste's for debugging!
 void printSteVar(node_st *steParentNode) {
   if (steParentNode != NULL) {
     // Open the new SteVar chain
