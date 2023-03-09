@@ -183,6 +183,37 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, NULL, $2, $3, true);
         }
+      // Rules with void type
+      | EXPORT VOIDTYPE ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          $$ = ASTfundef($8, $5, CT_void, $3, true);
+        }
+      | EXPORT VOIDTYPE ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          // Empty param
+          $$ = ASTfundef($7, NULL, CT_void, $3, true);
+        }
+      | VOIDTYPE ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          $$ = ASTfundef($7, $4, CT_void, $2, false);
+        }
+      | VOIDTYPE ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
+        {
+          // Empty param
+          $$ = ASTfundef($6, NULL, CT_void, $2, false);
+        }
+      | EXTERN VOIDTYPE ID BRACKET_L param BRACKET_R
+        {
+          // Empty funbody
+          // No need to do anything with EXTERN for the FunDec because they are always external!
+          $$ = ASTfundef(NULL, $5, CT_void, $3, true);
+        }
+      | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R
+        {
+          // Empty param and empty funbody
+          // No need to do anything with EXTERN for the FunDec because they are always external!
+          $$ = ASTfundef(NULL, NULL, CT_void, $3, true);
+        }
       ;
 
 globdecl: EXTERN type ID SEMICOLON
@@ -270,7 +301,6 @@ stmts: stmt stmts
 stmt: assign
       {
          $$ = $1;
-         printf("Assign\n");
       }
     | ifelse
       {
@@ -295,7 +325,6 @@ stmt: assign
       }
     | funcall SEMICOLON %prec FUNCTIONCALL
       {
-        printf("Funcall\n");
         $$ = ASTexprstmt($1);
         // Funcall belongs in expr and stmt, in stmt it has a SEMICOLON
       }
@@ -447,7 +476,7 @@ expr: BRACKET_L expr BRACKET_R
       }
     | BRACKET_L type BRACKET_R expr %prec TYPECAST
       {
-        // Type cast
+        // Type cast (can be int, float and bool)
         $$ = ASTcast($4, $2);
       }
     | funcall %prec FUNCTIONCALL
@@ -482,19 +511,17 @@ assign: varlet LET expr SEMICOLON
         }
       ;
 
-// type non-terminal
-// In the Typechecking traversal it checks the types because 
-// some nodes cannot have void type for example
+// type rule is for basic type: int, float and bool
+// Only FunDef can have VOIDTYPE, so therefore it will have a separate rule
+// to avoid conflicts by creating two type rules
 type: BOOLTYPE  { $$ = CT_bool; }
     | FLOATTYPE { $$ = CT_float; }
     | INTTYPE   { $$ = CT_int; }
-    | VOIDTYPE  { $$ = CT_void; }
     ;
 
 // Variable in assignment.
 varlet: ID
         {
-          printf("varlet\n");
           $$ = ASTvarlet($1);
           AddLocToNode($$, &@1, &@1);
         }
@@ -503,7 +530,6 @@ varlet: ID
 // Variable in an expression.
 var: ID
         {
-          printf("var\n");
           $$ = ASTvar($1);
           AddLocToNode($$, &@1, &@1);
         }
