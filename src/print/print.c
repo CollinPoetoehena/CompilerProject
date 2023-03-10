@@ -58,12 +58,10 @@ node_st *PRTprogram(node_st *node)
     printf("\n\n\n****************************************************************************************************************************************************************************** \
     \t\tStart of the print traversal:\n\n");
 
+    // TODO: uncomment and comment the ones you do not want to print!
     // Print the ste's for the global variables and global fundefs here on the top!
     printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
     printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
-    //TODO: FUNCTION STE'S
-    // TRAVFIRST_STE_VARIABLES(node);
-    // TRAVFIRST_STE_FUNCTIONS(node);
 
     // Go to child and print it
     TRAVdecls(node);
@@ -90,6 +88,69 @@ node_st *PRTdecls(node_st *node)
       printf("\n");
       TRAVnext(node);
     }
+
+    return node;
+}
+
+/**
+ * @fn PRTfundef
+ */
+node_st *PRTfundef(node_st *node)
+{    
+    // Get function type
+    char *tmp = getPrintType(FUNDEF_TYPE(node));
+
+    // No funBody means that it is a FunDeclaration, so print that, else print FunDefinition
+    if (FUNDEF_BODY(node) != NULL) {
+      bool isExported = FUNDEF_EXPORT(node) ? true : false;
+      if (isExported) {
+        // Print export with a space
+        printf("export ");
+      }
+
+      // Print spaces and function type and then function name
+      printf("%s %s", tmp, FUNDEF_NAME(node));
+
+      // If function has params, print params
+      if (FUNDEF_PARAMS(node) != NULL) {
+        printf("(");
+        // Print the params in between the fundef (no new lines)
+        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
+        TRAVparams(node);
+        // Close the params with a brace
+        printf(")");
+      } else {
+        printf("()");
+      }
+
+      // Open funbody
+      printf(" {\n");
+      // Print funbody
+      TRAVbody(node);
+      // Close funbody
+      printf("\n}");
+    } else {
+      // FunDeclaration is always extern
+      printf("extern %s %s", tmp, FUNDEF_NAME(node));
+
+      // If function has params, print params
+      if (FUNDEF_PARAMS(node) != NULL) {
+        printf("(");
+        // Print the params in between the fundef (no new lines)
+        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
+        TRAVparams(node);
+        // Close the params with a brace
+        printf(")");
+      } else {
+        printf("()");
+      }
+    }
+
+    // TODO: uncomment and comment the ones you do not want to print!
+    // Print the ste's of the variables as a structured comment
+    printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
+    // Print its own symbol table for its function definition
+    printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
 
     return node;
 }
@@ -190,68 +251,6 @@ node_st *PRTfundefs(node_st *node)
       TRAVnext(node);
     }
     
-    return node;
-}
-
-/**
- * @fn PRTfundef
- */
-node_st *PRTfundef(node_st *node)
-{    
-    // Get function type
-    char *tmp = getPrintType(FUNDEF_TYPE(node));
-
-    // No funBody means that it is a FunDeclaration, so print that, else print FunDefinition
-    if (FUNDEF_BODY(node) != NULL) {
-      bool isExported = FUNDEF_EXPORT(node) ? true : false;
-      if (isExported) {
-        // Print export with a space
-        printf("export ");
-      }
-
-      // Print spaces and function type and then function name
-      printf("%s %s", tmp, FUNDEF_NAME(node));
-
-      // If function has params, print params
-      if (FUNDEF_PARAMS(node) != NULL) {
-        printf("(");
-        // Print the params in between the fundef (no new lines)
-        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
-        TRAVparams(node);
-        // Close the params with a brace
-        printf(")");
-      } else {
-        printf("()");
-      }
-
-      // Open funbody
-      printf(" {\n");
-      // Print funbody
-      TRAVbody(node);
-      // Close funbody
-      printf("\n}");
-    } else {
-      // FunDeclaration is always extern
-      printf("extern %s %s", tmp, FUNDEF_NAME(node));
-
-      // If function has params, print params
-      if (FUNDEF_PARAMS(node) != NULL) {
-        printf("(");
-        // Print the params in between the fundef (no new lines)
-        // No need for a for loop because Param is a LinkedList and the next is automatically printed there
-        TRAVparams(node);
-        // Close the params with a brace
-        printf(")");
-      } else {
-        printf("()");
-      }
-    }
-
-    // Print the ste's of the variables as a structured comment
-    printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
-    // Print its own symbol table for its function definition
-    printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
-
     return node;
 }
 
