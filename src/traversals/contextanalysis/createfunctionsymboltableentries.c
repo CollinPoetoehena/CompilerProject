@@ -141,10 +141,6 @@ node_st *CFSfundef(node_st *node)
  */
 node_st *CFSparam(node_st *node)
 {
-    // printf("param\n");
-
-    //TODO: fundef params is not correctly getting linked, so the link is not correct, the print is probably ok!
-
     // If the temp FunDef node is not NULL link the params to it by using the previous FunDef
     if (tempFunDefNode != NULL) {
         if (firstParam) {

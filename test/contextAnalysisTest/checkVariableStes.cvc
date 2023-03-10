@@ -16,5 +16,3 @@ void faa() {
     int g = 2 *6;
     float i = 8.546;
 }
-
-//TODO: also test without a global scope of variables!

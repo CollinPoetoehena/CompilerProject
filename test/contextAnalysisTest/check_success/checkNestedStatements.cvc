@@ -1,0 +1,21 @@
+int a;
+float b;
+bool z;
+
+void foo(bool a, bool b) {
+    if (a) {
+        if (b) {
+            return a;
+        }
+        return b;
+    }
+
+    while (a) {
+        while (b) {
+            z = true;
+        }
+    }
+
+    b = true;
+    z = false;
+}

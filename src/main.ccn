@@ -20,6 +20,9 @@ start phase RootPhase {
 // For loop i's can have the same id at the start, but rename them in a previous traversal
 // milestones 8 and 11 are only for extensions!
 
+// TODO: for type checking see slides Semantic analysis for implementation hint on type checking!
+// Explanation on type checking: 
+
 // milestone 9:
 // || wordt lazy geevalueerd
 // voor bool operators een apart iets, dus || &&. Maak daar een ternary node voor
@@ -39,6 +42,8 @@ start phase RootPhase {
 //**********************************************************************************************************************************************
 // TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
+// it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
+
 // TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal
 // TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
@@ -47,12 +52,14 @@ traversal Print {
     uid = PRT
 };
 
-// TODO: finish this CA phase
+// The ContextAnalysis phase is mainly used to create Symbol tables
 phase ContextAnalysis {
     actions {
-        // This traversal systematicly rename all the identifiers in for loops and save it to the node.
-        // This is very handy in the creation of symbol tables because you can then just
-        // create symbol table entries for the identifiers in for loops without special operations.
+        /*
+        This traversal systematicly rename all the identifiers in for loops and save it to the node.
+        This is very handy in the creation of symbol tables because you can then just
+        create symbol table entries for the identifiers in for loops without special operations.
+        */
         traversal RenameForIdentifiers {
             uid = RFI,
             // Also rename all the occurrences of the for variable
@@ -88,36 +95,19 @@ phase ContextAnalysis {
         };
 
         // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        // TODO: create a separate traversal for linking all the Var, VarLet and FunCall occurrences!
-        // traversal LinkSymbolTableEntries {
-        //     uid = LSTE,
-        //     nodes = { 
-        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-        //         Program,
-        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-        //         FunDef, FunBody,
-        //         // These nodes are used to update their link once they occur in a program
-        //         Var, Varlet, FunCall
-        //     }
-        // };
+        traversal LinkSymbolTableEntries {
+            uid = LSTE,
+            nodes = { 
+                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+                Program,
+                // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+                FunDef, 
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet, FunCall
+            }
+        };
     }
 };
-
-// traversal ContextAnalysis {
-//     uid = CA,
-//     // TODO: you cannot declare a variable inside a Statement, so only linking can occur there
-//     nodes = {
-//             // Program, FunBody and IfElse, While, DoWhile, to go to the appropriate nodes' traversal functions
-//             // Decls and Stmts to link the children. These nodes are above the others so will be traversed first
-//             Program, Decls, Stmts, FunBody, IfElse, While, DoWhile, For, 
-//             // VarDecl, GlobDecl, GlobDef, FunDef and Param to create a new Ste
-//             VarDecl, GlobDecl, GlobDef, FunDef, Param,
-//             // Exprs and Assign to go to the Var and Varlet nodes traversal functions
-//             Exprs, Assign,
-//             // Var, Varlet and FunCall to link a symbol table entry with it's name
-            // Var, Varlet, FunCall
-//         }
-// };
 
 traversal RegularAssignments {
     // This traversal should transform Variable Initialisations into Regular Assignments
@@ -127,18 +117,6 @@ traversal RegularAssignments {
     // FunBody is used to first traverse the VarDecls and then the Stmts and append the 
     // saved initializations to the stmts, these are filled after TRAVdecls(node) of FunBody
     // For loop has something special to it, the above nodes are the correct nodes
-};
-
-// TODO: for type checking see slides Semantic analysis for implementation hint on type checking!
-// Explanation on type checking: 
-
-enum SymbolTableType {
-    // Can have two types, variable or function
-    prefix = STT,
-    values {
-        // TODO: is this correct, what about Param???
-        var, varlet, function
-    }
 };
 
 enum Type {

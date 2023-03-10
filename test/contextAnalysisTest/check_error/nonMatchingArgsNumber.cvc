@@ -1,0 +1,10 @@
+void foo(int a, float b, bool c, int z) {
+    // These should give an error
+    foo();
+    foo(a);
+    foo(a, b);
+    foo(a, b, c);
+
+    // This should not give an error
+    foo(a, b, c, z);
+}

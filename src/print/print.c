@@ -156,6 +156,73 @@ node_st *PRTfundef(node_st *node)
 }
 
 /**
+ * @fn PRTfuncall
+ */
+node_st *PRTfuncall(node_st *node)
+{
+    printf("%s", FUNCALL_NAME(node));
+
+    // IF the function call has arguments, print them, otherwise just use ()
+    if (FUNCALL_ARGS(node) != NULL) {
+      // Start the funcall arguments
+      printf("(");
+      // Print the arguments, these are not printed with spaces, they are Exprs so keep that in mind!
+      TRAVargs(node);
+      // End the funcall arguments
+      printf(")");
+    } else {
+      printf("()");
+    }
+
+    // End funcall with a semicolon and a new line
+    printf(";\n");
+
+    // TODO: uncomment and comment the ones you do not want to print!
+    // Print the SteFun link to this VarLet node
+    // if (FUNCALL_STE_LINK(node) != NULL) {
+    //   printOneSteFun(FUNCALL_STE_LINK(node));
+    // }
+
+    return node;
+}
+
+/**
+ * @fn PRTvarlet
+ */
+node_st *PRTvarlet(node_st *node)
+{
+    // Print varlet (variable in assignment)
+    printf("%s", VARLET_NAME(node));
+
+    // TODO: uncomment and comment the ones you do not want to print!
+    // Print the SteVar link to this VarLet node
+    // if (VARLET_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VARLET_STE_LINK(node));
+    // }
+
+    // This prints it with the locations
+    // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
+    return node;
+}
+
+/**
+ * @fn PRTvar
+ */
+node_st *PRTvar(node_st *node)
+{
+    // Print var (variable in an expression)
+    printf("%s", VAR_NAME(node));
+
+    // TODO: uncomment and comment the ones you do not want to print!
+    // Print the SteVar link to this Var node
+    // if (VAR_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VAR_STE_LINK(node));
+    // }
+
+    return node;
+}
+
+/**
  * @fn PRTexprs
  */
 node_st *PRTexprs(node_st *node)
@@ -338,6 +405,9 @@ node_st *PRTwhile(node_st *node)
       // Print a while statement without a body and start the block
       printf("while () {\n");
     }
+
+    // Go to the traversal function of the while block
+    TRAVblock(node);
 
     // End the block
     printf("\n}");
@@ -656,83 +726,6 @@ node_st *PRTmonop(node_st *node)
     // This prints it with the locations
     // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));    
     
-    return node;
-}
-
-/**
- * @fn PRTfuncall
- */
-node_st *PRTfuncall(node_st *node)
-{
-    printf("%s", FUNCALL_NAME(node));
-
-    // IF the function call has arguments, print them, otherwise just use ()
-    if (FUNCALL_ARGS(node) != NULL) {
-      // Start the funcall arguments
-      printf("(");
-      // Print the arguments, these are not printed with spaces, they are Exprs so keep that in mind!
-      TRAVargs(node);
-      // End the funcall arguments
-      printf(")");
-    } else {
-      printf("()");
-    }
-
-    // End funcall with a semicolon and a new line
-    printf(";\n");
-
-    // Print Ste link if it exists
-    // TODO: convert
-    // if (FUNCALL_STE_LINK(node) != NULL) {
-    //   printf("FunCall has an Ste link");
-    //   printf("\n/* FunCall Link to Ste:\n");
-    //   printSte(FUNCALL_STE_LINK(node));
-    //   printf("*\\ \n"); /* Escape a \ with a \ */
-    // }
-
-    return node;
-}
-
-/**
- * @fn PRTvarlet
- */
-node_st *PRTvarlet(node_st *node)
-{
-    // Print varlet (variable in assignment)
-    printf("%s", VARLET_NAME(node));
-
-    // Print Ste link if it exists
-    // TODO: convert
-    // if (VARLET_STE_LINK(node) != NULL) {
-    //   printf("\nVarLet has an Ste link");
-    //   printf("\n/* VarLet Link to Ste:\n");
-    //   printSte(VARLET_STE_LINK(node));
-    //   printf("*\\ \n"); /* Escape a \ with a \ */
-    // }
-    // TODO: print one SteVar en print one SteFun function!
-
-    // This prints it with the locations
-    // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
-    return node;
-}
-
-/**
- * @fn PRTvar
- */
-node_st *PRTvar(node_st *node)
-{
-    // Print var (variable in an expression)
-    printf("%s", VAR_NAME(node));
-
-    // Print Ste link if it exists
-    // TODO: convert
-    // if (VAR_STE_LINK(node) != NULL) {
-    //   printf("\nVar has an Ste link");
-    //   printf("\n/* Var Link to Ste:\n");
-    //   printSte(VAR_STE_LINK(node));
-    //   printf("*\\ \n"); /* Escape a \ with a \ */
-    // }
-
     return node;
 }
 

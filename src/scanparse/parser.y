@@ -499,9 +499,10 @@ exprs: expr
       {
         $$ = ASTexprs($1, NULL);
       }
-     | exprs COMMA expr
+     | expr COMMA exprs
       {
-        $$ = ASTexprs($3, $1);
+        // First expr then exprs to avoid reversing the order of exprs!
+        $$ = ASTexprs($1, $3);
       }
      ;
 
