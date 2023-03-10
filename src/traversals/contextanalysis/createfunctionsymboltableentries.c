@@ -83,7 +83,7 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         return newSte;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the function definition %s", name);
+        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the function: %s", name);
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }

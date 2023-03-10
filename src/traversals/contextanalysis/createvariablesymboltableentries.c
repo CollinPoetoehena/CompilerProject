@@ -143,7 +143,7 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         return true;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
+        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the variable: %s", name);
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }
