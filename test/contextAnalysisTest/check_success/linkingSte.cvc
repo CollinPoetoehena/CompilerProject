@@ -1,5 +1,5 @@
 int a;
-int b;
+float b;
 float z;
 
 void foo(float a) {
@@ -9,6 +9,6 @@ void foo(float a) {
     b = 5;
 }
 
-void faa(bool a) {
+void faa(float a) {
     z = a + b;
 }

@@ -95,7 +95,7 @@ node_st *findSteLink(char *name, char *steType) {
             // Return Ste found, automatically stops the execution of this function with the return
             return foundSteNodeInChain;
         }
-    } 
+    }
 
     // Search in the global chain if fundef chain is NULL or symbol not found there
     // If the return statement of the previous search is not called it will get to this part
@@ -199,6 +199,22 @@ node_st *LSTEfundef(node_st *node)
 node_st *LSTEfuncall(node_st *node)
 {
     printf("funcall occurrence!\n");
+
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteLink(FUNCALL_NAME(node), "fun");
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        FUNCALL_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for funcall: %s", FUNCALL_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
+
+    // Go to the traversal functions of the args (Exprs node type) to traverse the parameters
+    TRAVargs(node);
+
     return node;
 }
 
