@@ -60,8 +60,8 @@ node_st *PRTprogram(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the ste's for the global variables and global fundefs here on the top!
-    // printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
-    // printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
+    printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
+    printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
 
     // Go to child and print it
     TRAVdecls(node);
@@ -148,9 +148,9 @@ node_st *PRTfundef(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the ste's of the variables as a structured comment
-    // printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
-    // // Print its own symbol table for its function definition
-    // printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
+    printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
+    // Print its own symbol table for its function definition
+    printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
 
     return node;
 }
@@ -179,9 +179,9 @@ node_st *PRTfuncall(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteFun link to this VarLet node
-    if (FUNCALL_STE_LINK(node) != NULL) {
-      printOneSteFun(FUNCALL_STE_LINK(node));
-    }
+    // if (FUNCALL_STE_LINK(node) != NULL) {
+    //   printOneSteFun(FUNCALL_STE_LINK(node));
+    // }
 
     return node;
 }
@@ -196,9 +196,9 @@ node_st *PRTvarlet(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteVar link to this VarLet node
-    if (VARLET_STE_LINK(node) != NULL) {
-      printOneSteVar(VARLET_STE_LINK(node));
-    }
+    // if (VARLET_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VARLET_STE_LINK(node));
+    // }
 
     // This prints it with the locations
     // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
@@ -215,9 +215,9 @@ node_st *PRTvar(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteVar link to this Var node
-    if (VAR_STE_LINK(node) != NULL) {
-      printOneSteVar(VAR_STE_LINK(node));
-    }
+    // if (VAR_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VAR_STE_LINK(node));
+    // }
 
     return node;
 }

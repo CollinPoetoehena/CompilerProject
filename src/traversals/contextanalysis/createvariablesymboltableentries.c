@@ -36,15 +36,6 @@ node_st *lastSteVarCurrent = NULL;
 // Helper variable to keep track of when to open a new chain
 bool newSteVarChain = false;
 
-
-// TODO: 
-// First test linking separately with all the files
-// then test the whole context analysis printing with a couple of large files in the print.c traversal
-// check for loops with the renaming of the identifiers and the linking var
-
-
-
-
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
     if (newSte != NULL) {

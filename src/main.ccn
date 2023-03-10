@@ -52,12 +52,14 @@ traversal Print {
     uid = PRT
 };
 
-// TODO: finish this CA phase
+// The ContextAnalysis phase is mainly used to create Symbol tables
 phase ContextAnalysis {
     actions {
-        // This traversal systematicly rename all the identifiers in for loops and save it to the node.
-        // This is very handy in the creation of symbol tables because you can then just
-        // create symbol table entries for the identifiers in for loops without special operations.
+        /*
+        This traversal systematicly rename all the identifiers in for loops and save it to the node.
+        This is very handy in the creation of symbol tables because you can then just
+        create symbol table entries for the identifiers in for loops without special operations.
+        */
         traversal RenameForIdentifiers {
             uid = RFI,
             // Also rename all the occurrences of the for variable
@@ -93,7 +95,6 @@ phase ContextAnalysis {
         };
 
         // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        // TODO: create a separate traversal for linking all the Var, VarLet and FunCall occurrences!
         traversal LinkSymbolTableEntries {
             uid = LSTE,
             nodes = { 
@@ -101,8 +102,6 @@ phase ContextAnalysis {
                 Program,
                 // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
                 FunDef, 
-                // TODO: need funbody or not???
-                //FunBody,
                 // These nodes are used to update their link once they occur in a program
                 Var, Varlet, FunCall
             }
