@@ -1,0 +1,28 @@
+void vardec(int z, float b, bool x) {
+    int a;
+}
+
+void vardec_stat() {
+    int a;
+    a = 2;
+}
+
+int vardec_ret() {
+    int a;
+    return 2;
+}
+
+int vardec_stat_ret(bool y, int z) {
+    int a;
+    a = 2;
+    return a;
+}
+
+int stat_ret(bool b) {
+    vardec();
+    return 2;
+}
+
+int ret() {
+    return 2;
+}

@@ -28,6 +28,11 @@ node_st *firstSymbolTableFun = NULL;
 // lastSteVarGlobal is used to keep track of the last global Ste to use for appending to the LinkedList
 node_st *lastSteFunGlobal = NULL;
 
+// This node is used for linking the params to the previous fundef node
+node_st *tempFunDefNode = NULL;
+// This boolean is used to only link the first param occurrence in a fundef
+bool firstParam = false;
+
 // bool createSymbolTableEntrySteFun(char *name, enum Type type, node_st *params) 
 // node_st *newSte = ASTstefun(NULL, NULL, name, type, currentScopeFun, params);
 
@@ -72,8 +77,8 @@ bool isSymbolUniqueSteFun(char *name) {
     return true;
 }
 
-// Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
-bool createSymbolTableEntrySteFun(char *name, enum Type type) {
+// Create a symbol table entry node, declared after helper functions, because otherwise it gives an error in C!
+node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUniqueSteFun(name)) {
         // Parent of fundefs is in basic always NULL, next is set later, so for now NULL
@@ -86,7 +91,7 @@ bool createSymbolTableEntrySteFun(char *name, enum Type type) {
         //printSteVar(newSte);
 
         // Ste creation succeeded
-        return true;
+        return newSte;
     } else {
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
@@ -95,7 +100,7 @@ bool createSymbolTableEntrySteFun(char *name, enum Type type) {
     }
 
     // Creation failed
-    return false;
+    return NULL;
 }
 
 /**
@@ -120,17 +125,24 @@ node_st *CFSprogram(node_st *node)
  */
 node_st *CFSfundef(node_st *node)
 {
-    // Create a new SteFun 
-    // newSteFun = true;
-
     // Create a SteFun for this function definition
-    createSymbolTableEntrySteFun(FUNDEF_NAME(node), FUNDEF_TYPE(node));
+    node_st *fundefSte = createSymbolTableEntrySteFun(FUNDEF_NAME(node), FUNDEF_TYPE(node));
 
-    // Then traverse the params to add to this Ste
+    // Link SteFun creation to this FunDef node if it was successfull
+    if (fundefSte != NULL) {
+        FUNDEF_SYMBOL_TABLE(node) = fundefSte;
+        // Create a new SteFun to use in the params traversal if it was successfull
+        tempFunDefNode = node;
+        // Open the new params to link only the first one
+        firstParam = true;
+    }
+
+    // Then traverse the params to add to this tempFunDefNode
     TRAVparams(node);
 
     // Reset the fundef for the next params
-    // newSteFun = false;
+    tempFunDefNode = NULL;
+    firstParam = false;
 
     return node;
 }
@@ -141,6 +153,22 @@ node_st *CFSfundef(node_st *node)
 node_st *CFSparam(node_st *node)
 {
     printf("param\n");
+
+    //TODO: fundef params is not correctly getting linked, so the link is not correct, the print is probably ok!
+
+    // If the temp FunDef node is not NULL link the params to it by using the previous FunDef
+    if (tempFunDefNode != NULL) {
+        if (firstParam) {
+            // Put the first param in the SteFun node
+            STEFUN_PARAMS(tempFunDefNode) = node;
+            printf("Getting to set first param!*********************\n");
+            // Reset the firstParam boolean to only add the first param
+            firstParam = false;
+        }
+    }
+
+    // If this param has a next, do the same for the next param in the function definition
+    TRAVnext(node);
 
     // Use the lastSteFunGlobal because that is the FunDef which contains the params
     // If it is not null it contains the LinkedList of type Param from the FunDef
@@ -174,7 +202,7 @@ node_st *CFSparam(node_st *node)
     //     } while (paramIterator != NULL);
     // }
 
-    // // If this param has a next, do the same for the next param in the function definition
+    // If this param has a next, do the same for the next param in the function definition
     // TRAVnext(node);
 
     return node;
