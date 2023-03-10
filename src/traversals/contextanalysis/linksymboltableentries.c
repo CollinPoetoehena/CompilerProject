@@ -53,7 +53,6 @@ node_st *findSteNodeInSteChain(node_st *firstChainSte, char *name, char *steType
         char *tempSteName = getSteName(steIterator, steType);
         // Add NULL check to avoid Segmentation fault
         if (tempSteName != NULL && strcmp(tempSteName, name) == 0) {
-            printf("**********************Link found for: %s\n", name);
             // Return Ste found, automatically stops the execution of this function with the return
             return steIterator;
         }
@@ -68,8 +67,6 @@ node_st *findSteNodeInSteChain(node_st *firstChainSte, char *name, char *steType
 
 // Find an Ste node that has the specified name
 node_st *findSteLink(char *name, char *steType) {
-    printf("Trying to find Ste for: %s\n", name);
-
     // Create pointers and use a parameter steType to avoid creating two almost the same functions
     node_st *firstSteFunDefChain = NULL;
     node_st *firstSteGlobalChain = NULL;
@@ -112,41 +109,41 @@ node_st *findSteLink(char *name, char *steType) {
 }
 
 // Check for argument numbers matching parameter numbers
-// bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
-//     // Get the parameter count
-//     int parameterCount = 0;
-//     // Get the first param from the Ste
-//     node_st *paramIterator = STE_PARAMS(steLink);
-//     do {
-//         // Increment parameter count
-//         parameterCount++;
+bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
+    // Get the parameter count
+    int parameterCount = 0;
+    // Get the first param from the SteFun node
+    node_st *paramIterator = STEFUN_PARAMS(steLink);
+    do {
+        // Increment parameter count
+        parameterCount++;
 
-//         // Update parameter
-//         paramIterator = PARAM_NEXT(paramIterator);
-//     } while (paramIterator != NULL);
+        // Update parameter
+        paramIterator = PARAM_NEXT(paramIterator);
+    } while (paramIterator != NULL);
 
-//     // Get the count of the arguments in the funcall node
-//     int argumentsCount = 0;
-//     if (FUNCALL_ARGS(funcallNode) != NULL) {
-//         // Get the first param from the Ste
-//         node_st *funcallArgsIterator = FUNCALL_ARGS(funcallNode);
-//         do {
-//             // Increment parameter count
-//             argumentsCount++;
+    // Get the count of the arguments in the funcall node
+    int argumentsCount = 0;
+    if (FUNCALL_ARGS(funcallNode) != NULL) {
+        // Get the first param from the Ste
+        node_st *funcallArgsIterator = FUNCALL_ARGS(funcallNode);
+        do {
+            // Increment parameter count
+            argumentsCount++;
 
-//             // Update parameter
-//             funcallArgsIterator = EXPRS_NEXT(funcallArgsIterator);
-//         } while (funcallArgsIterator != NULL);
-//     }
+            // Update parameter
+            funcallArgsIterator = EXPRS_NEXT(funcallArgsIterator);
+        } while (funcallArgsIterator != NULL);
+    }
 
-//     if (parameterCount == argumentsCount) {
-//         // Equal arguments and parameter numbers
-//         return true;
-//     } else {
-//         // Not equal arguments and parameter numbers
-//         return false;
-//     }
-// }
+    if (parameterCount == argumentsCount) {
+        // Equal arguments and parameter numbers
+        return true;
+    }
+    
+    // Not equal arguments and parameter numbers
+    return false;
+}
 
 /**
  * @fn LSTEprogram
@@ -182,29 +179,24 @@ node_st *LSTEfundef(node_st *node)
     return node;
 }
 
-// TODO: need funbody or not???
-// /**
-//  * @fn LSTEfunbody
-//  */
-// node_st *LSTEfunbody(node_st *node)
-// {
-
-//     //TODO: need Stmts ifelse, while, etc for linking or do they already work fine when doing a = 5 for example, test!???
-//     return node;
-// }
-
 /**
  * @fn LSTEfuncall
  */
 node_st *LSTEfuncall(node_st *node)
 {
-    printf("funcall occurrence!\n");
-
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteLink(FUNCALL_NAME(node), "fun");
     if (steNode != NULL) {
-        // Save Ste node in link attribute
-        FUNCALL_STE_LINK(node) = steNode;
+        // If the arguments and parameter numbers are not equal, then error
+        if (STEFUN_PARAMS(steNode) != NULL && !compareFunCallArgumentsLength(node, steNode)) {
+            // Prints the error when it occurs, so in this line
+            CTI(CTI_ERROR, true, "argument numbers for function '%s' do not match parameter numbers", FUNCALL_NAME(node));
+            // Create error action, will stop the current compilation after this Action (contextanalysis traversal)
+            CCNerrorAction();
+        } else {
+            // Save Ste node in link attribute
+            FUNCALL_STE_LINK(node) = steNode;
+        }
     } else {
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "no matching declaration/definition for funcall: %s", FUNCALL_NAME(node));
@@ -223,8 +215,6 @@ node_st *LSTEfuncall(node_st *node)
  */
 node_st *LSTEvar(node_st *node)
 {
-    printf("var occurrence!\n");
-
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteLink(VAR_NAME(node), "var");
     if (steNode != NULL) {
@@ -237,8 +227,6 @@ node_st *LSTEvar(node_st *node)
         CCNerrorPhase();
     }
 
-    // printf("*************************symbol table link var\n");
-
     return node;
 }
 
@@ -247,8 +235,6 @@ node_st *LSTEvar(node_st *node)
  */
 node_st *LSTEvarlet(node_st *node)
 {
-    printf("varlet occurrence!\n");
-
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteLink(VARLET_NAME(node), "var");
     if (steNode != NULL) {
@@ -259,11 +245,7 @@ node_st *LSTEvarlet(node_st *node)
         CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
-        // TODP: UNCOMMENT
     }
     
-    // printf("*************************symbol table link varlet\n");
-
     return node;
 }
-
