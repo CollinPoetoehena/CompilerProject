@@ -2,9 +2,9 @@ start phase RootPhase {
     // Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        // TODO: uncomment when that is done, otherwise it might cause an error!
-        ContextAnalysis;
-        //RegularAssignments;
+        // TODO: uncomment when done with testing RA traversal, otherwise it might cause an error or bug!
+        //ContextAnalysis;
+        RegularAssignments;
         print;
     }
 }; 
@@ -13,6 +13,7 @@ start phase RootPhase {
 // make
 // ./civicc ../test/basic/check_success/binops.cvc
 // yacc -Wcounterexamples parser.y
+// This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
 
 // ************************************************************************************************************************************
 // TODO:
@@ -44,7 +45,8 @@ start phase RootPhase {
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
 // it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
 
-// TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal
+// TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal.
+// TODO: milestone 6, what to do with for, if anything, no need to do anything right???
 // TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
 
@@ -113,7 +115,7 @@ traversal RegularAssignments {
     // This traversal should transform Variable Initialisations into Regular Assignments
     uid = RA,
     // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
-    nodes = {FunBody, VarDecl, GlobDef, For}
+    nodes = {Program, Decls, GlobDef, FunBody, VarDecl, Stmts, For}
     // FunBody is used to first traverse the VarDecls and then the Stmts and append the 
     // saved initializations to the stmts, these are filled after TRAVdecls(node) of FunBody
     // For loop has something special to it, the above nodes are the correct nodes
@@ -173,7 +175,7 @@ root node Program {
 
 node Decls {
     children {
-        Decl decl { constructor, mandatory },
+        Decl decl { constructor },
         Decls next { constructor }
     }
 };
@@ -474,48 +476,3 @@ node SteFun {
         Param params { constructor }
     }
 };
-
-// Symbol table entry
-// node Ste {
-//     // variablen en functies
-//     children {
-//         // LinkedList data structure for next symbol table
-//         Ste next { constructor },
-//         // TODO: een lijst per functie en 1 global
-//         // Parent wijst naar hogere nesting level
-//         Ste parent
-
-//         // FunDef
-//         // Traverse funbody
-//         // travdata can be used for Ste
-
-//         // Start with Ste's for the variables only
-//         // Separate traversal for fundefs
-//         // 2 losse tables, 1 voor vars, 1 voor functinos, allebei linkedlist
-//         // 2 nodes, SteVar, SteFun
-//     }, 
-
-//     attributes {
-//         string name { constructor },
-//         Type type { constructor },
-//         int nesting_level { constructor },
-//         SymbolTableType symbol_type { constructor },
-//         // Params is the LinkedList from the FunDef, should contain the first value of 
-//         // the FunDef params. From the first value the LinkedList chain can be followed.
-//         Param params { constructor }
-//     }
-// };
-// Milestone 5 symbol table
-// Each symbol table entry would feature the name of the variable as a character string, 
-// its type as well as its nesting level (starting with zero for the global context)
-
-// basic heeft 2 scopes, global en in een funcall
-// LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
-// Alles die de AST ombouwt is een traversal
-// Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals
-
-// TODO: milestone 6
-// This needs to be a separate traversal as well
-// int a = expr;
-// milestone 6 is loskoppelen van die expr van een VarDecl, je knipt hem dus van de boom after
-// en weer aan de boom, dit is handig uiteindelijk voor code generation
