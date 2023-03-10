@@ -33,9 +33,6 @@ node_st *tempFunDefNode = NULL;
 // This boolean is used to only link the first param occurrence in a fundef
 bool firstParam = false;
 
-// bool createSymbolTableEntrySteFun(char *name, enum Type type, node_st *params) 
-// node_st *newSte = ASTstefun(NULL, NULL, name, type, currentScopeFun, params);
-
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTablesSteFun(node_st *newSte) {
     if (firstSymbolTableFun == NULL) {
@@ -56,15 +53,10 @@ bool isSymbolUniqueSteFun(char *name) {
     node_st *symtbolTableChainFun = firstSymbolTableFun;
     // Go through the current chain to check if it contains the symbol already
     if (symtbolTableChainFun != NULL) {
-        // TODO: remove after debugging
-        // printf("\n\n\n\n\n\n\nPRINTING STE CHAIN IT IS SERACHING IN********************\n");
-        // printSteVarChain(symtbolTableChainFun);
         do {
             // Symbol already present, return not unique/false. Use string comparison 
             // to check for equality, 0 means equal. == only checks if memory references are equal
             if (strcmp(STEFUN_NAME(symtbolTableChainFun), name) == 0) {
-                printf("**********************Link found for %s\n", name);
-                printf("First stefun that occured is: %s\n", STEFUN_NAME(symtbolTableChainFun));
                 return false;
             }
 
@@ -87,14 +79,11 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTablesSteFun(newSte);
 
-        // TODO: remove after debugging
-        //printSteVar(newSte);
-
         // Ste creation succeeded
         return newSte;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for %s", name);
+        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the function definition %s", name);
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }
@@ -132,7 +121,7 @@ node_st *CFSfundef(node_st *node)
     if (fundefSte != NULL) {
         FUNDEF_SYMBOL_TABLE(node) = fundefSte;
         // Create a new SteFun to use in the params traversal if it was successfull
-        tempFunDefNode = node;
+        tempFunDefNode = fundefSte;
         // Open the new params to link only the first one
         firstParam = true;
     }
@@ -152,7 +141,7 @@ node_st *CFSfundef(node_st *node)
  */
 node_st *CFSparam(node_st *node)
 {
-    printf("param\n");
+    // printf("param\n");
 
     //TODO: fundef params is not correctly getting linked, so the link is not correct, the print is probably ok!
 
@@ -161,7 +150,6 @@ node_st *CFSparam(node_st *node)
         if (firstParam) {
             // Put the first param in the SteFun node
             STEFUN_PARAMS(tempFunDefNode) = node;
-            printf("Getting to set first param!*********************\n");
             // Reset the firstParam boolean to only add the first param
             firstParam = false;
         }
@@ -170,41 +158,5 @@ node_st *CFSparam(node_st *node)
     // If this param has a next, do the same for the next param in the function definition
     TRAVnext(node);
 
-    // Use the lastSteFunGlobal because that is the FunDef which contains the params
-    // If it is not null it contains the LinkedList of type Param from the FunDef
-    // if (STEFUN_PARAMS(lastSteFunGlobal) != NULL) {
-    //     // Get the first param from the Ste
-    //     node_st *paramIterator = STEFUN_PARAMS(lastSteFunGlobal);
-    //     do {
-    //         // Create a symbol table entry for param (link it later in the Var, Varlet and Funcall)
-    //         createSymbolTableEntrySteFun(PARAM_NAME(paramIterator), PARAM_TYPE(paramIterator), STT_var, NULL);
-
-    //         // Update symbolTable
-    //         paramIterator = PARAM_NEXT(paramIterator);
-    //     } while (paramIterator != NULL);
-    // }
-
-    // TODO: convert to new implementation, you can probably reuse a lot or almost all from the previous CA traversal!
-
-
-
-    // Use the previousSymbolTable because that is the FunDef which contains the params
-    // If it is not null it contains the LinkedList of type Param from the FunDef
-    // if (STE_PARAMS(previousSymbolTable) != NULL) {
-    //     // Get the first param from the Ste
-    //     node_st *paramIterator = STE_PARAMS(previousSymbolTable);
-    //     do {
-    //         // Create a symbol table entry for param (link it later in the Var, Varlet and Funcall)
-    //         createSymbolTableEntrySteFun(PARAM_NAME(paramIterator), PARAM_TYPE(paramIterator), STT_var, NULL);
-
-    //         // Update symbolTable
-    //         paramIterator = PARAM_NEXT(paramIterator);
-    //     } while (paramIterator != NULL);
-    // }
-
-    // If this param has a next, do the same for the next param in the function definition
-    // TRAVnext(node);
-
     return node;
 }
-

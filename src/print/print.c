@@ -851,11 +851,9 @@ char *getSteFunParamTypes(node_st *steFunNode) {
   if (STEFUN_PARAMS(steFunNode) != NULL) {
       // Get the first param from the Ste
       node_st *paramIterator = STEFUN_PARAMS(steFunNode);
-      printf("GETTING INTO THE FUNDEF PARAMS NOT BEING NULL!!!!!!************************\n");
       do {
           // Get the param type
           char *paramType = getPrintType(PARAM_TYPE(paramIterator));
-          printf("*******************HELPER FUNC: PARAM TYPE: %s", paramType);
           // Add the param to the params string to print the fundef
           strcat(params, paramType);
           // Add a comma after every value, except the last one
@@ -863,13 +861,9 @@ char *getSteFunParamTypes(node_st *steFunNode) {
               strcat(params, ", ");
           }
 
-          printf("*******************HELPER FUNC: PARAMS: %s", params);
-
           // Update parameter
           paramIterator = PARAM_NEXT(paramIterator);
       } while (paramIterator != NULL);
-  } else {
-    printf("******* NOT *********GETTING INTO THE FUNDEF PARAMS NOT BEING NULL!!!!!!************************\n");
   }
 
   return params;
@@ -884,7 +878,6 @@ void printOneSteFun(node_st *steFunNode) {
     // Get the type
     char *type = getPrintType(STEFUN_TYPE(steFunNode));
     char *paramsTypes = getSteFunParamTypes(steFunNode);
-    printf("These are the param types in the print: %s*********************************\n", paramsTypes);
 
     // Print function Ste: "funName: returnType (param types)"
     printf("SteFun:\n %s : %s (%s)\nnesting level: %d\n", 
@@ -915,7 +908,6 @@ void printSteFunChain(node_st *steFunFirstNode) {
         char *type = getPrintType(STEFUN_TYPE(steIterator));
         // TODO check if this function works when params are added!
         char *paramsTypes = getSteFunParamTypes(steIterator);
-        printf("These are the param types in the print: %s*********************************\n", paramsTypes);
 
         // Print function Ste: "funName: returnType (param types)"
         printf("SteFun:\n %s : %s (%s)\nnesting level: %d\n", 
