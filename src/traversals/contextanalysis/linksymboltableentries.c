@@ -112,15 +112,18 @@ node_st *findSteLink(char *name, char *steType) {
 bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
     // Get the parameter count
     int parameterCount = 0;
-    // Get the first param from the SteFun node
-    node_st *paramIterator = STEFUN_PARAMS(steLink);
-    do {
-        // Increment parameter count
-        parameterCount++;
+    // If the arguments are NULL, then the parameterCount should remain 0
+    if (STEFUN_PARAMS(steLink) != NULL) {
+        // Get the first param from the SteFun node
+        node_st *paramIterator = STEFUN_PARAMS(steLink);
+        do {
+            // Increment parameter count
+            parameterCount++;
 
-        // Update parameter
-        paramIterator = PARAM_NEXT(paramIterator);
-    } while (paramIterator != NULL);
+            // Update parameter
+            paramIterator = PARAM_NEXT(paramIterator);
+        } while (paramIterator != NULL);
+    }
 
     // Get the count of the arguments in the funcall node
     int argumentsCount = 0;
@@ -137,6 +140,7 @@ bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
     }
 
     if (parameterCount == argumentsCount) {
+        printf("equal arguments************\n");
         // Equal arguments and parameter numbers
         return true;
     }
@@ -188,7 +192,7 @@ node_st *LSTEfuncall(node_st *node)
     node_st *steNode = findSteLink(FUNCALL_NAME(node), "fun");
     if (steNode != NULL) {
         // If the arguments and parameter numbers are not equal, then error
-        if (STEFUN_PARAMS(steNode) != NULL && !compareFunCallArgumentsLength(node, steNode)) {
+        if (!compareFunCallArgumentsLength(node, steNode)) {
             // Prints the error when it occurs, so in this line
             CTI(CTI_ERROR, true, "argument numbers for function '%s' do not match parameter numbers", FUNCALL_NAME(node));
             // Create error action, will stop the current compilation after this Action (contextanalysis traversal)

@@ -37,6 +37,14 @@ node_st *lastSteVarCurrent = NULL;
 bool newSteVarChain = false;
 
 
+// TODO: 
+// First test linking separately with all the files
+// then test the whole context analysis printing with a couple of large files in the print.c traversal
+// check for loops with the renaming of the identifiers and the linking var
+
+
+
+
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
     if (newSte != NULL) {
@@ -97,9 +105,6 @@ bool isSymbolUnique(char *name) {
 
         // Go through the current chain to check if it contains the symbol already
         if (symtbolTableChain != NULL) {
-            // TODO: remove after debugging
-            // printf("\n\n\n\n\n\n\nPRINTING STE CHAIN IT IS SERACHING IN********************\n");
-            // printSteVarChain(symtbolTableChain);
             do {
                 // Symbol already present, return not unique/false. Use string comparison 
                 // to check for equality, 0 means equal. == only checks if memory references are equal
@@ -136,9 +141,6 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        // TODO: remove after debugging
-        //printSteVar(newSte);
-
         // Ste creation succeeded
         return true;
     } else {
@@ -157,12 +159,6 @@ bool createSymbolTableEntry(char *name, enum Type type) {
  */
 node_st *CVSprogram(node_st *node)
 {
-    // printf("program\n");
-
-    // Print the start of the context analysis variables
-    // printf("\n\n\n****************************************************************************************************************************************************************************** \
-    // \t\tStart of context analysis variables\n");
-
     // Go to the traversal functions of the children
     TRAVchildren(node);
 
@@ -172,9 +168,6 @@ node_st *CVSprogram(node_st *node)
     }
     // If the firstSymbolTableVar is NULL, then no global symbol tables are created, fundefs may have a SteVar
 
-    // printf("\n\n\n\t\tEnd of context analysis variables\n****************************************************************************************************************************************************************************** \
-    // \n");
-
     return node;
 }
 
@@ -183,8 +176,6 @@ node_st *CVSprogram(node_st *node)
  */
 node_st *CVSglobdecl(node_st *node)
 {
-    // printf("globdecl\n");
-
     // Current scope is guarenteed to be global scope
     currentScopeVar = 0;
 
@@ -199,8 +190,6 @@ node_st *CVSglobdecl(node_st *node)
  */
 node_st *CVSglobdef(node_st *node)
 {
-    // printf("globdef\n");
-
     // Current scope is guarenteed to be global scope
     currentScopeVar = 0;
 
@@ -215,8 +204,6 @@ node_st *CVSglobdef(node_st *node)
  */
 node_st *CVSfundef(node_st *node)
 {
-    // printf("fundef\n");
-
     // No need to create a ste for the fundef here, that is done in the symbol tables for the functions
     // So, only create a pointer to the first SteVar in this functions scope
 
@@ -263,8 +250,6 @@ node_st *CVSfundef(node_st *node)
  */
 node_st *CVSparam(node_st *node)
 {
-    // printf("param\n");
-
     // Create a SteVar for the param
     createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node));
 
@@ -294,17 +279,13 @@ node_st *CVSfunbody(node_st *node)
  */
 node_st *CVSvardecl(node_st *node)
 {
-    //printf("vardecls\n");
-
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
 
-    // TODO: this is probably not necessary anymore to travinit?? Test this thourougly!
-    // Go to the traversal function of the expr to go to the Vars
-    //TRAVinit(node);
-
     // To perfom the traversal functions of the children (next vardecls) use TRAVchildx(node)
     TRAVnext(node);
+
+    // No need to traverse the init Expr child because the initialization has no declarations for the Ste
 
     return node;
 }
@@ -372,30 +353,3 @@ void printSteVar(node_st *steParentNode) {
     printf("\n\tEnd of SteVar chain\n**************************\n\n");
   }
 }
-
-// Helper function to return the appropriate current Ste
-// TODO: if it is not used it can be removed, but maybe this can be a helpful function (not yet tested, so needs to be tested and changed!)!
-// node_st *getCurrentSteVar(bool firstSte) {
-//     // TODO: convert to use scopes
-//     if (currentScopeVar == 0) {
-//         // Return an Ste from the global chain of Ste's
-//         if (firstSte) {
-//             // If the first Ste of the current scope is requested return first
-//             return firstSymbolTableVar;
-//         }
-
-//         // Otherwise return the last Ste of the current scope is requested return the last 
-//         return lastSteVarGlobal;
-//     } else {
-//         // Return an Ste from a non global chain of Ste's
-//         if (firstSte) {
-//             // If the first Ste of the current scope is requested return first
-//             return firstSteVarCurrent;
-//         }
-
-//         // Otherwise return the last Ste of the current scope is requested return the last 
-//         return lastSteVarCurrent;
-//     }
-
-//     return NULL;
-// }

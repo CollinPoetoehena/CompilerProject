@@ -406,6 +406,9 @@ node_st *PRTwhile(node_st *node)
       printf("while () {\n");
     }
 
+    // Go to the traversal function of the while block
+    TRAVblock(node);
+
     // End the block
     printf("\n}");
 
