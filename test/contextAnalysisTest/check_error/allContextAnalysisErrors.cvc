@@ -1,0 +1,19 @@
+int a;
+int b;
+
+void foo(bool b) {
+    // No matching declaration for varlets
+    x = 5;
+    z = 5.67;
+
+    // No matching declaration for vars
+    b = v + w;
+
+    // No matching declaration for funcalls
+    faa();
+    faz();
+
+    // Invalid argument numbers
+    foo(a, b);
+    foo();
+}

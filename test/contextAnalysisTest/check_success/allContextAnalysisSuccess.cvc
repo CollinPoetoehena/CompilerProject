@@ -1,0 +1,20 @@
+// Global declaration
+int a;
+int b;
+float z;
+
+void foo(float a, bool b) {
+    // local declarations
+    float y = 5.46;
+    bool x = false;
+
+    // varlet links
+    b = x;
+    a = 5.67;
+
+    // var links
+    a = y + z;
+
+    // funcall links
+    foo(a, b);
+}

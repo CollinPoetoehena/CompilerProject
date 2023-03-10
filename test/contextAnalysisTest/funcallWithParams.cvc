@@ -1,0 +1,3 @@
+void foo(int a, int b, float c) {
+    foo(a, b, c);
+}
