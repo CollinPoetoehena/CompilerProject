@@ -1,0 +1,14 @@
+int a;
+int b;
+float z;
+
+void foo(float a) {
+    int b;
+    int c = a + b;
+    foo(a);
+    b = 5;
+}
+
+void faa(bool a) {
+    z = a + b;
+}

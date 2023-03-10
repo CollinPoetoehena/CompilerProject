@@ -94,17 +94,19 @@ phase ContextAnalysis {
 
         // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
         // TODO: create a separate traversal for linking all the Var, VarLet and FunCall occurrences!
-        // traversal LinkSymbolTableEntries {
-        //     uid = LSTE,
-        //     nodes = { 
-        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-        //         Program,
-        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-        //         FunDef, FunBody,
-        //         // These nodes are used to update their link once they occur in a program
-        //         Var, Varlet, FunCall
-        //     }
-        // };
+        traversal LinkSymbolTableEntries {
+            uid = LSTE,
+            nodes = { 
+                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+                Program,
+                // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+                FunDef, 
+                // TODO: need funbody or not???
+                //FunBody,
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet, FunCall
+            }
+        };
     }
 };
 
