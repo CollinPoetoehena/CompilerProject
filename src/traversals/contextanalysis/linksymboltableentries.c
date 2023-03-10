@@ -140,7 +140,6 @@ bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
     }
 
     if (parameterCount == argumentsCount) {
-        printf("equal arguments************\n");
         // Equal arguments and parameter numbers
         return true;
     }
@@ -156,7 +155,7 @@ node_st *LSTEprogram(node_st *node)
 {
     // Save global Ste's to search in later in the linking process
     globalFirstSteVarLinking = PROGRAM_FIRST_STE_VARIABLES(node);
-    globalFirstSteVarLinking = PROGRAM_FIRST_STE_VARIABLES(node);
+    globalFirstSteFunLinking = PROGRAM_FIRST_STE_FUNCTIONS(node);
 
     // Go to the traversal functions of the children
     TRAVchildren(node);
