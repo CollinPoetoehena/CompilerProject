@@ -2,9 +2,9 @@ start phase RootPhase {
     // Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        ContextAnalysis;
         // TODO: uncomment when that is done, otherwise it might cause an error!
-        // RegularAssignments;
+        ContextAnalysis;
+        //RegularAssignments;
         print;
     }
 }; 
@@ -39,7 +39,8 @@ start phase RootPhase {
 //**********************************************************************************************************************************************
 // TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
-// TODO: when to create ExprStmt node in parser because this file does not compile: ./civicc ../test/basic/functional/typecheck.cvc 
+// TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal
+// TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
 
 traversal Print {
@@ -73,20 +74,18 @@ phase ContextAnalysis {
             }
         };
         
-        // TODO: uncomment when variables symbol tables are working and make this one!
         // Create Function Symboltables, linking will be done in a separate traversal
-        // traversal CreateFunctionSymbolTableEntries {
-        //     uid = CFS,
-        //     nodes = {
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // FunDef to use for creating a new SteFun 
-        //         // TODO: do this with (first travFunbody, then after that link using global node_st *symboltable)
-        //         FunDef,
-        //         // Param node (= LinkedList) to link the params of a FunDef
-        //         Param
-        //     }
-        // };
+        traversal CreateFunctionSymbolTableEntries {
+            uid = CFS,
+            nodes = {
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for creating a new SteFun 
+                FunDef,
+                // Param node (= LinkedList) to link the params of a FunDef
+                Param
+            }
+        };
 
         // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
         // TODO: create a separate traversal for linking all the Var, VarLet and FunCall occurrences!
@@ -462,11 +461,10 @@ node Bool {
 };
 
 
-//TODO: convert nodes, reuse as much as possible from the old contextanalysis traversal
-// Also see the picture from the lesson (also send to Sandro, can be found there)
+// This is the node for a Symbol table chain for variables
 node SteVar {
     children {
-        // Parent wijst naar hogere nesting level
+        // Parent points to a higher nesting level
         SteVar parent { constructor },
         // LinkedList data structure for next symbol table
         SteVar next { constructor }
@@ -476,22 +474,19 @@ node SteVar {
         string name { constructor },
         Type type { constructor },
         int nesting_level { constructor }
-        //SymbolTableType symbol_type { constructor } //TODO: probably not necessary anymore
     }
 };
 
-// Every function gets its own symbol table
+// This is the node for a Symbol table chain for functions. Every function definition gets its own symbol table.
 node SteFun {
     children {
         // Parent wijst naar hogere nesting level
+        // TODO: with basic it can just be NULL always in creation, so set to null in traversal function!
         SteFun parent { constructor },
         // LinkedList data structure for next symbol table
         SteFun next { constructor }
     }, 
 
-    // TODO: functions have their own scope, so one func that has 'a' and another that has 'a' should not give an error!
-    // Check this in the isSymbolUnique function, so change that up a bit, maybe with parent you can check it!
-    // TODO: also, fundef foo(){int foo;} -> is a valid program in CiviC
     attributes {
         string name { constructor },
         Type type { constructor },
@@ -499,7 +494,6 @@ node SteFun {
         // Params is the LinkedList from the FunDef, should contain the first value of 
         // the FunDef params. From the first value the LinkedList chain can be followed.
         Param params { constructor }
-        //SymbolTableType symbol_type { constructor }, //TODO: probably not necessary anymore
     }
 };
 

@@ -1,0 +1,11 @@
+int a;
+int b;
+
+void foo(int a) {
+    int b;
+    int c;
+}
+
+int foo2() {
+    float a;
+}
