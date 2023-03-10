@@ -60,6 +60,7 @@ node_st *PRTprogram(node_st *node)
 
     // Print the ste's for the global variables and global fundefs here on the top!
     printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
+    printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
     //TODO: FUNCTION STE'S
     // TRAVFIRST_STE_VARIABLES(node);
     // TRAVFIRST_STE_FUNCTIONS(node);
@@ -806,6 +807,7 @@ void printOneSteVarLink(node_st *steVarNode) {
   Prints a chain of SteVar's using the LinkedList structure.
   This is easier to use then printing it in the traversal functions of the SteVar
   because this allows to have the chain printed in one function, this is for clarity and readability.
+  This also gives more control in the print traversal to print a single SteVar or a whole chain.
 */ 
 void printSteVarChain(node_st *steVarFirstNode) {
   if (steVarFirstNode != NULL) {
@@ -835,6 +837,64 @@ void printSteVarChain(node_st *steVarFirstNode) {
     printf("\n\tEnd of SteVar chain\n****************************************************\n\n");
   }
 }
+
+/*
+  Prints a chain of SteFun's using the LinkedList structure.
+  This is easier to use then printing it in the traversal functions of the SteFun
+  because this allows to have the chain printed in one function, this is for clarity and readability.
+  This also gives more control in the print traversal to print a single SteFun or a whole chain.
+*/ 
+void printSteFunChain(node_st *steFunFirstNode) {
+  if (steFunFirstNode != NULL) {
+    // Open the new SteFun chain
+    printf("\n****************************************************\n\tNew SteFun chain:\n");
+
+    // Basic has no nested functions, so no need to print the parent because it is always NULL for now
+
+    // Get the first param from the Ste
+    node_st *steIterator = steFunFirstNode;
+    do {
+        // Get the return type of the FunDef
+        char *type = getPrintType(STEFUN_TYPE(steIterator));
+
+        // Allocate memory for a string of up to 99 characters
+        char *params = MEMmalloc(100 * sizeof(char)); 
+        // Initialize with empty string to avoid weird memory address value being used at the start
+        strcpy(params, "");
+        
+        if (STEFUN_PARAMS(steIterator) != NULL) {
+            // Get the first param from the Ste
+            node_st *paramIterator = STEFUN_PARAMS(steIterator);
+            do {
+                // Get the param type
+                char *paramType = getPrintType(PARAM_TYPE(paramIterator));
+                // Add the param to the params string to print the fundef
+                strcat(params, paramType);
+                // Add a comma after every value, except the last one
+                if (PARAM_NEXT(paramIterator) != NULL) {
+                    strcat(params, ", ");
+                }
+
+                // Update parameter
+                paramIterator = PARAM_NEXT(paramIterator);
+            } while (paramIterator != NULL);
+        }
+
+        // Print function Ste: "funName: returnType (param types)"
+        // printf("SteFun:\n %s : %s\nnesting level: %d\n", 
+        //     STEFUN_NAME(steIterator), type, STEFUN_NESTING_LEVEL(steIterator));
+        printf("SteFun:\n %s : %s (%s)\nnesting level: %d\n", 
+            STEFUN_NAME(steIterator), type, params, STEFUN_NESTING_LEVEL(steIterator));
+
+        // Update iterator
+        steIterator = STEVAR_NEXT(steIterator);
+    } while (steIterator != NULL);
+
+    // End the current SteFun chain
+    printf("\n\tEnd of SteFun chain\n****************************************************\n\n");
+  }
+}
+
 
 // TODO: remove at the end of the project, but maybe handy with the memory of params creation, etc!
 // void printSte(node_st *steVarFirstNode) {

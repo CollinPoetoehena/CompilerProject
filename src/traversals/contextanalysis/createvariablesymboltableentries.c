@@ -136,10 +136,6 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        // TODO this file does not work: ./civicc ../test/basic/check_success/parse_funbody.cvc 
-        // it saves the previous symbol table to the next one if it does not have any entries
-        // probably has to do with not creating a new symbol, so newChain is not set to false
-
         // TODO: remove after debugging
         //printSteVar(newSte);
 
@@ -330,8 +326,6 @@ node_st *CVSfor(node_st *node)
 
     // Go to stmts traversal functions
     TRAVblock(node);
-
-    // TODO: while, ifelse, etc not necessary??? Test by creating a var, varlet and funcall and see if they get linked in the body!
 
     return node;
 }
