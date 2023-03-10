@@ -807,13 +807,18 @@ void printOneSteVarLink(node_st *steVarNode) {
   This is easier to use then printing it in the traversal functions of the SteVar
   because this allows to have the chain printed in one function, this is for clarity and readability.
 */ 
-void printSteVarChain(node_st *steParentNode) {
-  if (steParentNode != NULL) {
+void printSteVarChain(node_st *steVarFirstNode) {
+  if (steVarFirstNode != NULL) {
     // Open the new SteVar chain
     printf("\n****************************************************\n\tNew SteVar chain:\n");
 
+    // Print the parent Ste node's name if it has a parent
+    if (STEVAR_PARENT(steVarFirstNode) != NULL) {
+          printf("Parent Ste node's name: %s\n\n", STEVAR_NAME(STEVAR_PARENT(steVarFirstNode)));
+    }
+
     // Get the first param from the Ste
-    node_st *steIterator = steParentNode;
+    node_st *steIterator = steVarFirstNode;
     do {
         // Get the type
         char *type = getPrintType(STEVAR_TYPE(steIterator));
@@ -832,12 +837,12 @@ void printSteVarChain(node_st *steParentNode) {
 }
 
 // TODO: remove at the end of the project, but maybe handy with the memory of params creation, etc!
-// void printSte(node_st *steParentNode) {
-//   if (steParentNode != NULL) {
+// void printSte(node_st *steVarFirstNode) {
+//   if (steVarFirstNode != NULL) {
 //     // Get the type
 //     char *type = NULL;
 
-//     switch (STE_TYPE(steParentNode)) {
+//     switch (STE_TYPE(steVarFirstNode)) {
 //       case CT_int:
 //       type = "int";
 //       break;
@@ -856,7 +861,7 @@ void printSteVarChain(node_st *steParentNode) {
             
 //     // Get the SymbolTableType
 //     char *stType = NULL;
-//     switch (STE_SYMBOL_TYPE(steParentNode)) {
+//     switch (STE_SYMBOL_TYPE(steVarFirstNode)) {
 //       case STT_var:
 //       stType = "var";
 //       break;
@@ -871,16 +876,16 @@ void printSteVarChain(node_st *steParentNode) {
 //     }
 
 //     // Print the Ste
-//     if (STE_SYMBOL_TYPE(steParentNode) == STT_function) {
+//     if (STE_SYMBOL_TYPE(steVarFirstNode) == STT_function) {
 //       // Print function Ste: "funName: returnType (param types)"
 //       // Declare a C string array with space for 5 strings of 20 characters each
 //       char *paramsPrint = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
 //       // Initialize with empty string to avoid weird memory address value being used at the start
 //       strcpy(paramsPrint, "");
       
-//       if (STE_PARAMS(steParentNode) != NULL) {
+//       if (STE_PARAMS(steVarFirstNode) != NULL) {
 //           // Get the first param from the Ste
-//           node_st *paramIterator = STE_PARAMS(steParentNode);
+//           node_st *paramIterator = STE_PARAMS(steVarFirstNode);
 //           do {
 //               // Get the type
 //               char *tmp = NULL;
@@ -915,14 +920,14 @@ void printSteVarChain(node_st *steParentNode) {
 
 //       // Print the function symbol table
 //       printf("Symbol table entry:\n %s : %s (%s) \nsymbol type: %s, nesting level: %d\n", 
-//           STE_NAME(steParentNode), type, paramsPrint, stType, STE_NESTING_LEVEL(steParentNode));
+//           STE_NAME(steVarFirstNode), type, paramsPrint, stType, STE_NESTING_LEVEL(steVarFirstNode));
 
 //       // Free the params memory when done because it is not needed anymore
 //       MEMfree(paramsPrint);
 //     } else {
 //       // Print var Ste: "name, type"
 //       printf("Symbol table entry:\n %s : %s\nsymbol type: %s, nesting level: %d\n", 
-//           STE_NAME(steParentNode), type, stType, STE_NESTING_LEVEL(steParentNode));
+//           STE_NAME(steVarFirstNode), type, stType, STE_NESTING_LEVEL(steVarFirstNode));
 //     }
 //   }
 // }
