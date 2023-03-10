@@ -26,6 +26,91 @@ node_st *globalFirstSteFunLinking = NULL;
 node_st *fundefFirstSteVarLinking = NULL;
 node_st *fundefFirstSteFunLinking = NULL;
 
+// Helper to avoid code duplication. Returns the name of an Ste
+char *getSteName(node_st *steNode, char *steType) {
+    if (strcmp("var", steType) == 0) {
+        return STEVAR_NAME(steNode);
+    } else {
+        return STEFUN_NAME(steNode);
+    }
+}
+
+// Helper to avoid code duplication. Returns the next Ste
+node_st *getNextSte(node_st *steNode, char *steType) {
+    if (strcmp("var", steType) == 0) {
+        return STEVAR_NEXT(steNode);
+    } else {
+        return STEFUN_NEXT(steNode);
+    }
+}
+
+// Helper to avoid code duplication. Returns a found Ste node or NULL if no match is found
+node_st *findSteNodeInSteChain(node_st *firstChainSte, char *name, char *steType) {
+    node_st *steIterator = firstChainSte;
+    do {
+        // Match found, return Ste node. Use string comparison 
+        // to check for equality, 0 means equal. == only checks if memory references are equal
+        char *tempSteName = getSteName(steIterator, steType);
+        // Add NULL check to avoid Segmentation fault
+        if (tempSteName != NULL && strcmp(tempSteName, name) == 0) {
+            printf("**********************Link found for: %s\n", name);
+            // Return Ste found, automatically stops the execution of this function with the return
+            return steIterator;
+        }
+
+        // Update steIterator
+        steIterator = getNextSte(steIterator, steType);
+    } while (steIterator != NULL);
+
+    // No link found
+    return NULL;
+}
+
+// Find an Ste node that has the specified name
+node_st *findSteLink(char *name, char *steType) {
+    printf("Trying to find Ste for: %s\n", name);
+
+    // Create pointers and use a parameter steType to avoid creating two almost the same functions
+    node_st *firstSteFunDefChain = NULL;
+    node_st *firstSteGlobalChain = NULL;
+
+    if (strcmp("var", steType) == 0) {
+        // Set to SteVar chain
+        firstSteFunDefChain = fundefFirstSteVarLinking;
+        firstSteGlobalChain = globalFirstSteVarLinking;
+    } else {
+        // Set to SteFun chain
+        firstSteFunDefChain = fundefFirstSteFunLinking;
+        firstSteGlobalChain = globalFirstSteFunLinking;
+    }
+
+    /*
+    First search in the fundef chain because you want the closest Ste to be linked.
+    If it is not in the current fundef chain, then search in the global chain.
+    If it is not in the global chain then give an error that there is no link found!
+    */
+    if (firstSteFunDefChain != NULL) {
+        node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteFunDefChain, name, steType);
+        if (foundSteNodeInChain != NULL) {
+            // Return Ste found, automatically stops the execution of this function with the return
+            return foundSteNodeInChain;
+        }
+    } 
+
+    // Search in the global chain if fundef chain is NULL or symbol not found there
+    // If the return statement of the previous search is not called it will get to this part
+    if (firstSteGlobalChain != NULL) {
+        node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteGlobalChain, name, steType);
+        if (foundSteNodeInChain != NULL) {
+            // Return Ste found, automatically stops the execution of this function with the return
+            return foundSteNodeInChain;
+        }
+    }
+
+    // No existing symbol found, return NULL
+    return NULL;
+}
+
 // Check for argument numbers matching parameter numbers
 // bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
 //     // Get the parameter count
@@ -62,57 +147,6 @@ node_st *fundefFirstSteFunLinking = NULL;
 //         return false;
 //     }
 // }
-
-// Find an Ste node that has the specified name
-node_st *findSteVarLink(char *name) {
-    printf("Trying to find SteVar for: %s\n", name);
-
-    /*
-    First search in the fundef chain because you want the closest Ste to be linked.
-    If it is not in the current fundef chain, then search in the global chain.
-    If it is not in the global chain then give an error that there is no link found!
-    */
-    if (fundefFirstSteVarLinking != NULL) {
-        node_st *steVarIterator = fundefFirstSteVarLinking;
-        do {
-            // Match found, return Ste node. Use string comparison 
-            // to check for equality, 0 means equal. == only checks if memory references are equal
-            if (strcmp(STEVAR_NAME(steVarIterator), name) == 0) {
-                printf("**********************Link found for: %s\n", name);
-                // Return Ste found, automatically stops the execution of this function with the return
-                return steVarIterator;
-            }
-
-            // Update steVarIterator
-            steVarIterator = STEVAR_NEXT(steVarIterator);
-        } while (steVarIterator != NULL);
-    } 
-
-    // Search in the global chain if fundef chain is NULL or symbol not found there
-    // If the return statement of the previous search is not called it will get to this part
-    if (globalFirstSteVarLinking != NULL) {
-        node_st *steVarIterator = globalFirstSteVarLinking;
-        do {
-            // Match found, return Ste node. Use string comparison 
-            // to check for equality, 0 means equal. == only checks if memory references are equal
-            if (strcmp(STEVAR_NAME(steVarIterator), name) == 0) {
-                printf("**********************Link found for: %s\n", name);
-                // Return Ste found, automatically stops the execution of this function with the return
-                return steVarIterator;
-            }
-
-            // Update steVarIterator
-            steVarIterator = STEVAR_NEXT(steVarIterator);
-        } while (steVarIterator != NULL);
-    }
-
-    // No existing symbol found, return NULL
-    return NULL;
-}
-
-node_st *findSteFunLink(char *name) {
-    
-}
 
 /**
  * @fn LSTEprogram
@@ -176,7 +210,7 @@ node_st *LSTEvar(node_st *node)
     printf("var occurrence!\n");
 
     // Update this link from var to the Ste with the given name 
-    node_st *steNode = findSteVarLink(VAR_NAME(node));
+    node_st *steNode = findSteLink(VAR_NAME(node), "var");
     if (steNode != NULL) {
         // Save Ste node in link attribute
         VAR_STE_LINK(node) = steNode;
@@ -200,7 +234,7 @@ node_st *LSTEvarlet(node_st *node)
     printf("varlet occurrence!\n");
 
     // Update this link from var to the Ste with the given name 
-    node_st *steNode = findSteVarLink(VARLET_NAME(node));
+    node_st *steNode = findSteLink(VARLET_NAME(node), "var");
     if (steNode != NULL) {
         // Save Ste node in link attribute
         VARLET_STE_LINK(node) = steNode;
