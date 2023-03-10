@@ -39,6 +39,10 @@ node_st *initFunDefNode = NULL;
 node_st *firstGlobdefStmts = NULL;
 node_st *currentGlobdefStmts = NULL;
 
+// node_st * global variables are used for building and updating the new nodes
+node_st *firstVardeclStmts = NULL;
+node_st *currentVardeclStmts = NULL;
+
 // vardecls in een lijst
 // __init maak je aan met ASTfundef, alle initializaties, worden stmts, alleen voor globdef hoeft dit
 // export int a = 3; 
@@ -62,6 +66,21 @@ void updateGlobDefStmts(node_st *newStmts) {
     }
 }
 
+// Helper function to update the global vardecl Stmts nodes helper variables
+void updateVarDeclStmts(node_st *newStmts) {
+    if (newStmts != NULL) {
+        if (firstVardeclStmts != NULL) {
+            // Save the next and update current globdef stmts
+            STMTS_NEXT(currentVardeclStmts) = newStmts;
+            currentVardeclStmts = newStmts;
+        } else {
+            // Save it as the first Stmts
+            firstVardeclStmts = newStmts;
+            currentVardeclStmts = newStmts;
+        }
+    }
+}
+
 // TODO: convert. Aparently you cannot create a Decl as a FunDef and save it in a Decls node as Decl
 // node_st *createInitFunDefWithStmts(node_st *stmtsNode) {
 //     return ASTfundef(NULL, NULL, CT_void, "__init", false);
@@ -73,6 +92,7 @@ void updateGlobDefStmts(node_st *newStmts) {
  */
 node_st *RAprogram(node_st *node)
 {
+    // TODO: maybe start with the other part, the vardecls, then focus on the __init function or leave it until class!
     TRAVdecls(node);
 
     return node;
@@ -138,6 +158,10 @@ node_st *RAfunbody(node_st *node)
     // Then traverse the Stmts and prepend the new Stmts nodes collected from the VarDecls
     TRAVstmts(node);
 
+    // Reset the temp helper variables after every funbody traversal
+    firstVardeclStmts = NULL;
+    currentVardeclStmts = NULL;
+
     return node;
 }
 
@@ -146,18 +170,23 @@ node_st *RAfunbody(node_st *node)
  */
 node_st *RAvardecl(node_st *node)
 {
-    // if init then it has an initialization: "= Expr"
-    // if (VARDECL_INIT(node) != NULL) {
-    //   //TODO: HOW TO CREATE THE __init function for the compiler
-      
-    //   // Create a copy of the nodes and then free this node to create separate nodes
-    //   //TODO: is this correct????
-    //   // Important: only use Copy when you want to have it at two different locations
-    //   // No need to Copy here because it is re-used here because it is set to NULL afterwards
-    //   node_st *init = VARDECL_INIT(node);
-    //   // Set init to NULL, to only keep declaration (such as int a;)
-    //   VARDECL_INIT(node) = NULL;
-    // }
+    // If the vardecl has an initialization, convert it
+    if (VARDECL_INIT(node) != NULL) {
+        // First convert it to a Varlet node and an Assign node
+        //TODO: what to do with the Link attribute, probably this traversal should be before the CA right?!
+        // Create copies to avoid pointing to the same reference twice
+        char *copiedVarDeclName = STRcpy(VARDECL_NAME(node));
+        node_st *newVarletNode = ASTvarlet(copiedVarDeclName);
+        node_st *copiedVarDeclExpr = CCNcopy(VARDECL_INIT(node));
+
+        node_st *newAssignNode = ASTassign(newVarletNode, copiedVarDeclExpr);
+
+        // Add the new AssignNode to the global Stmts helper variable
+        updateVarDeclStmts(newAssignNode);
+
+        // Then update this VarDecl node by setting the initialization to NULL
+       VARDECL_INIT(node) = NULL;
+    }
     
     return node;
 }
