@@ -1,0 +1,7 @@
+export int a = 5;
+export int b = 7;
+export bool c = true;
+export float d = 5.546;
+extern int e;
+extern bool f;
+extern float g;

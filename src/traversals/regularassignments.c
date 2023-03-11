@@ -32,17 +32,19 @@
 #include "palm/str.h"
 
 // This global variable for Decls is used to put the __init function at the top
-bool firstDeclsNode = true;
-node_st *initFunDefNode = NULL;
+// bool firstDeclsNode = true;
+//node_st *initFunDefNode = NULL;
 
 // node_st * global variables are used for building and updating the new nodes
 node_st *firstGlobdefStmts = NULL;
 node_st *currentGlobdefStmts = NULL;
 
+// This variable is used to determine the last globdef node to append the __init function to
+node_st *lastGlobDefNode = NULL;
+
 // node_st * global variables are used for building and updating the new nodes
 node_st *firstVardeclStmts = NULL;
 node_st *currentVardeclStmts = NULL;
-bool firstStmtsNode = true;
 
 // vardecls in een lijst
 // __init maak je aan met ASTfundef, alle initializaties, worden stmts, alleen voor globdef hoeft dit
@@ -98,17 +100,25 @@ node_st *RAprogram(node_st *node)
     // First traverse the GlobDefs to convert the initializations
     TRAVdecls(node);
 
-    // Update the Stmts of the funbody
-    if (firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
-        node_st *initFunBody = ASTfunbody(NULL, firstGlobdefStmts);
-        node_st *initFunDef = ASTfundef(initFunBody, NULL, CT_void, "__init", false);
-        node_st *newFirstDeclsNode = ASTdecls(initFunDef, PROGRAM_DECLS(node));
-        PROGRAM_DECLS(node) = newFirstDeclsNode;
-        // node_st *newDeclsNode;
-        // // First update the last Decls node of the GlobDef initializations with the current Decls
-        // DECLS_NEXT(currentGlobdefStmts) = PROGRAM_DECLS(node);
-        // // Then update the programs's decls with the new first Decls (which also contains the old Decls chain)
-        // PROGRAM_DECLS(node) = firstGlobdefStmts;
+    /*
+    Update the Stmts of the funbody.
+    If lastGlobDefNode is NULL, then there were no GlobDef occurrences. And if firstGlobdefStmts 
+    or currentGlobdefStmts is NULL, that means that there were no GlobDef initializations, so no
+    need to create the __init function then.
+    Otherwise, create the __init function and append it to the last globdef node in the program.
+    */ 
+    if (lastGlobDefNode != NULL && firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
+        // TODO: why does this return an invalid pointer???
+        node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
+            NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefNode));
+            // TODO: this is not working because lastGlobDefNode is a GlobDef and not a Decls node
+        DECLS_NEXT(lastGlobDefNode) = newDeclsNode;
+
+
+        // node_st *initFunBody = ASTfunbody(NULL, firstGlobdefStmts);
+        // node_st *initFunDef = ASTfundef(initFunBody, NULL, CT_void, "__init", false);
+        // node_st *newFirstDeclsNode = ASTdecls(initFunDef, PROGRAM_DECLS(node));
+        // PROGRAM_DECLS(node) = newFirstDeclsNode;
     }
 
     return node;
@@ -127,12 +137,7 @@ node_st *RAdecls(node_st *node)
     // If there are no next decls anymore, create the FunDef __init at the top
     // Last Decls node, so create and print the __init function
     // TODO: save it at the top, how to do that????? First focus on the creation and make that work, etc, later link it to the top!
-    if (DECLS_NEXT(node) == NULL) {
-
-    } else {
-        // Go to the next decls
-        TRAVnext(node);
-    }
+    TRAVnext(node);
 
     return node;
 }
@@ -144,32 +149,11 @@ node_st *RAglobdef(node_st *node)
 {
     printf("getting to globdef in RA*************\n");
 
-
-    // // If the vardecl has an initialization, convert it
-    // if (VARDECL_INIT(node) != NULL) {        
-    //     // Create copies to avoid pointing to the same reference twice
-    //     char *copiedVarDeclName = STRcpy(VARDECL_NAME(node));
-
-    //     // Create new VarLet, Assign and Stmts node, use the current INIT Expr node
-    //     // TODO: is this correct, no copies required or????
-    //     // TODO: what to do with the Link attribute, probably this traversal should be before the CA right?!
-    //     node_st *newStmtsNodeVarDecl = ASTstmts(ASTassign(ASTvarlet(copiedVarDeclName), VARDECL_INIT(node)), NULL);
-
-    //     // Add the new AssignNode to the global Stmts helper variables
-    //     updateVarDeclStmts(newStmtsNodeVarDecl);
-
-    //     // Then update this VarDecl node by setting the initialization to NULL
-    //     VARDECL_INIT(node) = NULL;
-    // }
-
-
     // If the globdef has an initialization, convert it
     if (GLOBDEF_INIT(node) != NULL) {
+        printf("globdef converting*************\n");
         // Create copies to avoid pointing to the same reference twice
         char *copiedGlobDefName = STRcpy(GLOBDEF_NAME(node));
-        // node_st *newVarletNode = ASTvarlet(copiedGlobDefName);
-        // node_st *copiedGlobDefExpr = CCNcopy(GLOBDEF_INIT(node));
-        // node_st *newAssignNode = ASTassign(newVarletNode, copiedGlobDefExpr);
 
         // Create new VarLet, Assign and Stmts node, use the current INIT Expr node
         // TODO: is this correct, no copies required or????
@@ -183,14 +167,11 @@ node_st *RAglobdef(node_st *node)
         GLOBDEF_INIT(node) = NULL;
     }
 
-    return node;
-}
+    // Update the lastGlobDefNode every time you traverse a GlobDef, 
+    // this node will be used to append the __init FunDef to
+    lastGlobDefNode = node;
 
-/**
- * @fn RAfundef
- */
-node_st *RAfundef(node_st *node) {
-    
+    return node;
 }
 
 /**
@@ -202,7 +183,7 @@ node_st *RAfunbody(node_st *node)
     TRAVdecls(node);
 
     // Set first stmts node to true because you are entering a new set of Stmts in a new funbody
-    // firstStmtsNode = true;
+    // lastGlobDefNode = true;
 
     // Update the Stmts of the funbody
     if (firstVardeclStmts != NULL && currentVardeclStmts != NULL) {

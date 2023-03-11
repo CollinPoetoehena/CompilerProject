@@ -1,0 +1,9 @@
+export int a;
+export int b;
+extern bool c;
+
+void foo() {
+    int a;
+    int b;
+    int c;
+}
