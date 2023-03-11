@@ -1,6 +1,6 @@
-export int a = 5;
-export int b = 7;
-extern bool c;
+// export int a = 5;
+// export int b = 7;
+// extern bool c;
 
 void foo(int a, float b, bool c) {
     // Vardecls
@@ -14,15 +14,15 @@ void foo(int a, float b, bool c) {
     c = true;
 }
 
-void faa() {
-    // Vardecls
-    int d = 5;
-    float e = 8.574;
-    bool c = false;
+// void faa() {
+//     // Vardecls
+//     int d = 5;
+//     float e = 8.574;
+//     bool c = false;
 
-    // Statements
-    d = 5;
-    e = 5.46;
-    c = true;
+//     // Statements
+//     d = 5;
+//     e = 5.46;
+//     c = true;
     
-}
+// }
