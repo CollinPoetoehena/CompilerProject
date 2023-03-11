@@ -94,7 +94,7 @@ node_st *RAprogram(node_st *node)
         node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
             NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
         DECLS_NEXT(lastGlobDefDeclsNode) = newDeclsNode;
-        // TODO: why does this return an invalid pointer??? or a Segmentation fault??
+        // TODO: why does this return an invalid pointer??? or a Segmentation fault??**************************************************************
     }
 
     return node;

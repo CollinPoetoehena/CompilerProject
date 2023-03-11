@@ -31,6 +31,8 @@ start phase RootPhase {
 // create a pass CodeGeneration with all the traversals in it and where to find what to do???
 // And how to start and how to test, etc.
 
+// TODO: milestone 10, what to do with funcalls?
+
 
 
 
@@ -158,7 +160,7 @@ traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     //TODO: is this correct?
     // It traverses all Cast expressions and turns boolean arguments/results into Constants (Float,Num,Bool)
-    nodes = {Cast}
+    nodes = {Cast, Expr, }
 };
 
 enum Type {
