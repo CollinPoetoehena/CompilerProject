@@ -28,5 +28,4 @@ void faa() {
     d = 5;
     e = 5.46;
     c = true;
-    
 }
