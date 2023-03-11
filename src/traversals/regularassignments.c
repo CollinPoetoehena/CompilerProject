@@ -31,28 +31,17 @@
 // Palm library for easy working with strings
 #include "palm/str.h"
 
-// This global variable for Decls is used to put the __init function at the top
-// bool firstDeclsNode = true;
-//node_st *initFunDefNode = NULL;
-
 // node_st * global variables are used for building and updating the new nodes
 node_st *firstGlobdefStmts = NULL;
 node_st *currentGlobdefStmts = NULL;
 
-// This variable is used to determine the last globdef node to append the __init function to
-node_st *lastGlobDefNode = NULL;
+// This variable is used to determine the last Decls node with a GlobDef node to append the __init function to
+node_st *tempDeclsNode = NULL;
+node_st *lastGlobDefDeclsNode = NULL;
 
 // node_st * global variables are used for building and updating the new nodes
 node_st *firstVardeclStmts = NULL;
 node_st *currentVardeclStmts = NULL;
-
-// vardecls in een lijst
-// __init maak je aan met ASTfundef, alle initializaties, worden stmts, alleen voor globdef hoeft dit
-// export int a = 3; 
-// init func heeft dan a = 3;
-
-// funbody travdecls
-// daarna travstmts initalizaties normale stmts maken en prependen aan de bestaande stmts
 
 // Helper function to update the global globdef Stmts nodes helper variables
 void updateGlobDefStmts(node_st *newStmts) {
@@ -62,8 +51,6 @@ void updateGlobDefStmts(node_st *newStmts) {
             STMTS_NEXT(currentGlobdefStmts) = newStmts;
             currentGlobdefStmts = newStmts;
         } else {
-            // // First create a new Stmts node
-            // node_st *newStmtsNode = ASTstmts(newStmts, NULL);
             // Save it as the first Stmts
             firstGlobdefStmts = newStmts;
             currentGlobdefStmts = newStmts;
@@ -86,12 +73,6 @@ void updateVarDeclStmts(node_st *newStmts) {
     }
 }
 
-// TODO: convert. Aparently you cannot create a Decl as a FunDef and save it in a Decls node as Decl
-// node_st *createInitFunDefWithStmts(node_st *stmtsNode) {
-//     return ASTfundef(NULL, NULL, CT_void, "__init", false);
-// }
-
-
 /**
  * @fn RAprogram
  */
@@ -102,23 +83,18 @@ node_st *RAprogram(node_st *node)
 
     /*
     Update the Stmts of the funbody.
-    If lastGlobDefNode is NULL, then there were no GlobDef occurrences. And if firstGlobdefStmts 
+    If lastGlobDefDeclsNode is NULL, then there were no GlobDef occurrences. And if firstGlobdefStmts 
     or currentGlobdefStmts is NULL, that means that there were no GlobDef initializations, so no
     need to create the __init function then.
     Otherwise, create the __init function and append it to the last globdef node in the program.
     */ 
-    if (lastGlobDefNode != NULL && firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
-        // TODO: why does this return an invalid pointer???
+    if (lastGlobDefDeclsNode != NULL && firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
+        // Init function will be put after the last GlobDef node 
+        // (not the GlobDecls because GlobDecls) do not have an initialization
         node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
-            NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefNode));
-            // TODO: this is not working because lastGlobDefNode is a GlobDef and not a Decls node
-        DECLS_NEXT(lastGlobDefNode) = newDeclsNode;
-
-
-        // node_st *initFunBody = ASTfunbody(NULL, firstGlobdefStmts);
-        // node_st *initFunDef = ASTfundef(initFunBody, NULL, CT_void, "__init", false);
-        // node_st *newFirstDeclsNode = ASTdecls(initFunDef, PROGRAM_DECLS(node));
-        // PROGRAM_DECLS(node) = newFirstDeclsNode;
+            NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
+        DECLS_NEXT(lastGlobDefDeclsNode) = newDeclsNode;
+        // TODO: why does this return an invalid pointer???
     }
 
     return node;
@@ -129,14 +105,14 @@ node_st *RAprogram(node_st *node)
  */
 node_st *RAdecls(node_st *node)
 {
-    // TODO: make sure that the __init function is the top-level function, use boolean global value
+    // Update the tempDeclsNode every time you traverse a Decls, 
+    // this node will be used to append the __init FunDef to
+    tempDeclsNode = node;
 
     // Go to the traversal function of the decl
     TRAVdecl(node);
 
-    // If there are no next decls anymore, create the FunDef __init at the top
-    // Last Decls node, so create and print the __init function
-    // TODO: save it at the top, how to do that????? First focus on the creation and make that work, etc, later link it to the top!
+    // Go to the next Decls
     TRAVnext(node);
 
     return node;
@@ -147,11 +123,11 @@ node_st *RAdecls(node_st *node)
  */
 node_st *RAglobdef(node_st *node)
 {
-    printf("getting to globdef in RA*************\n");
+    // If the Decls that is traversed is a GlobDef node, then confirm the last Decls variable
+    lastGlobDefDeclsNode = tempDeclsNode;
 
     // If the globdef has an initialization, convert it
     if (GLOBDEF_INIT(node) != NULL) {
-        printf("globdef converting*************\n");
         // Create copies to avoid pointing to the same reference twice
         char *copiedGlobDefName = STRcpy(GLOBDEF_NAME(node));
 
@@ -167,10 +143,6 @@ node_st *RAglobdef(node_st *node)
         GLOBDEF_INIT(node) = NULL;
     }
 
-    // Update the lastGlobDefNode every time you traverse a GlobDef, 
-    // this node will be used to append the __init FunDef to
-    lastGlobDefNode = node;
-
     return node;
 }
 
@@ -181,9 +153,6 @@ node_st *RAfunbody(node_st *node)
 {
     // First traverse the VarDecls to convert the initializations
     TRAVdecls(node);
-
-    // Set first stmts node to true because you are entering a new set of Stmts in a new funbody
-    // lastGlobDefNode = true;
 
     // Update the Stmts of the funbody
     if (firstVardeclStmts != NULL && currentVardeclStmts != NULL) {
@@ -228,18 +197,6 @@ node_st *RAvardecl(node_st *node)
     // Go to the next VarDecls to traverse that ndoe
     TRAVnext(node);
     
-    return node;
-}
-
-/**
- * @fn RAstmts
- */
-node_st *RAstmts(node_st *node)
-{
-    // TODO: does this need to be here or is nothing done with the stmts??
-    TRAVstmt(node);
-
-
     return node;
 }
 
