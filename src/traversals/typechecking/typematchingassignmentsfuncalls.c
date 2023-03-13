@@ -83,52 +83,9 @@ char *getTypeForPrinting(enum Type type) {
 }
 
 // TODO: create type signature lookup for built-in operators
-enum Type getTypeSignatureBuiltinOperator(enum Type firstType, enum Type secondType) {
+// Helper function to get the type signature of the Binop built-in operators
+enum Type getTypeSignatureBinOpOperator(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
     /*
-    list of all the type signatures of the operators in CiviC (see chapter 4: expression language):
-
-    Arithmetic operators:
-    '+' : int x int -> int
-    '+' : float x float -> float
-    '+' : bool x bool -> bool (implements strict logic disjunction)
-    '-' : int x int -> int
-    '-' : float x float -> float
-    '*' : int x int -> int
-    '*' : float x float -> float
-    '*' : bool x bool -> bool (implements strict logic conjunction)
-    '/' : int x int -> int
-    '/' : float x float -> float
-    '%' : int x int -> int
-
-    Relational operators:
-    // The relational operators for equality and inequality are defined on all basic types
-    //  On Boolean operands they complement strict logic disjunction and conjunction 
-    // in supporting all potential relationships between two Boolean values
-    '==' : T x T -> bool, where T is any basic type
-    '!=' : T x T -> bool, where T is any basic type
-    // The remaining four relational operators are only defined for integer and floating point numbers as operand values
-    '<' : int x int -> bool
-    '<' : float x float -> bool
-    '<=' : int x int -> bool
-    '<=' : float x float -> bool
-    '>' : int x int -> bool
-    '>' : float x float -> bool
-    '>=' : int x int -> bool
-    '>=' : float x float -> bool
-
-    Logical operators:
-    '&&' : bool x bool -> bool (short-circuits evaluation)
-    '||' : bool x bool -> bool (short-circuits evaluation)
-    
-    Unary operators:
-    '-' : int -> int
-    '-' : float -> float
-    // TODO: can unary minus be done on bool values???
-    // '-' : bool x bool -> bool (implements negation)
-    '!' : bool -> bool
-
-    Note: 'x' denotes the Cartesian product, and 'T' denotes any basic type (bool, int, or float).
-
     Explanation about Strict logic disjunction and conjunction:
         Strict logic disjunction and conjunction are logical operations that implement the logical OR 
         and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
@@ -143,14 +100,115 @@ enum Type getTypeSignatureBuiltinOperator(enum Type firstType, enum Type secondT
         It is implemented by the multiplication operator (*).
     */
 
-    // TODO: if secondType is NULL, then do unary operators, otherwise binop operators
-    if (firstType != NULL && secondType != NULL) {
+    if (firstType != NULL && secondType != NULL && operator != NULL) {
         // Use BinOp
+
+        /*
+        Arithmetic operators:
+
+        '+' : int x int -> int
+        '+' : float x float -> float
+        '+' : bool x bool -> bool (implements strict logic disjunction)
+        '-' : int x int -> int
+        '-' : float x float -> float
+        '*' : int x int -> int
+        '*' : float x float -> float
+        '*' : bool x bool -> bool (implements strict logic conjunction)
+        '/' : int x int -> int
+        '/' : float x float -> float
+        '%' : int x int -> int
+        */
+        if (operator == BO_add) {
+
+        } else if (operator == BO_sub) {
+            
+        } else if (operator == BO_mul) {
+            
+        } else if (operator == BO_div) {
+            
+        } else if (operator == BO_mod) {
+            
+        }
+
+        /*
+        Relational operators:
+        
+        'T' denotes any basic type (bool, int, or float)
+        The relational operators for equality and inequality are defined on all basic types
+        On Boolean operands they complement strict logic disjunction and conjunction 
+        in supporting all potential relationships between two Boolean values
+        '==' : T x T -> bool, where T is any basic type
+        '!=' : T x T -> bool, where T is any basic type
+        The remaining four relational operators are only defined for integer and floating point numbers as operand values
+        '<' : int x int -> bool
+        '<' : float x float -> bool
+        '<=' : int x int -> bool
+        '<=' : float x float -> bool
+        '>' : int x int -> bool
+        '>' : float x float -> bool
+        '>=' : int x int -> bool
+        '>=' : float x float -> bool
+        */
+        if (operator == BO_eq) {
+            
+        } else if (operator == BO_no) {
+
+        } else if (operator == BO_lt) {
+
+        } else if (operator == BO_le) {
+            
+        } else if (operator == BO_gt) {
+            
+        } else if (operator == BO_ge) {
+            
+        }
+
+        /*
+        Logical operators:
+
+        '&&' : bool x bool -> bool (short-circuits evaluation)
+        '||' : bool x bool -> bool (short-circuits evaluation)
+        */
+        if (operator == BO_and) {
+            
+        } else if (operator == BO_or) {
+
+        }
     }
 
-    if (firstType != NULL && secondType == NULL) {
-        // Use MonOp
+    // No type signature found, return NULL
+    return NULL;
+}
+
+// Helper function to get the type signature of the Binop built-in operators
+enum Type getTypeSignatureMonOpOperator(enum Type firstType, enum MonOpEnum operator) {
+    // Create type signatures for MonOp nodes
+    if (firstType != NULL && operator != NULL) {
+        /*
+         Unary operators:
+        '-' : int -> int
+        '-' : float -> float
+        // TODO: can unary minus be done on bool values???
+        // '-' : bool x bool -> bool (implements negation)
+        '!' : bool -> bool
+        */
+        if (operator == MO_neg) {
+            // unary minus (-, MO_neg), arithmetic negation, used for arithmetic values (=numbers, etc)
+            if (firstType == CT_bool) {
+                return CT_bool;
+            }
+        } else if (operator == MO_not) {
+            // logical negation (!, MO_not), used for boolean values (true, false)
+            if (firstType == CT_int) {
+                return CT_int;
+            } else if (firstType == CT_float) {
+                return CT_float;
+            }
+        }
     }
+
+    // No type signature found, return NULL
+    return NULL;
 }
 
 // Helper function to check for condition type of statements
@@ -443,6 +501,9 @@ node_st *TMAFbinop(node_st *node)
     // Yield operator result type (use helper function)
     // TODO
 
+    // Update this operator node with the type signature just obtained to use later in code generation
+    // TODO
+
     return node;
 }
 
@@ -457,6 +518,9 @@ node_st *TMAFmonop(node_st *node)
     TRAVoperand(node);
 
     // Yield operator result type (use helper function)
+    // TODO
+
+    // Update this operator node with the type signature just obtained to use later in code generation
     // TODO
 
     return node;

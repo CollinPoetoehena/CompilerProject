@@ -1,0 +1,8 @@
+void foo() {
+    // TODO: change to all possible occurrences of type signatures of built-in operators
+    
+    // MonOps success
+    
+
+    // MonOps failure
+}

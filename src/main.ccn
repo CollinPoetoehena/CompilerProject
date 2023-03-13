@@ -125,38 +125,19 @@ phase ContextAnalysis {
 // This traversal should transform Variable Initialisations into Regular Assignments
 traversal RegularAssignments {
     uid = RA,
-    // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
     nodes = { Program, Decls, GlobDef, FunBody, VarDecl, For}
-    // FunBody is used to first traverse the VarDecls and then the Stmts and append the 
-    // saved initializations to the stmts, these are filled after TRAVdecls(node) of FunBody
-    // For loop has something special to it, the above nodes are the correct nodes
 };
 
-// TODO: Make TypeChecking for the compiler
 // The TypeChecking phase is used to check all the types
 phase TypeChecking {
     actions {
-        // TODO: create type inference for expressions
-        // TODO: what to do here, how to do type inference and save it to the nodes????
-        // traversal TypeInferenceExpressions {
-        //     uid = TIE,
-        //     //TODO: are these nodes correct??
-        //     nodes = {
-        //         // Expr to save the 
-        //         Expr,
-        //         // Extend these nodes with the type signature of the built-in operators with the given expr types
-        //         Binop, Monop
-        //         // Constants to yield the correct type
-        //         Float, Bool, Num
-        //     }
-        // };
-
-        // TODO: create type matching and produce errors
-        // TODO: maybe split it in more traversals, ask TA for best approach???
+        // This traversal is used for type checking, such as matching assignments and funcall types
         traversal TypeMatchingAssignmentsFunCalls {
             uid = TMAF,
-            // TODO: are these nodes correct??
             nodes = {
+                /*
+                    These nodes are used for checking the types
+                */
                 // Foreach function definition
                 FunDef,
                 // Traverse into the function body
@@ -172,10 +153,10 @@ phase TypeChecking {
                 For,
                 // Case return: ...
                 Return,
-                // Then continue with next statement
-
-                // TODO: is this correct here or in a separate traversal and save type in nodes??
-                // This part is to infer the types of the Expression
+                // Then continue with next statement...
+                /*
+                    These nodes are used to infer the types of the Expression
+                */
                 // Case FunCall: Foreach argument expression: Infer argument type
                 // Compare with corresponding parameter type. Yield function return type
                 FunCall, Exprs,
@@ -471,7 +452,7 @@ node Binop {
 
     attributes {
         BinOpEnum op { constructor },
-        // TODO: is this correct for the type signature???
+        // Save the infered operator type in typechecking in the node to use in code generation later
         Type operator_type_signature
     }
 };
@@ -483,7 +464,7 @@ node Monop {
 
     attributes {
         MonOpEnum op { constructor },
-        // TODO: is this correct for the type signature???
+        // Save the infered operator type in typechecking in the node to use in code generation later
         Type operator_type_signature
     }
 };
