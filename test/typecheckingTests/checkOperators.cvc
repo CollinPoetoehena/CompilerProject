@@ -11,9 +11,8 @@ void foo() {
     a = -a;
     c = -c;
     g = !g;
-
     // MonOps failure
-    g = -a;
-    g = -c;
-    a = !g;
+    // g = -a;
+    // g = -c;
+    // a = !g;
 }

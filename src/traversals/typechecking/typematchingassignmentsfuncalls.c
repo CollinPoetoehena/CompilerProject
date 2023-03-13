@@ -82,8 +82,7 @@ char *getTypeForPrinting(enum Type type) {
   return printType;
 }
 
-// TODO: create type signature lookup for built-in operators
-// Helper function to get the type signature of the Binop built-in operators
+// Helper function to get the type signature of the BinOp built-in operators
 enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
     /*
     Explanation about Strict logic disjunction and conjunction:
@@ -180,7 +179,7 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
     return CT_NULL; // CT_NULL is the NULL type
 }
 
-// Helper function to get the type signature of the Binop built-in operators
+// Helper function to get the type signature of the MonOp built-in operators
 enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
     // Create type signatures for MonOp nodes
     if (firstType != NULL && operator != NULL) {
@@ -269,7 +268,7 @@ node_st *TMAFassign(node_st *node)
     // Get the varlet type from the Ste's link and compar it with the expr type
     if (tempType != STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node)))) {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in assignment %s", VARLET_NAME(ASSIGN_LET(node)));
+        CTI(CTI_ERROR, true, "type error in assignment: %s", VARLET_NAME(ASSIGN_LET(node)));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
@@ -290,10 +289,6 @@ node_st *TMAFifelse(node_st *node)
 {
     // Traverse the expr type to infer the type of the expression
     TRAVcond(node);
-
-    // TODO: remove after debugging
-    char *printexprType = getTypeForPrinting(tempType);
-    //printf("expr type of if else is: %s\n", printexprType);
 
     // Check if the condition expr is a Boolean, if so, traverse into then and else block
     if (checkConditionExpression(tempType, "if-statement")) {
@@ -407,7 +402,6 @@ node_st *TMAFreturn(node_st *node)
 /*
 *************************************************************************************************************************************************
 This part is for the type inference of the Expr
-TODO: is this correct or does it need to be in a separate traversal??
 */
 /**
  * @fn TMAFcast
@@ -529,7 +523,9 @@ node_st *TMAFmonop(node_st *node)
         tempType = inferedTypeMonOp;
         // Update this operator node with the type signature just obtained to use later in code generation
         MONOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeMonOp;
-        // TODO
+        // TODO: remove after debugging
+        char *printexprType = getTypeForPrinting(MONOP_OPERATOR_TYPE_SIGNATURE(node));
+        printf("type signature for monop: %s\n", printexprType);
     }    
 
     return node;
