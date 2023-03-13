@@ -64,6 +64,10 @@ void foo() {
     // g = a >= b;
     // g = c >= d;
 
+    // Logical operators
+    e = f && g;
+    g = f || e;
+
     /*
     ************************ BinOps operator failures ************************
     */ 
@@ -98,6 +102,12 @@ void foo() {
 
     // g = a >= d;
     // g = c >= b;
+
+    // Logical operators
+    e = f && a; // bool and int
+    g = f || c; // bool and float
+    f = c && a; // float and int
+    g = b || d; // int and float
 
     /*
     ************************ BinOps return type failures ************************
@@ -134,4 +144,8 @@ void foo() {
 
     // d = a >= b;
     // b = c >= d;
+
+    // Logical operators
+    a = f && g; // bool return type for int variable a
+    c = f || e; // bool return type for float variable c
 }

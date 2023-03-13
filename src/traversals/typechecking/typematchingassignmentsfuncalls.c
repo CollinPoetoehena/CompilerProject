@@ -181,10 +181,11 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         '&&' : bool x bool -> bool (short-circuits evaluation)
         '||' : bool x bool -> bool (short-circuits evaluation)
         */
-        if (operator == BO_and) {
-            
-        } else if (operator == BO_or) {
-
+        if (operator == BO_and || operator == BO_or) {
+            // Logical operators can only be performed on bool
+            if (firstType == CT_bool && secondType == CT_bool) {
+                return CT_bool;
+            }
         }
     }
 
