@@ -13,12 +13,12 @@ void foo() {
     } while (false);
 
     // Failure
-    // do {
-    //     a = false;
-    // } while (b);
-    // do {
-    //     do {
-    //         b = 7;
-    //     } while (b);
-    // } while (a);
+    do {
+        a = false;
+    } while (b);
+    do {
+        do {
+            b = 7;
+        } while (b);
+    } while (a);
 }

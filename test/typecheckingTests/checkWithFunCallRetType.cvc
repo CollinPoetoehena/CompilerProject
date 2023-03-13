@@ -1,0 +1,30 @@
+void foo(int a, bool b, float c) {
+    bool d = true;
+    bool e = true;
+
+    bool f;
+    int g;
+    float h;
+
+    // Success
+    f = boolFun(d, e);
+    g = intFun(a);
+    h = floatFun(c);
+
+    // Failure
+    h = boolFun(d, e);
+    f = intFun(a);
+    g = floatFun(c);
+}
+
+bool boolFun(bool a, bool b) {
+    return a && b;
+}
+
+int intFun(int a) {
+    return a;
+}
+
+float floatFun(float a) {
+    return a;
+}

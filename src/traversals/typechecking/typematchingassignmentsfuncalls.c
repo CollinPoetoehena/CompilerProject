@@ -184,8 +184,7 @@ node_st *TMAFfundef(node_st *node)
  */
 node_st *TMAFfunbody(node_st *node)
 {
-    // Traverse the VarDecls for init expressions
-    // TODO: necessary??? because of regular assignments traversal???
+    // Traverse the VarDecls
     TRAVdecls(node);
 
     // Traverse into the Stmts
@@ -213,10 +212,6 @@ node_st *TMAFassign(node_st *node)
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
-    // TODO: remove after debugging
-    // char *printVarLetType = getTypeForPrinting(STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node))));
-    // char *printexprType = getTypeForPrinting(tempType);
-    // printf("expr type is: %s, type for assign is: %s\n", printexprType, printVarLetType);
 
     // Reset global type helper variable at the end
     tempType = CT_NULL; // CT_NULL is the NULL type
@@ -341,7 +336,10 @@ node_st *TMAFfor(node_st *node)
  */
 node_st *TMAFreturn(node_st *node)
 {
-    // TODO: what to do here????
+    // TODO: what to do here with the return????
+
+    TRAVexpr(node);
+
     return node;
 }
 
@@ -376,6 +374,7 @@ node_st *TMAFfuncall(node_st *node)
     tempArgumentIndex = 0;
     // Save the FunCall link to use for checking the arguments
     tempSteFunCallLink = FUNCALL_STE_LINK(node);
+    // Save the FunCall node itself for giving a specific type error
     tempSteFunCallNode = node;
     // Then, traverse to the arguments to infer the type of each argument using these variables
     TRAVargs(node);
@@ -388,9 +387,10 @@ node_st *TMAFfuncall(node_st *node)
 
     // Yield function return type after checking arguments
     tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
+    
     // TODO: remove after debugging
-    char *printingType = getTypeForPrinting(STEFUN_TYPE(FUNCALL_STE_LINK(node)));
-    printf("return type for funcall is: %s\n", printingType);
+    // char *printingType = getTypeForPrinting(STEFUN_TYPE(FUNCALL_STE_LINK(node)));
+    // printf("return type for funcall is: %s\n", printingType);
 
     return node;
 }
@@ -468,7 +468,7 @@ node_st *TMAFmonop(node_st *node)
  */
 node_st *TMAFvar(node_st *node)
 {
-    // Yield type from Ste
+    // Yield type from Ste link
     tempType = STEVAR_TYPE(VAR_STE_LINK(node));
 
     return node;
