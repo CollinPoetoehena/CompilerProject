@@ -1,0 +1,16 @@
+void foo() {
+    int a;
+    int b = 5;
+    float c = 5.4564;
+    bool d = false;
+
+    // Success
+    a = 5;
+    a = b;
+
+    // Failure
+    // a = 5.643;
+    // a = false;
+    // a = c;
+    // a = d;
+}

@@ -12,11 +12,12 @@
 // Include enums and types, for the Type
 #include "ccngen/enum.h"
 #include "ccn/ccn_types.h"
+#include "palm/dbug.h"
 // Include error functionality
 #include "palm/ctinfo.h"
 
 // Global helper variable to save the type in
-enum Type tempType = NULL;
+enum Type tempType = CT_NULL; // CT_NULL is the NULL type
 
 // Helper function to get the string type of the enum Type
 // Define at the top to avoid C return type error
@@ -115,6 +116,32 @@ enum Type getTypeSignatureBuiltinOperator(enum Type firstType, enum Type secondT
     }
 }
 
+// Helper function to reset all the temp variables
+void resetTempVariables() {
+    tempType = CT_NULL; // CT_NULL is the NULL type
+}
+
+// Check for argument types matching parameter types
+bool compareFunCallArgumentsTypes(node_st *steLink) {
+    // TODO: implement this function with argument types of funcall
+
+
+    // If the arguments are NULL, then there are no parameter types
+    if (STEFUN_PARAMS(steLink) != NULL) {
+        // Get the first param from the SteFun node
+        node_st *paramIterator = STEFUN_PARAMS(steLink);
+        do {
+            // TODO: add check for funcall argument
+
+            // Update parameter
+            paramIterator = PARAM_NEXT(paramIterator);
+        } while (paramIterator != NULL);
+    }
+    
+    // Got through every check, types are correct
+    return true;
+}
+
 /**
  * @fn TMAFfundef
  */
@@ -148,13 +175,22 @@ node_st *TMAFfunbody(node_st *node)
  */
 node_st *TMAFassign(node_st *node)
 {
+    printf("assign in typechecking\n");
+
     // Traverse the expr type to infer the type of the expression
     TRAVexpr(node);
 
     // Get the varlet type from the Ste's link and compar it with the expr type
+    if (tempType != STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node)))) {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in assignment %s", VARLET_NAME(ASSIGN_LET(node)));
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
     // TODO: remove after debugging
-    char *printingType = getTypeForPrinting(STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node))));
-    printf("type for assign is: %s\n", printingType);
+    char *printVarLetType = getTypeForPrinting(STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node))));
+    char *printexprType = getTypeForPrinting(tempType);
+    printf("expr type is: %s, type for assign is: %s\n", printexprType, printVarLetType);
 
     return node;
 }
@@ -307,9 +343,13 @@ node_st *TMAFfuncall(node_st *node)
     TRAVargs(node);
 
     // Compare with corresponding parameter types of fundef
-    // TODO: maybe save temp node_st* fundef for SteFun entry??
+    // TODO: maybe use SteFuns for it???? Implement the function
+    //compareFunCallArgumentsTypes(FUNCALL_STE_LINK(node));
 
     // Yield function return type
+    // TODO: remove after debugging
+    char *printingType = getTypeForPrinting(STEFUN_TYPE(FUNCALL_STE_LINK(node)));
+    printf("return type for funcall is: %s\n", printingType);
 
     return node;
 }
@@ -368,6 +408,11 @@ node_st *TMAFmonop(node_st *node)
  */
 node_st *TMAFnum(node_st *node)
 {
+    printf("num node in typechecking\n");
+    
+    // Yield int
+    tempType = CT_int;
+
     return node;
 }
 
@@ -378,6 +423,11 @@ node_st *TMAFnum(node_st *node)
  */
 node_st *TMAFfloat(node_st *node)
 {
+    printf("float node in typechecking\n");
+
+    // Yield float
+    tempType = CT_float;
+
     return node;
 }
 
@@ -388,5 +438,10 @@ node_st *TMAFfloat(node_st *node)
  */
 node_st *TMAFbool(node_st *node)
 {
+    printf("bool node in typechecking\n");
+        
+    // Yield bool
+    tempType = CT_bool;
+
     return node;
 }

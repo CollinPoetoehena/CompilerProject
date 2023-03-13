@@ -59,8 +59,8 @@ node_st *PRTprogram(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the ste's for the global variables and global fundefs here on the top!
-    printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
-    printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
+    // printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
+    // printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
 
     // Go to child and print it
     TRAVdecls(node);
@@ -147,9 +147,9 @@ node_st *PRTfundef(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the ste's of the variables as a structured comment
-    printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
-    // Print its own symbol table for its function definition
-    printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
+    // printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
+    // // Print its own symbol table for its function definition
+    // printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
 
     return node;
 }

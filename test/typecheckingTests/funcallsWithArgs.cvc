@@ -1,0 +1,7 @@
+void foo(int a, float b, bool c) {
+    // Success
+    foo(5, 5.45645, true);
+
+    // Error
+    // foo(true, 5.5646, 2);
+}
