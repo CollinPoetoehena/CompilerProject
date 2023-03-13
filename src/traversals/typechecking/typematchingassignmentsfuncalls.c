@@ -108,7 +108,7 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
     if (firstType != NULL && secondType != NULL && operator != NULL) {
         char *firstTypePrint = getTypeForPrinting(firstType);
         char *secondTypePrint = getTypeForPrinting(secondType);
-        printf("********types of operators are: %s and %s\n\n", firstTypePrint, firstTypePrint);
+        printf("********types of operators are: %s and %s\n\n", firstTypePrint, secondTypePrint);
         /*
         Arithmetic operators:
 
@@ -193,8 +193,9 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
             // Logical operators can only be performed on bool
             char *firstTypePrint = getTypeForPrinting(firstType);
             char *secondTypePrint = getTypeForPrinting(secondType);
-            printf("********types of logic operators are: %s and %s\n", firstTypePrint, firstTypePrint);
+            printf("********types of logic operators are: %s and %s\n", firstTypePrint, secondTypePrint);
             if (firstType == CT_bool && secondType == CT_bool) {
+                printf("getting here!!********\n");
                 return CT_bool;
             }
         }
@@ -561,6 +562,7 @@ node_st *TMAFbinop(node_st *node)
         printf("temptype after right of binop: %s\n", getTypeForPrinting(tempType));
 
     // TODO: ERROR WITH TEMPTYPECHECKING.CVC, with multiple binops it does the first type twice, why?????
+    // checked memory addresses and they are different, so not the same pointers!
 
     // Yield operator result type (use helper function)
     enum Type inferedTypeBinOp = getTypeSignatureBinOp(binopLeftExprType, binopRightExprType, BINOP_OP(node));
@@ -572,6 +574,12 @@ node_st *TMAFbinop(node_st *node)
         // TODO: remove after debugging
         char *printexprType = getTypeForPrinting(BINOP_OPERATOR_TYPE_SIGNATURE(node));
         printf("type signature for binop: %s\n", printexprType);
+    } else {
+        // If the function returned CT_NULL than it could not infer a type, so error!
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error: could not infer type of binary operator!");
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
     }
 
     return node;
@@ -596,6 +604,12 @@ node_st *TMAFmonop(node_st *node)
         tempType = inferedTypeMonOp;
         // Update this operator node with the type signature just obtained to use later in code generation
         MONOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeMonOp;
+    } else {
+        // If the function returned CT_NULL than it could not infer a type, so error!
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error: could not infer type of monary operator!");
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
     }
 
     return node;

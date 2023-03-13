@@ -4,6 +4,6 @@ void foo() {
     int c=3;
     int d=4;
     
-    if(4.52353||a>c)
+    if(b>d||a>c)
         a=7;
 }
