@@ -28,13 +28,15 @@ start phase RootPhase {
 // TODO: milestone 6, what to do with for, if anything, no need to do anything right???
 // TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
+// TODO: typechecking, ask TA what to do with Cast and if everything is correct for the rest (so also return statement??)
+
+// TODO: milestone 10, what to do with funcalls? And how to do the rest: create new node: TernaryOperator, see inbox message
+
+
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
 // create a pass CodeGeneration with all the traversals in it and where to find what to do???
 // And how to start and how to test, etc.
 
-//TODO: how to create a lookup table for the builtin operators to help you do type inference and type checking on the builtin operators
-
-// TODO: milestone 10, what to do with funcalls? And how to do the rest because no values are present right???
 
 
 

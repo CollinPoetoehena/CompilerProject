@@ -27,6 +27,33 @@ node_st *tempSteFunCallLink = NULL;
 node_st *tempSteFunCallNode = NULL;
 int tempArgumentIndex = 0;
 
+// TODO: remove after debugging!
+// Helper function to get the string type of the enum Type
+// Define at the top to avoid C return type error
+char *getTypeForPrinting(enum Type type) {
+  // Get the type
+  char *printType = NULL;
+
+  switch (type) {
+    case CT_int:
+    printType = "int";
+    break;
+    case CT_float:
+    printType = "float";
+    break;
+    case CT_bool:
+    printType = "bool";
+    break;
+    case CT_void:
+    printType = "void";
+    break;
+    case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  return printType;
+}
+
 // Helper function to check if an argument type is the same as the parameter type
 bool compareFunCallArgumentsTypes(enum Type argumentType) {
     // Check if the link is not NULL
@@ -79,6 +106,9 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
     */
 
     if (firstType != NULL && secondType != NULL && operator != NULL) {
+        char *firstTypePrint = getTypeForPrinting(firstType);
+        char *secondTypePrint = getTypeForPrinting(secondType);
+        printf("********types of operators are: %s and %s\n\n", firstTypePrint, firstTypePrint);
         /*
         Arithmetic operators:
 
@@ -161,6 +191,9 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         */
         if (operator == BO_and || operator == BO_or) {
             // Logical operators can only be performed on bool
+            char *firstTypePrint = getTypeForPrinting(firstType);
+            char *secondTypePrint = getTypeForPrinting(secondType);
+            printf("********types of logic operators are: %s and %s\n", firstTypePrint, firstTypePrint);
             if (firstType == CT_bool && secondType == CT_bool) {
                 return CT_bool;
             }
@@ -218,33 +251,6 @@ bool checkConditionExpression(enum Type conditionType, char *statementType) {
     }
 
     return false;
-}
-
-// TODO: remove after debugging!
-// Helper function to get the string type of the enum Type
-// Define at the top to avoid C return type error
-char *getTypeForPrinting(enum Type type) {
-  // Get the type
-  char *printType = NULL;
-
-  switch (type) {
-    case CT_int:
-    printType = "int";
-    break;
-    case CT_float:
-    printType = "float";
-    break;
-    case CT_bool:
-    printType = "bool";
-    break;
-    case CT_void:
-    printType = "void";
-    break;
-    case CT_NULL:
-    DBUG_ASSERT(false, "unknown type detected!");
-  }
-
-  return printType;
 }
 
 /**
@@ -534,17 +540,28 @@ node_st *TMAFexprs(node_st *node)
  */
 node_st *TMAFbinop(node_st *node)
 {
+    // Reset global type helper variable at the end
+    tempType = CT_NULL; // CT_NULL is the NULL type
+    if (tempType != CT_NULL) {
+        printf("temptype start of binop: %s\n", getTypeForPrinting(tempType));
+    } else {
+        printf("temptype start of binop is CT_NULL now\n");
+    }
+
     // Infer left operand type
     TRAVleft(node);
     // Save the tempType variable to save expression type
     enum Type binopLeftExprType = tempType;
+    printf("temptype after left of binop: %s\n", getTypeForPrinting(tempType));
 
     // Then, infer right operand type
     TRAVright(node);
     // Save the tempType variable to save expression type
     enum Type binopRightExprType = tempType;
+        printf("temptype after right of binop: %s\n", getTypeForPrinting(tempType));
 
-    // Yield operator result type (use helper function)
+    // TODO: ERROR WITH TEMPTYPECHECKING.CVC, with multiple binops it does the first type twice, why?????
+
     // Yield operator result type (use helper function)
     enum Type inferedTypeBinOp = getTypeSignatureBinOp(binopLeftExprType, binopRightExprType, BINOP_OP(node));
     if (inferedTypeBinOp != CT_NULL) {
