@@ -1,0 +1,24 @@
+void foo() {
+    bool a = true;
+    int b = 5;
+
+    // Success
+    if (a) {
+        a = false;
+    }
+    if (false) {
+        if (a) {
+            b = 6;
+        }
+    }
+
+    // Failure
+    // if (b) {
+    //     a = false;
+    // }
+    // if (a) {
+    //     if (b) {
+    //         b = 7;
+    //     }
+    // }
+}

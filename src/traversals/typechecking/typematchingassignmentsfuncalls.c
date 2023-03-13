@@ -188,9 +188,9 @@ node_st *TMAFassign(node_st *node)
         CCNerrorPhase();
     }
     // TODO: remove after debugging
-    char *printVarLetType = getTypeForPrinting(STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node))));
-    char *printexprType = getTypeForPrinting(tempType);
-    printf("expr type is: %s, type for assign is: %s\n", printexprType, printVarLetType);
+    // char *printVarLetType = getTypeForPrinting(STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node))));
+    // char *printexprType = getTypeForPrinting(tempType);
+    // printf("expr type is: %s, type for assign is: %s\n", printexprType, printVarLetType);
 
     // Reset global type helper variable at the end
     resetTempVariables();
@@ -209,9 +209,13 @@ node_st *TMAFifelse(node_st *node)
     // Traverse the expr type to infer the type of the expression
     TRAVcond(node);
 
+    // TODO: remove after debugging
+    char *printexprType = getTypeForPrinting(tempType);
+    //printf("expr type of if else is: %s\n", printexprType);
+
     // Check if the condition expr is a Boolean, if so, traverse into then and else block
     // TODO: add check
-    if (true) {
+    if (tempType == CT_bool) {
         TRAVthen(node);
         TRAVelse_block(node);
     } else {
@@ -410,7 +414,7 @@ node_st *TMAFmonop(node_st *node)
  */
 node_st *TMAFvar(node_st *node)
 {
-    printf("var occurrence in typechecking\n");
+    //printf("var occurrence in typechecking\n");
 
     // Yield type from Ste
     tempType = STEVAR_TYPE(VAR_STE_LINK(node));
