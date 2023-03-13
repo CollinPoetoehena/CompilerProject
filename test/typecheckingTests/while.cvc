@@ -3,21 +3,21 @@ void foo() {
     int b = 5;
 
     // Success
-    if (a) {
+    while (a) {
         a = false;
     }
-    if (false) {
-        if (a) {
+    while (false) {
+        while (a) {
             b = 6;
         }
     }
 
     // Failure
-    if (b) {
+    while (b) {
         a = false;
     }
-    if (a) {
-        if (b) {
+    while (a) {
+        while (b) {
             b = 7;
         }
     }

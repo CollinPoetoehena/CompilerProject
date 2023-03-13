@@ -116,6 +116,21 @@ enum Type getTypeSignatureBuiltinOperator(enum Type firstType, enum Type secondT
     }
 }
 
+// Helper function to check for condition type of statements
+bool checkConditionExpression(enum Type conditionType, char *statementType) {
+    if (conditionType == CT_bool) {
+        // Return true if the condition expression is of type Boolean
+        return true;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in %s: condition is not a Boolean expression", statementType);
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
+
+    return false;
+}
+
 // Helper function to reset all the temp variables
 void resetTempVariables() {
     tempType = CT_NULL; // CT_NULL is the NULL type
@@ -175,7 +190,7 @@ node_st *TMAFfunbody(node_st *node)
  */
 node_st *TMAFassign(node_st *node)
 {
-    printf("assign in typechecking\n");
+    // printf("assign in typechecking\n");
 
     // Traverse the expr type to infer the type of the expression
     TRAVexpr(node);
@@ -214,16 +229,13 @@ node_st *TMAFifelse(node_st *node)
     //printf("expr type of if else is: %s\n", printexprType);
 
     // Check if the condition expr is a Boolean, if so, traverse into then and else block
-    // TODO: add check
-    if (tempType == CT_bool) {
+    if (checkConditionExpression(tempType, "if-statement")) {
         TRAVthen(node);
         TRAVelse_block(node);
-    } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in if-else statement: condition is not a Boolean expression");
-        // Create error action, will stop the current compilation at the end of this Phase
-        CCNerrorPhase();
     }
+
+    // Reset global type helper variable at the end
+    resetTempVariables();
 
     return node;
 }
@@ -241,15 +253,12 @@ node_st *TMAFwhile(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into the loop body
-    // TODO: add check
-    if (true) {
+    if (checkConditionExpression(tempType, "while-loop")) {
         TRAVblock(node);
-    } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in while loop: condition is not a Boolean expression");
-        // Create error action, will stop the current compilation at the end of this Phase
-        CCNerrorPhase();
     }
+
+    // Reset global type helper variable at the end
+    resetTempVariables();
 
     return node;
 }
@@ -267,15 +276,12 @@ node_st *TMAFdowhile(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into the loop body
-    // TODO: add check
-    if (true) {
+    if (checkConditionExpression(tempType, "dowhile-loop")) {
         TRAVblock(node);
-    } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in do-while loop: condition is not a Boolean expression");
-        // Create error action, will stop the current compilation at the end of this Phase
-        CCNerrorPhase();
     }
+
+    // Reset global type helper variable at the end
+    resetTempVariables();
 
     return node;
 }
@@ -304,6 +310,9 @@ node_st *TMAFfor(node_st *node)
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
+
+    // Reset global type helper variable at the end
+    resetTempVariables();
 
     return node;
 }
@@ -351,6 +360,7 @@ node_st *TMAFfuncall(node_st *node)
 
     // Compare with corresponding parameter types of fundef
     // TODO: maybe use SteFuns for it???? Implement the function
+    // TODO: think of something to check for the type of the funcall args!
     //compareFunCallArgumentsTypes(FUNCALL_STE_LINK(node));
 
     // Yield function return type
