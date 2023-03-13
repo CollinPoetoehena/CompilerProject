@@ -45,7 +45,6 @@ char *getPrintType(enum Type type) {
   }
 
   return printType;
-
 }
 
 /**

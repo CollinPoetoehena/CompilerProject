@@ -6,7 +6,8 @@ start phase RootPhase {
         ContextAnalysis;
         //RegularAssignments;
         // TODO: finish and uncomment above parts if this is finished and tested
-        CompilingBooleanCastExpressions;
+        //CompilingBooleanCastExpressions;
+        TypeChecking;
         print;
     }
 }; 
@@ -31,7 +32,9 @@ start phase RootPhase {
 // create a pass CodeGeneration with all the traversals in it and where to find what to do???
 // And how to start and how to test, etc.
 
-// TODO: milestone 10, what to do with funcalls?
+//TODO: how to create a lookup table for the builtin operators to help you do type inference and type checking on the builtin operators
+
+// TODO: milestone 10, what to do with funcalls? And how to do the rest because no values are present right???
 
 
 
@@ -123,7 +126,7 @@ phase ContextAnalysis {
 traversal RegularAssignments {
     uid = RA,
     // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
-    nodes = {Program, Decls, GlobDef, FunBody, VarDecl, For}
+    nodes = { Program, Decls, GlobDef, FunBody, VarDecl, For}
     // FunBody is used to first traverse the VarDecls and then the Stmts and append the 
     // saved initializations to the stmts, these are filled after TRAVdecls(node) of FunBody
     // For loop has something special to it, the above nodes are the correct nodes
@@ -131,28 +134,67 @@ traversal RegularAssignments {
 
 // TODO: Make TypeChecking for the compiler
 // The TypeChecking phase is used to check all the types
-// phase TypeChecking {
-//     actions {
-//         //TODO: read milestone 7 thoroughly!
-//         // for example this is mentioned:
-//         // Type checking naturally falls into two separate tasks: type inference for expressions and type
-//         // matching for assignments and function calls. Type inference infers the type of an expression based
-//         // on the declared types of identifiers, the natural types of constants, the typing rules of built-in
-//         // operators and type declarations of defined functions. Type matching checks whether inferred
-//         // types match declared types, e.g. in assignments to variables, in argument/return positions of
-//         // function calls or in predicate positions of control flow constructs.
+phase TypeChecking {
+    actions {
+        // TODO: create type inference for expressions
+        // TODO: what to do here, how to do type inference and save it to the nodes????
+        // traversal TypeInferenceExpressions {
+        //     uid = TIE,
+        //     //TODO: are these nodes correct??
+        //     nodes = {
+        //         // Expr to save the 
+        //         Expr,
+        //         // Extend these nodes with the type signature of the built-in operators with the given expr types
+        //         Binop, Monop
+        //         // Constants to yield the correct type
+        //         Float, Bool, Num
+        //     }
+        // };
 
-//         traversal TypeInferenceExpressions {
-//             uid = TIE,
-//             nodes = {}
-//         };
+        // TODO: create type matching and produce errors
+        // TODO: maybe split it in more traversals, ask TA for best approach???
+        traversal TypeMatchingAssignmentsFunCalls {
+            uid = TMAF,
+            // TODO: are these nodes correct??
+            nodes = {
+                // Foreach function definition
+                FunDef,
+                // Traverse into the function body
+                FunBody,
+                // Case assignment: Infer expression type. Compare with variable type
+                Assign,
+                // Case if-then-else: Infer type of predicate expression: Boolean? 
+                // Traverse into then-branch. Traverse into else-branch
+                IfElse,
+                // Case while-/do-loop: Infer type of predicate expression: Boolean? Traverse into loop body
+                While, DoWhile,
+                // Case for-loop: Infer types of bound/step expressions: Integer? Traverse into loop body
+                For,
+                // Case return: ...
+                Return,
+                // Then continue with next statement
 
-//         traversal TypeMatchingAssignmentsFunCalls {
-//             uid = TMAF,
-//             nodes = {}
-//         };
-//     }
-// };
+                // TODO: is this correct here or in a separate traversal and save type in nodes??
+                // This part is to infer the types of the Expression
+                // Case FunCall: Foreach argument expression: Infer argument type
+                // Compare with corresponding parameter type. Yield function return type
+                FunCall
+                // TODO: what to do with Cast???
+                Cast, 
+                // Case BinOp: Infer left operand type. Infer right operand type. Yield operator result type
+                BinOp,
+                // Case MonOp: Infer operand type. Yield operator result type
+                Monop,
+                // Case IntConstant: Yield int
+                Num,
+                // Case FloatConstant: Yield float
+                Float,
+                // Case BoolConstant: Yield bool
+                Bool
+            }
+        };
+    }
+};
 
 // This traversal should transform cast expressions with Boolean argument or result value
 // into semantically equivalent non-cast expressions (milestone 10)
@@ -160,7 +202,7 @@ traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     //TODO: is this correct?
     // It traverses all Cast expressions and turns boolean arguments/results into Constants (Float,Num,Bool)
-    nodes = {Cast, Expr, }
+    nodes = { Cast }
 };
 
 enum Type {
@@ -425,7 +467,9 @@ node Binop {
     }, 
 
     attributes {
-        BinOpEnum op { constructor }
+        BinOpEnum op { constructor },
+        // TODO: is this correct for the type signature???
+        Type operator_type_signature
     }
 };
 
@@ -435,7 +479,9 @@ node Monop {
     },
 
     attributes {
-        MonOpEnum op { constructor }
+        MonOpEnum op { constructor },
+        // TODO: is this correct for the type signature???
+        Type operator_type_signature
     }
 };
 
@@ -455,6 +501,7 @@ node VarLet {
 // Variable in an expression (= later on, such as int d = a * 5, a is the Var).
 node Var {
     children {
+        // NOT used currently, indices is for the array extensions
         Exprs indices
     }, 
 

@@ -42,6 +42,9 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
 
     # Convert boolean arguments/results cast expressions into non-cast expressions
     src/traversals/compilingbooleancastexpressions.c
+
+    # TypeChecking traversals
+    src/traversals/typechecking/typematchingassignmentsfuncalls.c
 )
 
 target_compile_options(civicc PRIVATE
