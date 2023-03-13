@@ -123,17 +123,12 @@ bool checkConditionExpression(enum Type conditionType, char *statementType) {
         return true;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in %s: condition is not a Boolean expression", statementType);
+        CTI(CTI_ERROR, true, "type error in %s: condition is not a bool expression", statementType);
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
 
     return false;
-}
-
-// Helper function to reset all the temp variables
-void resetTempVariables() {
-    tempType = CT_NULL; // CT_NULL is the NULL type
 }
 
 // Check for argument types matching parameter types
@@ -208,8 +203,8 @@ node_st *TMAFassign(node_st *node)
     // printf("expr type is: %s, type for assign is: %s\n", printexprType, printVarLetType);
 
     // Reset global type helper variable at the end
-    resetTempVariables();
-
+    tempType = CT_NULL; // CT_NULL is the NULL type
+    
     return node;
 }
 
@@ -235,7 +230,7 @@ node_st *TMAFifelse(node_st *node)
     }
 
     // Reset global type helper variable at the end
-    resetTempVariables();
+    tempType = CT_NULL; // CT_NULL is the NULL type
 
     return node;
 }
@@ -258,7 +253,7 @@ node_st *TMAFwhile(node_st *node)
     }
 
     // Reset global type helper variable at the end
-    resetTempVariables();
+    tempType = CT_NULL; // CT_NULL is the NULL type
 
     return node;
 }
@@ -281,7 +276,7 @@ node_st *TMAFdowhile(node_st *node)
     }
 
     // Reset global type helper variable at the end
-    resetTempVariables();
+    tempType = CT_NULL; // CT_NULL is the NULL type
 
     return node;
 }
@@ -297,22 +292,26 @@ node_st *TMAFfor(node_st *node)
 {
     // Traverse the expr type to infer the type of the expression
     TRAVstop(node);
+    // Save the tempType variable to save the stop expression type
+    enum Type forStopExprType = tempType;
+
     // Then traverse into the step expression to find the step Expression type 
     TRAVstep(node);
+    // Save the tempType variable to save the step expression type
+    enum Type forStepExprType = tempType;
 
     // Check if the stop expr is an Integer, if so, traverse into the loop body
-    // TODO: add check
-    if (true && true) {
+    if (forStopExprType == CT_int && forStepExprType == CT_int) {
         TRAVblock(node);
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in for loop: stop or step expression is not an Integer expression");
+        CTI(CTI_ERROR, true, "type error in for-loop: stop and/or step expressions is not an int expression");
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
 
     // Reset global type helper variable at the end
-    resetTempVariables();
+    tempType = CT_NULL; // CT_NULL is the NULL type
 
     return node;
 }
