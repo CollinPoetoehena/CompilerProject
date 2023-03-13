@@ -100,8 +100,6 @@ bool isSymbolUnique(char *name) {
                 // Symbol already present, return not unique/false. Use string comparison 
                 // to check for equality, 0 means equal. == only checks if memory references are equal
                 if (strcmp(STEVAR_NAME(symtbolTableChain), name) == 0) {
-                    printf("**********************Link found for %s\n", name);
-                    printf("First stevar that occured is: %s\n", STEVAR_NAME(symtbolTableChain));
                     return false;
                 }
 

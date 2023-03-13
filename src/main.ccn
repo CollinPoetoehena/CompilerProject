@@ -178,9 +178,9 @@ phase TypeChecking {
                 // This part is to infer the types of the Expression
                 // Case FunCall: Foreach argument expression: Infer argument type
                 // Compare with corresponding parameter type. Yield function return type
-                FunCall
+                FunCall, Exprs
                 // TODO: what to do with Cast???
-                Cast, 
+                Cast,
                 // Case BinOp: Infer left operand type. Infer right operand type. Yield operator result type
                 BinOp,
                 // Case MonOp: Infer operand type. Yield operator result type
@@ -216,6 +216,8 @@ enum Type {
 enum MonOpEnum {
     prefix = MO,
     values {
+        // logical negation (!, MO_not), used for boolean values (true, false)
+        // unary minus (-, MO_neg), arithmetic negation, used for arithmetic values (=numbers, etc)
         not, neg
     }
 };

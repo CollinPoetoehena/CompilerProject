@@ -12,6 +12,11 @@
 // Include enums and types, for the Type
 #include "ccngen/enum.h"
 #include "ccn/ccn_types.h"
+// Include error functionality
+#include "palm/ctinfo.h"
+
+// Global helper variable to save the type in
+enum Type tempType = NULL;
 
 // Helper function to get the string type of the enum Type
 // Define at the top to avoid C return type error
@@ -37,6 +42,77 @@ char *getTypeForPrinting(enum Type type) {
   }
 
   return printType;
+}
+
+// TODO: create type signature lookup for built-in operators
+enum Type getTypeSignatureBuiltinOperator(enum Type firstType, enum Type secondType) {
+    /*
+    list of all the type signatures of the operators in CiviC (see chapter 4: expression language):
+
+    Arithmetic operators:
+    '+' : int x int -> int
+    '+' : float x float -> float
+    '+' : bool x bool -> bool (implements strict logic disjunction)
+    '-' : int x int -> int
+    '-' : float x float -> float
+    '*' : int x int -> int
+    '*' : float x float -> float
+    '*' : bool x bool -> bool (implements strict logic conjunction)
+    '/' : int x int -> int
+    '/' : float x float -> float
+    '%' : int x int -> int
+
+    Relational operators:
+    // The relational operators for equality and inequality are defined on all basic types
+    //  On Boolean operands they complement strict logic disjunction and conjunction 
+    // in supporting all potential relationships between two Boolean values
+    '==' : T x T -> bool, where T is any basic type
+    '!=' : T x T -> bool, where T is any basic type
+    // The remaining four relational operators are only defined for integer and floating point numbers as operand values
+    '<' : int x int -> bool
+    '<' : float x float -> bool
+    '<=' : int x int -> bool
+    '<=' : float x float -> bool
+    '>' : int x int -> bool
+    '>' : float x float -> bool
+    '>=' : int x int -> bool
+    '>=' : float x float -> bool
+
+    Logical operators:
+    '&&' : bool x bool -> bool (short-circuits evaluation)
+    '||' : bool x bool -> bool (short-circuits evaluation)
+    
+    Unary operators:
+    '-' : int -> int
+    '-' : float -> float
+    // TODO: can unary minus be done on bool values???
+    // '-' : bool x bool -> bool (implements negation)
+    '!' : bool -> bool
+
+    Note: 'x' denotes the Cartesian product, and 'T' denotes any basic type (bool, int, or float).
+
+    Explanation about Strict logic disjunction and conjunction:
+        Strict logic disjunction and conjunction are logical operations that implement the logical OR 
+        and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
+        conjunction, the operators are defined as arithmetic operators for addition and multiplication, respectively, 
+        and not as logical operators. This means that they operate on Boolean values as if they were integers, 
+        with the value true being treated as 1 and the value false being treated as 0.
+
+        In strict logic disjunction, the result is true if either or both operands are true, and false otherwise. 
+        It is implemented by the addition operator (+).
+
+        In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
+        It is implemented by the multiplication operator (*).
+    */
+
+    // TODO: if secondType is NULL, then do unary operators, otherwise binop operators
+    if (firstType != NULL && secondType != NULL) {
+        // Use BinOp
+    }
+
+    if (firstType != NULL && secondType == NULL) {
+        // Use MonOp
+    }
 }
 
 /**
@@ -91,6 +167,20 @@ node_st *TMAFassign(node_st *node)
  */
 node_st *TMAFifelse(node_st *node)
 {
+    // Traverse the expr type to infer the type of the expression
+    TRAVcond(node);
+
+    // Check if the condition expr is a Boolean, if so, traverse into then and else block
+    // TODO: add check
+    if (true) {
+        TRAVthen(node);
+        TRAVelse_block(node);
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in if-else statement: condition is not a Boolean expression");
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
 
     return node;
 }
@@ -104,6 +194,20 @@ node_st *TMAFifelse(node_st *node)
  */
 node_st *TMAFwhile(node_st *node)
 {
+    // Traverse the expr type to infer the type of the expression
+    TRAVcond(node);
+
+    // Check if the condition expr is a Boolean, if so, traverse into the loop body
+    // TODO: add check
+    if (true) {
+        TRAVblock(node);
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in while loop: condition is not a Boolean expression");
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
+
     return node;
 }
 
@@ -116,6 +220,20 @@ node_st *TMAFwhile(node_st *node)
  */
 node_st *TMAFdowhile(node_st *node)
 {
+    // Traverse the expr type to infer the type of the expression
+    TRAVcond(node);
+
+    // Check if the condition expr is a Boolean, if so, traverse into the loop body
+    // TODO: add check
+    if (true) {
+        TRAVblock(node);
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in do-while loop: condition is not a Boolean expression");
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
+
     return node;
 }
 
@@ -128,6 +246,22 @@ node_st *TMAFdowhile(node_st *node)
  */
 node_st *TMAFfor(node_st *node)
 {
+    // Traverse the expr type to infer the type of the expression
+    TRAVstop(node);
+    // Then traverse into the step expression to find the step Expression type 
+    TRAVstep(node);
+
+    // Check if the stop expr is an Integer, if so, traverse into the loop body
+    // TODO: add check
+    if (true && true) {
+        TRAVblock(node);
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in for loop: stop or step expression is not an Integer expression");
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
+
     return node;
 }
 
@@ -138,6 +272,7 @@ node_st *TMAFfor(node_st *node)
  */
 node_st *TMAFreturn(node_st *node)
 {
+    // TODO: what to do here????
     return node;
 }
 
@@ -152,6 +287,11 @@ TODO: is this correct or does it need to be in a separate traversal??
 node_st *TMAFcast(node_st *node)
 {
     // TODO: what to do with cast expression????
+    //TRAVexpr(node);
+
+    // Yield the type of the Cast for now
+    tempType = CAST_TYPE(node);
+
     return node;
 }
 
@@ -163,6 +303,25 @@ node_st *TMAFcast(node_st *node)
  */
 node_st *TMAFfuncall(node_st *node)
 {
+    // Traverse to the arguments to infer the type of each argument
+    TRAVargs(node);
+
+    // Compare with corresponding parameter types of fundef
+    // TODO: maybe save temp node_st* fundef for SteFun entry??
+
+    // Yield function return type
+
+    return node;
+}
+
+/**
+ * @fn TMAFexprs
+ */
+node_st *TMAFexprs(node_st *node)
+{
+    TRAVexpr(node);
+    TRAVnext(node);
+
     return node;
 }
 
@@ -174,6 +333,15 @@ node_st *TMAFfuncall(node_st *node)
  */
 node_st *TMAFbinop(node_st *node)
 {
+    // Infer left operand type
+    TRAVleft(node);
+
+    // Infer right operand type
+    TRAVright(node);
+
+    // Yield operator result type (use helper function)
+    // TODO
+
     return node;
 }
 
@@ -184,6 +352,12 @@ node_st *TMAFbinop(node_st *node)
  */
 node_st *TMAFmonop(node_st *node)
 {
+    // Infer operand type
+    TRAVoperand(node);
+
+    // Yield operator result type (use helper function)
+    // TODO
+
     return node;
 }
 
