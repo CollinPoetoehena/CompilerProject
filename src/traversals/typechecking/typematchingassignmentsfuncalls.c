@@ -84,7 +84,7 @@ char *getTypeForPrinting(enum Type type) {
 
 // TODO: create type signature lookup for built-in operators
 // Helper function to get the type signature of the Binop built-in operators
-enum Type getTypeSignatureBinOpOperator(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
+enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
     /*
     Explanation about Strict logic disjunction and conjunction:
         Strict logic disjunction and conjunction are logical operations that implement the logical OR 
@@ -151,7 +151,7 @@ enum Type getTypeSignatureBinOpOperator(enum Type firstType, enum Type secondTyp
         */
         if (operator == BO_eq) {
             
-        } else if (operator == BO_no) {
+        } else if (operator == BO_ne) {
 
         } else if (operator == BO_lt) {
 
@@ -177,11 +177,11 @@ enum Type getTypeSignatureBinOpOperator(enum Type firstType, enum Type secondTyp
     }
 
     // No type signature found, return NULL
-    return NULL;
+    return CT_NULL; // CT_NULL is the NULL type
 }
 
 // Helper function to get the type signature of the Binop built-in operators
-enum Type getTypeSignatureMonOpOperator(enum Type firstType, enum MonOpEnum operator) {
+enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
     // Create type signatures for MonOp nodes
     if (firstType != NULL && operator != NULL) {
         /*
@@ -194,21 +194,24 @@ enum Type getTypeSignatureMonOpOperator(enum Type firstType, enum MonOpEnum oper
         */
         if (operator == MO_neg) {
             // unary minus (-, MO_neg), arithmetic negation, used for arithmetic values (=numbers, etc)
-            if (firstType == CT_bool) {
-                return CT_bool;
+            if (firstType == CT_int) {
+                printf("unary minus on int -> -\n");
+                return CT_int;
+            } else if (firstType == CT_float) {
+                printf("unary minus on float -> -\n");
+                return CT_float;
             }
         } else if (operator == MO_not) {
             // logical negation (!, MO_not), used for boolean values (true, false)
-            if (firstType == CT_int) {
-                return CT_int;
-            } else if (firstType == CT_float) {
-                return CT_float;
+            if (firstType == CT_bool) {
+                printf("bool logical negation -> !\n");
+                return CT_bool;
             }
         }
     }
 
     // No type signature found, return NULL
-    return NULL;
+    return CT_NULL; // CT_NULL is the NULL type
 }
 
 // Helper function to check for condition type of statements
@@ -516,12 +519,18 @@ node_st *TMAFmonop(node_st *node)
 {
     // Infer operand type
     TRAVoperand(node);
+    // Save the tempType variable to save expression type
+    enum Type monopExprType = tempType;
 
     // Yield operator result type (use helper function)
-    // TODO
-
-    // Update this operator node with the type signature just obtained to use later in code generation
-    // TODO
+    enum Type inferedTypeMonOp = getTypeSignatureMonOp(monopExprType, MONOP_OP(node));
+    if (inferedTypeMonOp != NULL) {
+        // Save the infered operator type to the global helper variable
+        tempType = inferedTypeMonOp;
+        // Update this operator node with the type signature just obtained to use later in code generation
+        MONOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeMonOp;
+        // TODO
+    }    
 
     return node;
 }

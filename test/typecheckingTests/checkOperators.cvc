@@ -1,8 +1,19 @@
 void foo() {
-    // TODO: change to all possible occurrences of type signatures of built-in operators
-    
+    int a = 5;
+    int b = 8;
+    float c = 5.346;    
+    float d = 34.43643;
+    bool e = true;
+    bool f = false;
+    bool g = true;
+
     // MonOps success
-    
+    a = -a;
+    c = -c;
+    g = !g;
 
     // MonOps failure
+    g = -a;
+    g = -c;
+    a = !g;
 }
