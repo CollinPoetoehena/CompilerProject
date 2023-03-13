@@ -1,0 +1,34 @@
+// Check success
+void foo(int a, bool b, float c) {
+    // return; should yield void return type
+    return;
+}
+
+bool boolFun(bool a, bool b) {
+    return a && b;
+}
+
+int intFun(int a) {
+    return a;
+}
+
+float floatFun(float a) {
+    return a;
+}
+
+// Check Failure
+void fooErr(int a, bool b, float c) {
+    return a;
+}
+
+bool boolFunErr(bool a, bool b, int c) {
+    return c;
+}
+
+int intFunErr(int a, bool b) {
+    return b;
+}
+
+float floatFunErr(float a, int b) {
+    return b;
+}

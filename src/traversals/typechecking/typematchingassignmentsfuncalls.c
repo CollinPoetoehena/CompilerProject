@@ -16,6 +16,9 @@
 // Include error functionality
 #include "palm/ctinfo.h"
 
+// Global helper variable to save the fundef type in to use for checking return type
+node_st *tempFundefSteLink = NULL;
+
 // Global helper variable to save the type in
 enum Type tempType = CT_NULL; // CT_NULL is the NULL type
 
@@ -55,31 +58,6 @@ bool compareFunCallArgumentsTypes(enum Type argumentType) {
     
     // Not equal argument and parameter type
     return false;
-}
-// Helper function to get the string type of the enum Type
-// Define at the top to avoid C return type error
-char *getTypeForPrinting(enum Type type) {
-  // Get the type
-  char *printType = NULL;
-
-  switch (type) {
-    case CT_int:
-    printType = "int";
-    break;
-    case CT_float:
-    printType = "float";
-    break;
-    case CT_bool:
-    printType = "bool";
-    break;
-    case CT_void:
-    printType = "void";
-    break;
-    case CT_NULL:
-    DBUG_ASSERT(false, "unknown type detected!");
-  }
-
-  return printType;
 }
 
 // Helper function to get the type signature of the BinOp built-in operators
@@ -242,13 +220,48 @@ bool checkConditionExpression(enum Type conditionType, char *statementType) {
     return false;
 }
 
+// TODO: remove after debugging!
+// Helper function to get the string type of the enum Type
+// Define at the top to avoid C return type error
+char *getTypeForPrinting(enum Type type) {
+  // Get the type
+  char *printType = NULL;
+
+  switch (type) {
+    case CT_int:
+    printType = "int";
+    break;
+    case CT_float:
+    printType = "float";
+    break;
+    case CT_bool:
+    printType = "bool";
+    break;
+    case CT_void:
+    printType = "void";
+    break;
+    case CT_NULL:
+    DBUG_ASSERT(false, "unknown type detected!");
+  }
+
+  return printType;
+}
+
 /**
  * @fn TMAFfundef
+ *
+ * Foreach function definition: Traverse into function body:
  */
 node_st *TMAFfundef(node_st *node)
 {
-    // Foreach function definition: Traverse into function body:
+     // Save the fundef return type by using the Ste
+    tempFundefSteLink = FUNDEF_SYMBOL_TABLE(node);
+
+    // Then, traverse into function body
     TRAVbody(node);
+
+    // Reset global type helper variable for the FunDef type at the end
+    tempFundefSteLink = NULL;
 
     return node;
 }
@@ -408,8 +421,26 @@ node_st *TMAFreturn(node_st *node)
 {
     // TODO: what to do here with the return????
 
-    TRAVexpr(node);
+    // If the expression is not NULL check for a type, otherwise use void (== return;)
+    if (RETURN_EXPR(node) != NULL) {
+        TRAVexpr(node);
+    } else {
+        tempType = CT_void;
+    }
 
+    // Check with FunDef node type
+    if (tempFundefSteLink != NULL) {
+        if (tempType != STEFUN_TYPE(tempFundefSteLink)) {
+            // Prints the error when it occurs, so in this line
+            CTI(CTI_ERROR, true, "type error in return statement for function '%s'", STEFUN_NAME(tempFundefSteLink));
+            // Create error action, will stop the current compilation at the end of this Phase
+            CCNerrorPhase();
+        }
+    }
+
+    // Reset global type helper variable at the end
+    tempType = CT_NULL; // CT_NULL is the NULL type
+    
     return node;
 }
 
