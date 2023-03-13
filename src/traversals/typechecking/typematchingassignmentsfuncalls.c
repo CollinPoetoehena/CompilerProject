@@ -85,6 +85,7 @@ char *getTypeForPrinting(enum Type type) {
 // Helper function to get the type signature of the BinOp built-in operators
 enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
     /*
+    // TODO: where to implement this and put this explanation??
     Explanation about Strict logic disjunction and conjunction:
         Strict logic disjunction and conjunction are logical operations that implement the logical OR 
         and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
@@ -100,8 +101,6 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
     */
 
     if (firstType != NULL && secondType != NULL && operator != NULL) {
-        // Use BinOp
-
         /*
         Arithmetic operators:
 
@@ -117,16 +116,27 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         '/' : float x float -> float
         '%' : int x int -> int
         */
-        if (operator == BO_add) {
-
-        } else if (operator == BO_sub) {
-            
-        } else if (operator == BO_mul) {
-            
-        } else if (operator == BO_div) {
-            
+        if (operator == BO_add || operator == BO_mul) {
+            // Addition and Multiplication can be performed on int, float and bool
+            if (firstType == CT_int && secondType == CT_int) {
+                return CT_int;
+            } else if (firstType == CT_float && secondType == CT_float) {
+                return CT_float;
+            } else if (firstType == CT_bool && secondType == CT_bool) {
+                return CT_bool;
+            }
+        } else if (operator == BO_sub || operator == BO_div) {
+            // Subtraction and Division can be performed on int and float
+            if (firstType == CT_int && secondType == CT_int) {
+                return CT_int;
+            } else if (firstType == CT_float && secondType == CT_float) {
+                return CT_float;
+            }
         } else if (operator == BO_mod) {
-            
+            // Modulo can only be performed on int
+            if (firstType == CT_int && secondType == CT_int) {
+                return CT_int;
+            }
         }
 
         /*
@@ -135,10 +145,12 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         'T' denotes any basic type (bool, int, or float)
         The relational operators for equality and inequality are defined on all basic types
         On Boolean operands they complement strict logic disjunction and conjunction 
-        in supporting all potential relationships between two Boolean values
+        in supporting all potential relationships between two Boolean values.
+        
         '==' : T x T -> bool, where T is any basic type
         '!=' : T x T -> bool, where T is any basic type
-        The remaining four relational operators are only defined for integer and floating point numbers as operand values
+
+        The remaining four relational operators are only defined for integer and floating point numbers as operand values.
         '<' : int x int -> bool
         '<' : float x float -> bool
         '<=' : int x int -> bool
@@ -148,18 +160,19 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         '>=' : int x int -> bool
         '>=' : float x float -> bool
         */
-        if (operator == BO_eq) {
-            
-        } else if (operator == BO_ne) {
-
-        } else if (operator == BO_lt) {
-
-        } else if (operator == BO_le) {
-            
-        } else if (operator == BO_gt) {
-            
-        } else if (operator == BO_ge) {
-            
+        if (operator == BO_eq || operator == BO_ne) {
+            // equal and not equal expressions can be of any basic type in any combination (int, float, bool)
+            if ((firstType == CT_int || firstType == CT_float || firstType == CT_bool) &&
+                ((secondType == CT_int || secondType == CT_float || secondType == CT_bool))) {
+                return CT_bool;
+            }
+        } else if (operator == BO_lt || operator == BO_le || operator == BO_gt || operator == BO_ge) {
+            // The remaining 4 relational operators can be performed on int or float and yield bool
+            if (firstType == CT_int && secondType == CT_int) {
+                return CT_bool;
+            } else if (firstType == CT_float && secondType == CT_float) {
+                return CT_bool;
+            }
         }
 
         /*
@@ -491,15 +504,26 @@ node_st *TMAFbinop(node_st *node)
 {
     // Infer left operand type
     TRAVleft(node);
+    // Save the tempType variable to save expression type
+    enum Type binopLeftExprType = tempType;
 
-    // Infer right operand type
+    // Then, infer right operand type
     TRAVright(node);
+    // Save the tempType variable to save expression type
+    enum Type binopRightExprType = tempType;
 
     // Yield operator result type (use helper function)
-    // TODO
-
-    // Update this operator node with the type signature just obtained to use later in code generation
-    // TODO
+    // Yield operator result type (use helper function)
+    enum Type inferedTypeBinOp = getTypeSignatureBinOp(binopLeftExprType, binopRightExprType, BINOP_OP(node));
+    if (inferedTypeBinOp != CT_NULL) {
+        // Save the infered operator type to the global helper variable
+        tempType = inferedTypeBinOp;
+        // Update this operator node with the type signature just obtained to use later in code generation
+        BINOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeBinOp;
+        // TODO: remove after debugging
+        char *printexprType = getTypeForPrinting(BINOP_OPERATOR_TYPE_SIGNATURE(node));
+        printf("type signature for binop: %s\n", printexprType);
+    }
 
     return node;
 }
@@ -518,15 +542,12 @@ node_st *TMAFmonop(node_st *node)
 
     // Yield operator result type (use helper function)
     enum Type inferedTypeMonOp = getTypeSignatureMonOp(monopExprType, MONOP_OP(node));
-    if (inferedTypeMonOp != NULL) {
+    if (inferedTypeMonOp != CT_NULL) {
         // Save the infered operator type to the global helper variable
         tempType = inferedTypeMonOp;
         // Update this operator node with the type signature just obtained to use later in code generation
         MONOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeMonOp;
-        // TODO: remove after debugging
-        char *printexprType = getTypeForPrinting(MONOP_OPERATOR_TYPE_SIGNATURE(node));
-        printf("type signature for monop: %s\n", printexprType);
-    }    
+    }
 
     return node;
 }
