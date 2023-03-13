@@ -106,9 +106,6 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
     */
 
     if (firstType != NULL && secondType != NULL && operator != NULL) {
-        char *firstTypePrint = getTypeForPrinting(firstType);
-        char *secondTypePrint = getTypeForPrinting(secondType);
-        printf("********types of operators are: %s and %s\n\n", firstTypePrint, secondTypePrint);
         /*
         Arithmetic operators:
 
@@ -191,11 +188,7 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         */
         if (operator == BO_and || operator == BO_or) {
             // Logical operators can only be performed on bool
-            char *firstTypePrint = getTypeForPrinting(firstType);
-            char *secondTypePrint = getTypeForPrinting(secondType);
-            printf("********types of logic operators are: %s and %s\n", firstTypePrint, secondTypePrint);
             if (firstType == CT_bool && secondType == CT_bool) {
-                printf("getting here!!********\n");
                 return CT_bool;
             }
         }
@@ -220,16 +213,13 @@ enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
         if (operator == MO_neg) {
             // unary minus (-, MO_neg), arithmetic negation, used for arithmetic values (=numbers, etc)
             if (firstType == CT_int) {
-                printf("unary minus on int -> -\n");
                 return CT_int;
             } else if (firstType == CT_float) {
-                printf("unary minus on float -> -\n");
                 return CT_float;
             }
         } else if (operator == MO_not) {
             // logical negation (!, MO_not), used for boolean values (true, false)
             if (firstType == CT_bool) {
-                printf("bool logical negation -> !\n");
                 return CT_bool;
             }
         }
@@ -541,28 +531,15 @@ node_st *TMAFexprs(node_st *node)
  */
 node_st *TMAFbinop(node_st *node)
 {
-    // Reset global type helper variable at the end
-    tempType = CT_NULL; // CT_NULL is the NULL type
-    if (tempType != CT_NULL) {
-        printf("temptype start of binop: %s\n", getTypeForPrinting(tempType));
-    } else {
-        printf("temptype start of binop is CT_NULL now\n");
-    }
-
     // Infer left operand type
     TRAVleft(node);
     // Save the tempType variable to save expression type
     enum Type binopLeftExprType = tempType;
-    printf("temptype after left of binop: %s\n", getTypeForPrinting(tempType));
 
     // Then, infer right operand type
     TRAVright(node);
     // Save the tempType variable to save expression type
     enum Type binopRightExprType = tempType;
-        printf("temptype after right of binop: %s\n", getTypeForPrinting(tempType));
-
-    // TODO: ERROR WITH TEMPTYPECHECKING.CVC, with multiple binops it does the first type twice, why?????
-    // checked memory addresses and they are different, so not the same pointers!
 
     // Yield operator result type (use helper function)
     enum Type inferedTypeBinOp = getTypeSignatureBinOp(binopLeftExprType, binopRightExprType, BINOP_OP(node));
@@ -573,7 +550,6 @@ node_st *TMAFbinop(node_st *node)
         BINOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeBinOp;
         // TODO: remove after debugging
         char *printexprType = getTypeForPrinting(BINOP_OPERATOR_TYPE_SIGNATURE(node));
-        printf("type signature for binop: %s\n", printexprType);
     } else {
         // If the function returned CT_NULL than it could not infer a type, so error!
         // Prints the error when it occurs, so in this line
