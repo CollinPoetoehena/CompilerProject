@@ -231,6 +231,8 @@ node_st *PRTexprs(node_st *node)
 
     // Then go to the next expr, if there is a next
     if (EXPRS_NEXT(node) != NULL) {
+      // Separate the next with a COMMA (,)
+      printf(", ");
       TRAVnext(node);
     }
 

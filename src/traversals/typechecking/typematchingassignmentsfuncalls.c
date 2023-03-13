@@ -19,6 +19,43 @@
 // Global helper variable to save the type in
 enum Type tempType = CT_NULL; // CT_NULL is the NULL type
 
+// These global variables are used for typechecking for FunCall arguments
+node_st *tempSteFunCallLink = NULL;
+node_st *tempSteFunCallNode = NULL;
+int tempArgumentIndex = 0;
+
+// Helper function to check if an argument type is the same as the parameter type
+bool compareFunCallArgumentsTypes(enum Type argumentType) {
+    // Check if the link is not NULL
+    if (tempSteFunCallLink != NULL) {
+        // Check if there are any params
+        if (STEFUN_PARAMS(tempSteFunCallLink) != NULL) {
+            // Get the first param from the SteFun node
+            node_st *paramIterator = STEFUN_PARAMS(tempSteFunCallLink);
+            int counter = 0;
+            // Go to the nTh argument using the linkedlist of the Params
+            do {
+                // Found parameter in SteFun link
+                if (counter == tempArgumentIndex) {
+                    if (argumentType == PARAM_TYPE(paramIterator)) {
+                        // Return true if the argument and the corresponding parameter type match
+                        return true;
+                    }
+                }
+
+                // Update parameter and counter
+                paramIterator = PARAM_NEXT(paramIterator);
+                counter++;
+            } while (paramIterator != NULL && counter <= tempArgumentIndex);
+        } else {
+            // No params in FunDef, so no types to check, return true
+            return true;
+        }
+    }
+    
+    // Not equal argument and parameter type
+    return false;
+}
 // Helper function to get the string type of the enum Type
 // Define at the top to avoid C return type error
 char *getTypeForPrinting(enum Type type) {
@@ -129,27 +166,6 @@ bool checkConditionExpression(enum Type conditionType, char *statementType) {
     }
 
     return false;
-}
-
-// Check for argument types matching parameter types
-bool compareFunCallArgumentsTypes(node_st *steLink) {
-    // TODO: implement this function with argument types of funcall
-
-
-    // If the arguments are NULL, then there are no parameter types
-    if (STEFUN_PARAMS(steLink) != NULL) {
-        // Get the first param from the SteFun node
-        node_st *paramIterator = STEFUN_PARAMS(steLink);
-        do {
-            // TODO: add check for funcall argument
-
-            // Update parameter
-            paramIterator = PARAM_NEXT(paramIterator);
-        } while (paramIterator != NULL);
-    }
-    
-    // Got through every check, types are correct
-    return true;
 }
 
 /**
@@ -294,6 +310,8 @@ node_st *TMAFfor(node_st *node)
     TRAVstop(node);
     // Save the tempType variable to save the stop expression type
     enum Type forStopExprType = tempType;
+    // Reset global type helper variable before going to the next for Expr
+    tempType = CT_NULL;
 
     // Then traverse into the step expression to find the step Expression type 
     TRAVstep(node);
@@ -354,15 +372,22 @@ node_st *TMAFcast(node_st *node)
  */
 node_st *TMAFfuncall(node_st *node)
 {
-    // Traverse to the arguments to infer the type of each argument
+    // Start the tempArgumentIndex at 0
+    tempArgumentIndex = 0;
+    // Save the FunCall link to use for checking the arguments
+    tempSteFunCallLink = FUNCALL_STE_LINK(node);
+    tempSteFunCallNode = node;
+    // Then, traverse to the arguments to infer the type of each argument using these variables
     TRAVargs(node);
 
-    // Compare with corresponding parameter types of fundef
-    // TODO: maybe use SteFuns for it???? Implement the function
-    // TODO: think of something to check for the type of the funcall args!
-    //compareFunCallArgumentsTypes(FUNCALL_STE_LINK(node));
+    // Reset global type helper variables after traversing arguments
+    tempType = CT_NULL; // CT_NULL is the NULL type
+    tempSteFunCallLink = NULL;
+    tempSteFunCallNode = NULL;
+    tempArgumentIndex = 0;
 
-    // Yield function return type
+    // Yield function return type after checking arguments
+    tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
     // TODO: remove after debugging
     char *printingType = getTypeForPrinting(STEFUN_TYPE(FUNCALL_STE_LINK(node)));
     printf("return type for funcall is: %s\n", printingType);
@@ -372,10 +397,30 @@ node_st *TMAFfuncall(node_st *node)
 
 /**
  * @fn TMAFexprs
+ *
+ * With basic exprs is only used for FunCall arguments
  */
 node_st *TMAFexprs(node_st *node)
 {
+    // Traverse the first expr
     TRAVexpr(node);
+    // Save the tempType variable to save the stop expression type
+    enum Type currentArgumentType = tempType;
+
+    // Then check if the current argument type matches the corresponding parameter type
+    if (!compareFunCallArgumentsTypes(currentArgumentType)) {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "type error in funcall '%s': argument number %d's type does not match corresponding parameter type",
+            FUNCALL_NAME(tempSteFunCallNode), (tempArgumentIndex+1));
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    } 
+
+    // Increment the argument index before the next to find the corresponding parameter in the FunDef node
+    tempArgumentIndex++;
+    // Reset global type helper variable before going to the next argument
+    tempType = CT_NULL;
+    // Then, do the same for the next argument
     TRAVnext(node);
 
     return node;
@@ -423,8 +468,6 @@ node_st *TMAFmonop(node_st *node)
  */
 node_st *TMAFvar(node_st *node)
 {
-    //printf("var occurrence in typechecking\n");
-
     // Yield type from Ste
     tempType = STEVAR_TYPE(VAR_STE_LINK(node));
 
@@ -437,9 +480,7 @@ node_st *TMAFvar(node_st *node)
  * Case IntConstant: Yield int
  */
 node_st *TMAFnum(node_st *node)
-{
-    //printf("num node in typechecking\n");
-    
+{    
     // Yield int
     tempType = CT_int;
 
@@ -453,8 +494,6 @@ node_st *TMAFnum(node_st *node)
  */
 node_st *TMAFfloat(node_st *node)
 {
-    //printf("float node in typechecking\n");
-
     // Yield float
     tempType = CT_float;
 
@@ -467,9 +506,7 @@ node_st *TMAFfloat(node_st *node)
  * Case BoolConstant: Yield bool
  */
 node_st *TMAFbool(node_st *node)
-{
-    //printf("bool node in typechecking\n");
-        
+{        
     // Yield bool
     tempType = CT_bool;
 
