@@ -192,6 +192,9 @@ node_st *TMAFassign(node_st *node)
     char *printexprType = getTypeForPrinting(tempType);
     printf("expr type is: %s, type for assign is: %s\n", printexprType, printVarLetType);
 
+    // Reset global type helper variable at the end
+    resetTempVariables();
+
     return node;
 }
 
@@ -402,13 +405,27 @@ node_st *TMAFmonop(node_st *node)
 }
 
 /**
+ * @fn TMAFvar
+ *
+ */
+node_st *TMAFvar(node_st *node)
+{
+    printf("var occurrence in typechecking\n");
+
+    // Yield type from Ste
+    tempType = STEVAR_TYPE(VAR_STE_LINK(node));
+
+    return node;
+}
+
+/**
  * @fn TMAFnum
  *
  * Case IntConstant: Yield int
  */
 node_st *TMAFnum(node_st *node)
 {
-    printf("num node in typechecking\n");
+    //printf("num node in typechecking\n");
     
     // Yield int
     tempType = CT_int;
@@ -423,7 +440,7 @@ node_st *TMAFnum(node_st *node)
  */
 node_st *TMAFfloat(node_st *node)
 {
-    printf("float node in typechecking\n");
+    //printf("float node in typechecking\n");
 
     // Yield float
     tempType = CT_float;
@@ -438,7 +455,7 @@ node_st *TMAFfloat(node_st *node)
  */
 node_st *TMAFbool(node_st *node)
 {
-    printf("bool node in typechecking\n");
+    //printf("bool node in typechecking\n");
         
     // Yield bool
     tempType = CT_bool;

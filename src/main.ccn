@@ -185,6 +185,7 @@ phase TypeChecking {
                 BinOp,
                 // Case MonOp: Infer operand type. Yield operator result type
                 Monop,
+                Var,
                 // Case IntConstant: Yield int
                 Num,
                 // Case FloatConstant: Yield float
