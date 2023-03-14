@@ -30,6 +30,8 @@
 #include "ccngen/trav.h"
 // Palm library for easy working with strings
 #include "palm/str.h"
+// Palm library for easily using memory in C
+#include "palm/memory.h"
 
 // node_st * global variables are used for building and updating the new nodes
 node_st *firstGlobdefStmts = NULL;
@@ -91,9 +93,16 @@ node_st *RAprogram(node_st *node)
     if (lastGlobDefDeclsNode != NULL && firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
         // Init function will be put after the last GlobDef node 
         // (not the GlobDecls because GlobDecls) do not have an initialization
+        printf("DECLS next before new assign is at address: %p\n", (void*)&DECLS_NEXT(lastGlobDefDeclsNode));
+
+        // Allocate new memory to add the new FunDef node
+        //node_st *newDeclsNode = MEMmalloc(1000);
         node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
             NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
         DECLS_NEXT(lastGlobDefDeclsNode) = newDeclsNode;
+        
+        printf("newDeclsNode is at address: %p\n", (void*)&newDeclsNode);
+        printf("DECLS next after new assign is at address: %p\n", (void*)&DECLS_NEXT(lastGlobDefDeclsNode));
         // TODO: why does this return an invalid pointer??? or a Segmentation fault??**************************************************************
     }
 
@@ -105,9 +114,13 @@ node_st *RAprogram(node_st *node)
  */
 node_st *RAdecls(node_st *node)
 {
-    // Update the tempDeclsNode every time you traverse a Decls, 
-    // this node will be used to append the __init FunDef to
-    tempDeclsNode = node;
+    char *bool_str = NODE_TYPE(DECLS_DECL(node)) == NT_GLOBDEF ? "true" : "false";
+    printf("%s\n", bool_str);
+    // Check if the type is NT_GLOBDEF
+    if (NODE_TYPE(DECLS_DECL(node)) == NT_GLOBDEF) {
+        // Update last globdef node, this node will be used to append the __init FunDef to
+        lastGlobDefDeclsNode = node;
+    }
 
     // Go to the traversal function of the decl
     TRAVdecl(node);
@@ -123,9 +136,6 @@ node_st *RAdecls(node_st *node)
  */
 node_st *RAglobdef(node_st *node)
 {
-    // If the Decls that is traversed is a GlobDef node, then confirm the last Decls variable
-    lastGlobDefDeclsNode = tempDeclsNode;
-
     // If the globdef has an initialization, convert it
     if (GLOBDEF_INIT(node) != NULL) {
         // Create copies to avoid pointing to the same reference twice

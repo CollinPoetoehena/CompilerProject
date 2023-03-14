@@ -8,7 +8,7 @@ start phase RootPhase {
         // TODO: finish and uncomment above parts if this is finished and tested
         //TypeChecking;
         //CompilingBooleanDisjunctionAndConjunction;
-        CompilingBooleanCastExpressions;
+        //CompilingBooleanCastExpressions;
         print;
     }
 }; 
