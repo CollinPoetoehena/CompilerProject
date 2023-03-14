@@ -8,7 +8,7 @@ start phase RootPhase {
         // TODO: finish and uncomment above parts if this is finished and tested
         //TypeChecking;
         //CompilingBooleanDisjunctionAndConjunction;
-        //CompilingBooleanCastExpressions;
+        CompilingBooleanCastExpressions;
         print;
     }
 }; 
@@ -26,8 +26,10 @@ start phase RootPhase {
 
 // TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal.
 // TODO: segmentation fault/invalid pointer error there, why I cannot understand, i checked everything if it is NULL and prints, etc
+// ./civicc ../test/regularAssignmentsTests/globdefsAndVardeclsInits.cvc 
 // TODO: milestone 6, what to do with for, if anything, no need to do anything right???
 // TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
+
 
 // TODO: DO NOT FORGET TO UNCOMMENT THE TRAVERSAL/PHASE OF THE CORRESPONDING TRAVERSAL*****************************
 // TODO: typechecking, ask TA what to do with Cast and if everything is correct for the rest (so also return statement??)
@@ -35,11 +37,10 @@ start phase RootPhase {
 
 // TODO: milestone 9: is the node TernaryOp correct?????
 // and the rest of the traversal is it correct???
-// TODO: also extend TypeChecking now with the new TernaryOperator right??? to save the type signature???
-// or not necessary because it only has one type right, bool???
-// or good like I am doing righr now, use the signature that the BinOp already had???
+// TODO: what to do with the type signature, can I just use the type signature from the old BinOp????
 
-// TODO: milestone 10, what to do with funcalls? And how to do the rest: create new node: TernaryOperator, see inbox message
+// TODO: milestone 10, what to do with funcalls? And how to do the rest???
+// TODO: are the nodes correct?? and when to do this, before milestone 9 or after???? After right???
 
 
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
@@ -205,8 +206,8 @@ traversal CompilingBooleanDisjunctionAndConjunction {
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     //TODO: is this correct?
-    // It traverses all Cast expressions
-    nodes = { Cast }
+    // It traverses all Cast expressions that have a boolean result or bool cast
+    nodes = { Cast, BinOp, Bool }
 };
 
 enum Type {

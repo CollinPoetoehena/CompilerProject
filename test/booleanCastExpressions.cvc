@@ -17,6 +17,10 @@ void foo() {
     d = (int)(b<d); //d = 1
     w = (float)(b>d||q); // w = 1.0
     w = (float)(b>d&&q); // w = 0.0
+    w = (float)true;
+    d = (int)false;
+    // nested bool casts
+    d = (int) ((bool)1);
 
     // Boolean cast results
     q = (bool)falseInt; // q = false
