@@ -68,4 +68,3 @@ node_st *CBDCbinop(node_st *node)
     // If no changes were made, just return the original BinOp node again
     return node;
 }
-
