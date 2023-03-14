@@ -99,7 +99,10 @@ node_st *RAprogram(node_st *node)
         //node_st *newDeclsNode = MEMmalloc(1000);
         node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
             NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
-        DECLS_NEXT(lastGlobDefDeclsNode) = newDeclsNode;
+        // Create a copy of the created node because otherwise the node is lost after the traversal
+        // because it is cleaned after this traversal, so create a copy for it
+        DECLS_NEXT(lastGlobDefDeclsNode) = CCNcopy(newDeclsNode);
+        // This assignment is not done, why??
         
         printf("newDeclsNode is at address: %p\n", (void*)&newDeclsNode);
         printf("DECLS next after new assign is at address: %p\n", (void*)&DECLS_NEXT(lastGlobDefDeclsNode));
