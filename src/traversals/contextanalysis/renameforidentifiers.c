@@ -20,6 +20,25 @@ char *currentRenamedId = NULL;
 // Global currentForNode is used to save the new for loop node in and 
 node_st *currentForNode = NULL;
 
+// TODO: hash table String maken met de variabele en na elke for loop die eruit halen
+// use the travdata, like 1.6
+//char *[]
+
+// TODO: create VarDecl in above fundef and set for loop to Var call
+//int i=0;
+    //for(_i, 5) 
+
+void RFIinit() { 
+    // initialize hash table, makes sure there is a hash table
+    htable_st *hash_table = HTnew_String(100);
+
+    struct data_ci *data = DATA_CI_GET();
+    data->id_table = hash_table;
+
+    return; 
+}
+void RFIfini() { return; }
+
 /**
  * @fn RFIfor
  */
@@ -31,8 +50,6 @@ node_st *RFIfor(node_st *node)
     // The problem is because it first goes in to the block part, wich is a new for loop first, and
     // then after that the vars occur that are not renamed because the identifier is from the new for loop
     // TODO: skip for now, but ask in the lesson next week!
-
-
 
     // This will rename all the iterators from the for loop to xCountUnderscores (with count x underscore)
     // such as: 'i__'
@@ -55,6 +72,9 @@ node_st *RFIfor(node_st *node)
 
     // Go to the traversal functions of the children
     TRAVblock(node);
+
+    // Remove current array item after traversing the block
+    // TODO
 
     return node;
 }

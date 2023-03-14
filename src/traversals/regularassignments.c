@@ -93,20 +93,11 @@ node_st *RAprogram(node_st *node)
     if (lastGlobDefDeclsNode != NULL && firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
         // Init function will be put after the last GlobDef node 
         // (not the GlobDecls because GlobDecls) do not have an initialization
-        printf("DECLS next before new assign is at address: %p\n", (void*)&DECLS_NEXT(lastGlobDefDeclsNode));
-
-        // Allocate new memory to add the new FunDef node
-        //node_st *newDeclsNode = MEMmalloc(1000);
         node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
             NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
         // Create a copy of the created node because otherwise the node is lost after the traversal
         // because it is cleaned after this traversal, so create a copy for it
         DECLS_NEXT(lastGlobDefDeclsNode) = CCNcopy(newDeclsNode);
-        // This assignment is not done, why??
-        
-        printf("newDeclsNode is at address: %p\n", (void*)&newDeclsNode);
-        printf("DECLS next after new assign is at address: %p\n", (void*)&DECLS_NEXT(lastGlobDefDeclsNode));
-        // TODO: why does this return an invalid pointer??? or a Segmentation fault??**************************************************************
     }
 
     return node;
@@ -117,8 +108,6 @@ node_st *RAprogram(node_st *node)
  */
 node_st *RAdecls(node_st *node)
 {
-    char *bool_str = NODE_TYPE(DECLS_DECL(node)) == NT_GLOBDEF ? "true" : "false";
-    printf("%s\n", bool_str);
     // Check if the type is NT_GLOBDEF
     if (NODE_TYPE(DECLS_DECL(node)) == NT_GLOBDEF) {
         // Update last globdef node, this node will be used to append the __init FunDef to
@@ -145,8 +134,6 @@ node_st *RAglobdef(node_st *node)
         char *copiedGlobDefName = STRcpy(GLOBDEF_NAME(node));
 
         // Create new VarLet, Assign and Stmts node, use the current INIT Expr node
-        // TODO: is this correct, no copies required or????
-        // TODO: what to do with the Link attribute, probably this traversal should be before the CA right?!
         node_st *newStmtsNodeGlobDef = ASTstmts(ASTassign(ASTvarlet(copiedGlobDefName), GLOBDEF_INIT(node)), NULL);
 
         // Add the new AssignNode to the global Stmts helper variable
@@ -196,8 +183,6 @@ node_st *RAvardecl(node_st *node)
         char *copiedVarDeclName = STRcpy(VARDECL_NAME(node));
 
         // Create new VarLet, Assign and Stmts node, use the current INIT Expr node
-        // TODO: is this correct, no copies required or????
-        // TODO: what to do with the Link attribute, probably this traversal should be before the CA right?!
         node_st *newStmtsNodeVarDecl = ASTstmts(ASTassign(ASTvarlet(copiedVarDeclName), VARDECL_INIT(node)), NULL);
 
         // Add the new AssignNode to the global Stmts helper variables
@@ -212,13 +197,3 @@ node_st *RAvardecl(node_st *node)
     
     return node;
 }
-
-/**
- * @fn RAfor
- */
-node_st *RAfor(node_st *node)
-{
-    // TODO: milestone 6, what to do with for, if anything, no need to do anything right???
-    return node;
-}
-

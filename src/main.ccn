@@ -4,10 +4,10 @@ start phase RootPhase {
         pass SPdoScanParse;
         // TODO: uncomment when done with testing RA traversal, otherwise it might cause an error or bug!
         ContextAnalysis;
-        RegularAssignments;
+        //RegularAssignments;
         // TODO: finish and uncomment above parts if this is finished and tested
-        //TypeChecking;
-        //CompilingBooleanDisjunctionAndConjunction;
+        TypeChecking;
+        CompilingBooleanDisjunctionAndConjunction;
         //CompilingBooleanCastExpressions;
         print;
     }
@@ -21,23 +21,23 @@ start phase RootPhase {
 
 //**********************************************************************************************************************************************
 // TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
-// TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
+// this is done before code generation because it has no for loops in the VM for example, like this:
+// int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
+// (step expr from for loop)
+
+// TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
 // it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
 
 // TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal.
-// TODO: segmentation fault/invalid pointer error there, why I cannot understand, i checked everything if it is NULL and prints, etc
 // ./civicc ../test/regularAssignmentsTests/globdefsAndVardeclsInits.cvc 
-// TODO: milestone 6, what to do with for, if anything, no need to do anything right???
-// TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
+// TODO: milestone 6, when this traversal should be performed, before ContextAnalysis or after, etcetera
+// Answer: 
 
 
 // TODO: DO NOT FORGET TO UNCOMMENT THE TRAVERSAL/PHASE OF THE CORRESPONDING TRAVERSAL*****************************
-// TODO: typechecking, ask TA what to do with Cast and if everything is correct for the rest (so also return statement??)
-// and are the operators correct??? Ask Simon
+// TODO: typechecking: are the operators correct??? Ask Simon
 
-// TODO: milestone 9: is the node TernaryOp correct?????
-// and the rest of the traversal is it correct???
-// TODO: what to do with the type signature, can I just use the type signature from the old BinOp????
+// Milestone 9: asked, this is correct for the TernaryOperator
 
 // TODO: milestone 10, what to do with funcalls? And how to do the rest???
 // TODO: are the nodes correct?? and when to do this, before milestone 9 or after???? After right???

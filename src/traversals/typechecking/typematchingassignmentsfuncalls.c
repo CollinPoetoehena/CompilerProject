@@ -456,6 +456,8 @@ node_st *TMAFcast(node_st *node)
     // Yield the type of the Cast for now
     tempType = CAST_TYPE(node);
 
+    // Check if it is a valid cast
+
     return node;
 }
 
