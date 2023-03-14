@@ -34,8 +34,17 @@ node_st *CBCEcast(node_st *node)
     // Or if the result features boolean operators it needs to be converted
     // TODO: traverse operators of cast expression and use there type signature, or if it has a boolean constant do it
     if (operatorTypeIsBool) {
-        
+        node_st *newConvertedNode = ASTternaryop(BINOP_LEFT(node), ASTbool(true), 
+            BINOP_RIGHT(node), BINOP_OPERATOR_TYPE_SIGNATURE(node));
+
+        // Return the new TernaryOp node
+        return newConvertedNode;
     }
+
+    // TODO: how to do this with the TernaryOp???
+    // Do not think about the complext expressions, it will simply be the TernaryOp node:
+    // predicate ? 1 : 0
+    // 
 
 
     // TODO: what to do with funcalls???
@@ -43,6 +52,7 @@ node_st *CBCEcast(node_st *node)
     // Reset the boolean value at the end for the next Cast operator
     operatorTypeIsBool = false;
 
+    // If no changes were made, just return the original Cast node again
     return node;
 }
 

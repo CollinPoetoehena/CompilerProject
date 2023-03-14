@@ -3,8 +3,8 @@ start phase RootPhase {
     actions {
         pass SPdoScanParse;
         // TODO: uncomment when done with testing RA traversal, otherwise it might cause an error or bug!
+        RegularAssignments;
         ContextAnalysis;
-        //RegularAssignments;
         // TODO: finish and uncomment above parts if this is finished and tested
         TypeChecking;
         CompilingBooleanDisjunctionAndConjunction;
@@ -28,11 +28,6 @@ start phase RootPhase {
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
 // it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
 
-// TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal.
-// ./civicc ../test/regularAssignmentsTests/globdefsAndVardeclsInits.cvc 
-// TODO: milestone 6, when this traversal should be performed, before ContextAnalysis or after, etcetera
-// Answer: 
-
 
 // TODO: DO NOT FORGET TO UNCOMMENT THE TRAVERSAL/PHASE OF THE CORRESPONDING TRAVERSAL*****************************
 // TODO: typechecking: are the operators correct??? Ask Simon
@@ -46,6 +41,7 @@ start phase RootPhase {
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
 // create a pass CodeGeneration with all the traversals in it and where to find what to do???
 // And how to start and how to test, etc.
+// traversal waar nodes met assembly code uitkomen bijvoorbeeld, maar vraag verder volgende keer!
 
 
 // ************************************************************************************************************************************
@@ -72,6 +68,13 @@ start phase RootPhase {
 
 traversal Print {
     uid = PRT
+};
+
+// This traversal should transform Variable Initialisations into Regular Assignments. Should be 
+// performed before the ContextAnalysis because that phase can create Ste's for the transformed code
+traversal RegularAssignments {
+    uid = RA,
+    nodes = { Program, Decls, GlobDef, FunBody, VarDecl, For}
 };
 
 // The ContextAnalysis phase is mainly used to create Symbol tables
@@ -129,12 +132,6 @@ phase ContextAnalysis {
             }
         };
     }
-};
-
-// This traversal should transform Variable Initialisations into Regular Assignments
-traversal RegularAssignments {
-    uid = RA,
-    nodes = { Program, Decls, GlobDef, FunBody, VarDecl, For}
 };
 
 // The TypeChecking phase is used to check all the types
@@ -492,7 +489,7 @@ node Monop {
     }
 };
 
-// TODO: is this correct???
+// This node is used 
 node TernaryOp {
     children {
         Expr predicate { constructor, mandatory },

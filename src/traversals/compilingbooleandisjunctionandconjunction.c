@@ -19,8 +19,6 @@ node_st *CBDCbinop(node_st *node)
     TRAVleft(node);
     TRAVright(node);
 
-    // TODO: are these correct?????**********************************************************************************
-
     // Then, convert binop that is a logical operator to TernaryOp node when the children are traversed.
     // This is done after because otherwise a BinOp with a BinOp Expr would not be correctly converted to TernaryOp
     if (BINOP_OP(node) == BO_or) {        
@@ -36,16 +34,6 @@ node_st *CBDCbinop(node_st *node)
         */
         node_st *newConvertedNode = ASTternaryop(BINOP_LEFT(node), ASTbool(true), 
             BINOP_RIGHT(node), BINOP_OPERATOR_TYPE_SIGNATURE(node));
-
-        // TODO: or is this correct?????
-        // Create a new TernaryOp node with the same type signature as the original BinOp
-        // node_st* ternaryop = ASTternaryop(NULL, NULL, NULL, BINOP_OPERATOR_TYPE_SIGNATURE(binop));
-        // // Set the predicate of the TernaryOp to the left child of the BinOp
-        // TERNARY_PREDICATE(ternaryop) = BINOP_LEFT(binop);
-        // // Set the then_expr of the TernaryOp to a new TernaryOp with a true predicate and the right child of the BinOp
-        // TERNARY_THEN_EXPR(ternaryop) = ASTternaryop(NULL, ASTbool(true), BINOP_RIGHT(binop), NULL);
-        // // Set the else_expr of the TernaryOp to a BoolLit node with value false
-        // TERNARY_ELSE_EXPR(ternaryop) = ASTboollit(false);
         
         // Return the new TernaryOp node
         return newConvertedNode;

@@ -24,20 +24,49 @@ node_st *currentForNode = NULL;
 // use the travdata, like 1.6
 //char *[]
 
-// TODO: create VarDecl in above fundef and set for loop to Var call
-//int i=0;
-    //for(_i, 5) 
+// TODO: create VarDecl in above fundef and set for loop to Var call, maybe even in a separate traversal separate the induction var from for???
+// for(int i = 0, 5); wordt niet dit want dit gaat fout met nested for loops:
+//int i_=0;
+//for(i_, 5) 
+// Wat je wel wilt is dat de declaratie voor de for loops komen in de fundef.
+// daarnaast wil je dat de assignment van de for loop inductie variabele precies voor de for loop komt. Dus bijvoorbeeld:
+/*
+void foo() {
+    for (int i = 0, 10) {
+        for (int i = 0, 10) {
 
-void RFIinit() { 
-    // initialize hash table, makes sure there is a hash table
-    htable_st *hash_table = HTnew_String(100);
-
-    struct data_ci *data = DATA_CI_GET();
-    data->id_table = hash_table;
-
-    return; 
+        }
+    }
 }
-void RFIfini() { return; }
+
+wordt (ook is de declaratie nu handmatig gescheiden van de assignment omdat de regular assignments voor de Ste's is!):
+void foo() {
+    int i_;
+    int i__;
+    i_ = 0;
+    for (i_, 10) {
+        i__ = 0;
+        for (i__, 10) {
+        }
+    }
+}
+
+// TODO: verwerk dit in de report ook nog!
+*/
+
+// Stmts traversal
+// elke for loop de var decl ervoor plakken
+
+// void RFIinit() { 
+//     // initialize hash table, makes sure there is a hash table
+//     htable_st *hash_table = HTnew_String(100);
+
+//     struct data_ci *data = DATA_CI_GET();
+//     data->id_table = hash_table;
+
+//     return; 
+// }
+// void RFIfini() { return; }
 
 /**
  * @fn RFIfor
