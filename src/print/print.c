@@ -731,6 +731,36 @@ node_st *PRTmonop(node_st *node)
 }
 
 /**
+ * @fn PRTternaryop
+ */
+node_st *PRTternaryop(node_st *node)
+{
+    //TODO: create print for the TernaryOp node
+    // Start TernaryOp
+    printf( "( ");
+
+    // Print predicate expression
+    TRAVpredicate(node);
+
+    // Print operator
+    printf( " ? ");
+    
+    // Print then expression
+    TRAVthen_expr(node);
+
+    // Print operator
+    printf( " : ");
+
+    // Print else expression
+    TRAVelse_expr(node);
+
+    // End binop
+    printf( " )");
+
+    return node;
+}
+
+/**
  * @fn PRTnum
  */
 node_st *PRTnum(node_st *node)
@@ -899,7 +929,6 @@ void printSteFunChain(node_st *steFunFirstNode) {
     do {
         // Get the return type of the FunDef
         char *type = getPrintType(STEFUN_TYPE(steIterator));
-        // TODO check if this function works when params are added!
         char *paramsTypes = getSteFunParamTypes(steIterator);
 
         // Print function Ste: "funName: returnType (param types)"

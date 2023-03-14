@@ -32,10 +32,11 @@ start phase RootPhase {
 // TODO: typechecking, ask TA what to do with Cast and if everything is correct for the rest (so also return statement??)
 // and are the operators correct??? Ask Simon
 
-// TODO: milestone 9: is the node TernaryOperator correct?????
+// TODO: milestone 9: is the node TernaryOp correct?????
 // and the rest of the traversal is it correct???
 // TODO: also extend TypeChecking now with the new TernaryOperator right??? to save the type signature???
 // or not necessary because it only has one type right, bool???
+// or good like I am doing righr now, use the signature that the BinOp already had???
 
 // TODO: milestone 10, what to do with funcalls? And how to do the rest: create new node: TernaryOperator, see inbox message
 
@@ -194,6 +195,7 @@ transform all Boolean operations in question into semantically equivalent condit
 */
 traversal CompilingBooleanDisjunctionAndConjunction {
     uid = CBDC,
+    // TODO: create print traversal for the TernaryOp
     nodes = { BinOp }
 };
 
@@ -233,7 +235,7 @@ enum BinOpEnum {
 
 nodeset Constants = {Float, Bool, Num};
 
-nodeset Operations = {Binop, Monop};
+nodeset Operations = {Binop, Monop, TernaryOp};
 
 nodeset Decl = {GlobDef, GlobDecl, FunDef};
 
@@ -463,19 +465,6 @@ node Assign {
     }
 };
 
-// TODO: is this correct???
-node TernaryOperator {
-    children {
-        Expr predicate { constructor, mandatory },
-        Expr then_expr { constructor, mandatory },
-        Expr else_expr { constructor, mandatory }
-    },
-    attributes {
-        // Save the inferred type of the ternary operator expression in typechecking to use in code generation later
-        Type type_signature { constructor }
-    }
-};
-
 node Binop {
     children {
         Expr left { constructor, mandatory },
@@ -498,6 +487,20 @@ node Monop {
         MonOpEnum op { constructor },
         // Save the infered operator type in typechecking in the node to use in code generation later
         Type operator_type_signature
+    }
+};
+
+// TODO: is this correct???
+node TernaryOp {
+    children {
+        Expr predicate { constructor, mandatory },
+        Expr then_expr { constructor, mandatory },
+        Expr else_expr { constructor, mandatory }
+    },
+    attributes {
+        // Save the inferred type of the ternary operator expression to use in code generation later
+        // Can be copied from the BinOp turned into TernaryOp
+        Type type_signature { constructor }
     }
 };
 
