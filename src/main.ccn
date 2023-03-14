@@ -204,7 +204,7 @@ traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     //TODO: is this correct?
     // It traverses all Cast expressions that have a boolean result or bool cast
-    nodes = { Cast, BinOp, Bool }
+    nodes = { Cast, BinOp, FunCall, Bool }
 };
 
 enum Type {
@@ -332,9 +332,11 @@ node FunDefs {
     }
 };
 
-// This ast uses the FunDef node for both the function definition and the function declaration. 
-// A function declaration is simply represented as a FunDef node without a FunBody.
-// FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
+/*
+This ast uses the FunDef node for both the function definition and the function declaration.
+A function declaration is simply represented as a FunDef node without a FunBody.
+FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
+*/
 node FunDef {
     children {
         FunBody body { constructor },
@@ -489,7 +491,7 @@ node Monop {
     }
 };
 
-// This node is used 
+// This node is used for the format: pred?then:else
 node TernaryOp {
     children {
         Expr predicate { constructor, mandatory },

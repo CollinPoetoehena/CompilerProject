@@ -22,20 +22,31 @@ bool operatorTypeIsBool = false;
  */
 node_st *CBCEcast(node_st *node)
 {
-    // TODO: how to do this??? because you do not know the value here right??? only the types, etc??
-
-    // First traverse the expression to also convert those Cast nodes if they are Casts
+    // First traverse the expression to also convert those Cast nodes first if they are Casts
     TRAVexpr(node);
 
     // If the Cast type is bool than it needs to be converted
     if (CAST_TYPE(node) == CT_bool) {
-        
+        node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTnum(1), 
+            ASTnum(0), CT_bool);
+        // TODO: what to do with type signature, is it correct?
+
+        // Return the new TernaryOp node
+        return newConvertedNode;
     }
     // Or if the result features boolean operators it needs to be converted
     // TODO: traverse operators of cast expression and use there type signature, or if it has a boolean constant do it
-    if (operatorTypeIsBool) {
-        node_st *newConvertedNode = ASTternaryop(BINOP_LEFT(node), ASTbool(true), 
-            BINOP_RIGHT(node), BINOP_OPERATOR_TYPE_SIGNATURE(node));
+    if (operatorTypeIsBool && CAST_TYPE(node) == CT_int) {
+        node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTnum(1), 
+            ASTnum(0), CT_int);
+        // TODO: what to do with type signature, is it correct?
+
+        // Return the new TernaryOp node
+        return newConvertedNode;
+    } else if (operatorTypeIsBool && CAST_TYPE(node) == CT_float) {
+        node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTfloat(1.0), 
+            ASTfloat(0.0), CT_float);
+        // TODO: what to do with type signature, is it correct?
 
         // Return the new TernaryOp node
         return newConvertedNode;
@@ -44,10 +55,7 @@ node_st *CBCEcast(node_st *node)
     // TODO: how to do this with the TernaryOp???
     // Do not think about the complext expressions, it will simply be the TernaryOp node:
     // predicate ? 1 : 0
-    // 
-
-
-    // TODO: what to do with funcalls???
+    // TODO: what to do with funcalls??? Just save it as an expr because you do not really care about what expr
 
     // Reset the boolean value at the end for the next Cast operator
     operatorTypeIsBool = false;
@@ -70,6 +78,16 @@ node_st *CBCEbinop(node_st *node)
         // Set the bool result value to true
         operatorTypeIsBool = true;
     }
+    return node;
+}
+
+/**
+ * @fn CBCEfuncall
+ */
+node_st *CBCEfuncall(node_st *node)
+{
+    // TODO: get SteFun link and see if it is a bool return type, then set to true, otherwise nothing
+
     return node;
 }
 
