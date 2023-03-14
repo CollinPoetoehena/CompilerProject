@@ -22,7 +22,6 @@ node_st *currentForNode = NULL;
 
 // TODO: hash table String maken met de variabele en na elke for loop die eruit halen
 // use the travdata, like 1.6
-//char *[]
 
 // TODO: create VarDecl in above fundef and set for loop to Var call, maybe even in a separate traversal separate the induction var from for???
 // for(int i = 0, 5); wordt niet dit want dit gaat fout met nested for loops:
@@ -57,16 +56,16 @@ void foo() {
 // Stmts traversal
 // elke for loop de var decl ervoor plakken
 
-// void RFIinit() { 
-//     // initialize hash table, makes sure there is a hash table
-//     htable_st *hash_table = HTnew_String(100);
+void RFIinit() { 
+    // initialize hash table, makes sure there is a hash table
+    htable_st *hash_table = HTnew_String(100);
 
-//     struct data_ci *data = DATA_CI_GET();
-//     data->id_table = hash_table;
+    struct data_rfi *data = DATA_RFI_GET();
+    data->for_identifiers_table = hash_table;
 
-//     return; 
-// }
-// void RFIfini() { return; }
+    return; 
+}
+void RFIfini() { return; }
 
 /**
  * @fn RFIstmts

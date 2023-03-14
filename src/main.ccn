@@ -67,7 +67,10 @@ phase ContextAnalysis {
         traversal RenameForIdentifiers {
             uid = RFI,
             // Also rename all the occurrences of the for variable
-            nodes = { Stmts, For, FunCall, Assign, Var, VarLet }
+            nodes = { Stmts, For, FunCall, Assign, Var, VarLet },
+            travdata {
+                user htable_ptr for_identifiers_table
+            }
         };
 
         // Create Variable Symboltables, linking will be done in a separate traversal
