@@ -6,8 +6,9 @@ start phase RootPhase {
         ContextAnalysis;
         //RegularAssignments;
         // TODO: finish and uncomment above parts if this is finished and tested
-        //CompilingBooleanCastExpressions;
         TypeChecking;
+        CompilingBooleanDisjunctionAndConjunction;
+        //CompilingBooleanCastExpressions;
         print;
     }
 }; 
@@ -29,6 +30,12 @@ start phase RootPhase {
 // TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
 // TODO: typechecking, ask TA what to do with Cast and if everything is correct for the rest (so also return statement??)
+// and are the operators correct??? Ask Simon
+
+// TODO: milestone 9: is the node TernaryOperator correct?????
+// and the rest of the traversal is it correct???
+// TODO: also extend TypeChecking now with the new TernaryOperator right??? to save the type signature???
+// or not necessary because it only has one type right, bool???
 
 // TODO: milestone 10, what to do with funcalls? And how to do the rest: create new node: TernaryOperator, see inbox message
 
@@ -36,9 +43,6 @@ start phase RootPhase {
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
 // create a pass CodeGeneration with all the traversals in it and where to find what to do???
 // And how to start and how to test, etc.
-
-
-
 
 
 // ************************************************************************************************************************************
@@ -153,7 +157,7 @@ phase TypeChecking {
                 While, DoWhile,
                 // Case for-loop: Infer types of bound/step expressions: Integer? Traverse into loop body
                 For,
-                // Case return: ...
+                // Case return: check with fundef return type
                 Return,
                 // Then continue with next statement...
                 /*
@@ -178,6 +182,19 @@ phase TypeChecking {
             }
         };
     }
+};
+
+// TODO: Note that CiviC also features eager disjunction (Boolean addition) and conjunction (Boolean
+//multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
+//by this milestone and can be compiled into corresponding VM instructions during code generation.
+/*
+This traversal extends the intermediate representation of the compiler by conditional
+expressions as exemplified by the C ternary operator pred ?then :else and to systematically
+transform all Boolean operations in question into semantically equivalent conditional expressions.
+*/
+traversal CompilingBooleanDisjunctionAndConjunction {
+    uid = CBDC,
+    nodes = { BinOp }
 };
 
 // This traversal should transform cast expressions with Boolean argument or result value
@@ -443,6 +460,19 @@ node Assign {
     children {
         VarLet let { constructor },
         Expr expr { constructor, mandatory }
+    }
+};
+
+// TODO: is this correct???
+node TernaryOperator {
+    children {
+        Expr predicate { constructor, mandatory },
+        Expr then_expr { constructor, mandatory },
+        Expr else_expr { constructor, mandatory }
+    },
+    attributes {
+        // Save the inferred type of the ternary operator expression in typechecking to use in code generation later
+        Type type_signature { constructor }
     }
 };
 
