@@ -4,10 +4,10 @@ start phase RootPhase {
         pass SPdoScanParse;
         // TODO: uncomment when done with testing RA traversal, otherwise it might cause an error or bug!
         ContextAnalysis;
-        //RegularAssignments;
+        RegularAssignments;
         // TODO: finish and uncomment above parts if this is finished and tested
-        TypeChecking;
-        CompilingBooleanDisjunctionAndConjunction;
+        //TypeChecking;
+        //CompilingBooleanDisjunctionAndConjunction;
         //CompilingBooleanCastExpressions;
         print;
     }
@@ -29,6 +29,7 @@ start phase RootPhase {
 // TODO: milestone 6, what to do with for, if anything, no need to do anything right???
 // TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
+// TODO: DO NOT FORGET TO UNCOMMENT THE TRAVERSAL/PHASE OF THE CORRESPONDING TRAVERSAL*****************************
 // TODO: typechecking, ask TA what to do with Cast and if everything is correct for the rest (so also return statement??)
 // and are the operators correct??? Ask Simon
 
@@ -204,7 +205,7 @@ traversal CompilingBooleanDisjunctionAndConjunction {
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     //TODO: is this correct?
-    // It traverses all Cast expressions and turns boolean arguments/results into Constants (Float,Num,Bool)
+    // It traverses all Cast expressions
     nodes = { Cast }
 };
 
