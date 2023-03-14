@@ -69,6 +69,15 @@ void foo() {
 // void RFIfini() { return; }
 
 /**
+ * @fn RFIstmts
+ */
+node_st *RFIstmts(node_st *node)
+{
+    //TODO
+    return node;
+}
+
+/**
  * @fn RFIfor
  */
 node_st *RFIfor(node_st *node)

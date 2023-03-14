@@ -8,7 +8,7 @@ start phase RootPhase {
         // TODO: finish and uncomment above parts if this is finished and tested
         TypeChecking;
         CompilingBooleanDisjunctionAndConjunction;
-        //CompilingBooleanCastExpressions;
+        CompilingBooleanCastExpressions;
         print;
     }
 }; 
@@ -32,39 +32,18 @@ start phase RootPhase {
 // TODO: DO NOT FORGET TO UNCOMMENT THE TRAVERSAL/PHASE OF THE CORRESPONDING TRAVERSAL*****************************
 // TODO: typechecking: are the operators correct??? Ask Simon
 
-// Milestone 9: asked, this is correct for the TernaryOperator
-
-// TODO: milestone 10, what to do with funcalls? And how to do the rest???
-// TODO: are the nodes correct?? and when to do this, before milestone 9 or after???? After right???
+// Milestone 10: what to do with type signature for casts????
 
 
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
 // create a pass CodeGeneration with all the traversals in it and where to find what to do???
 // And how to start and how to test, etc.
 // traversal waar nodes met assembly code uitkomen bijvoorbeeld, maar vraag verder volgende keer!
+// Maak dan een phase CodeGeneration met de aparte traversals daarin, dat is denk ik het handigst, vraag of dat zo is???
 
 
 // ************************************************************************************************************************************
-// milestones 8 and 11 are only for extensions!
-// TODO: for type checking see slides Semantic analysis for implementation hint on type checking!
-// TODO: see chapter 4: Expression language for types and other information for typechecking milestones!
-// Explanation on type checking: 
-
-// milestone 9:
-// || wordt lazy geevalueerd
-// voor bool operators een apart iets, dus || &&. Maak daar een ternary node voor
-// Dus eig die dingen omvormen in ternary statements
-// Example:
-// funcCallA() || funcallb()
-// Als funCallA() true returned dan zou funcallb() niet uitgevoerd hoeven worden (als die side effects heeft is dat slecht)
-// Traversal hoeft dan alleen over de binops te gaan en dan de logicoperators van Binop
-
-// milestone 10:
-// in assembly worden booleans anders afgehandeld
-// Er zijn geen assembly instructions om van en naar booleans te casten
-// Dit moet je dus zelf gaan doen met de cijfers
-// cast van int naar bool moet dan bijv een > 0 vergelijking, etc en andersom
-// traversal gaat over de Cast nodes
+// milestones 8 and 11 are only for extensions, so not necessary for basic!!
 
 traversal Print {
     uid = PRT
@@ -74,7 +53,7 @@ traversal Print {
 // performed before the ContextAnalysis because that phase can create Ste's for the transformed code
 traversal RegularAssignments {
     uid = RA,
-    nodes = { Program, Decls, GlobDef, FunBody, VarDecl, For}
+    nodes = { Program, Decls, GlobDef, FunBody, VarDecl}
 };
 
 // The ContextAnalysis phase is mainly used to create Symbol tables
@@ -88,7 +67,7 @@ phase ContextAnalysis {
         traversal RenameForIdentifiers {
             uid = RFI,
             // Also rename all the occurrences of the for variable
-            nodes = { For, FunCall, Assign, Var, VarLet }
+            nodes = { Stmts, For, FunCall, Assign, Var, VarLet }
         };
 
         // Create Variable Symboltables, linking will be done in a separate traversal

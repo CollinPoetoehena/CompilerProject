@@ -21,6 +21,7 @@ void foo() {
     d = (int)false;
     // nested bool casts
     d = (int) ((bool)1);
+    d = (int) boolFun();
 
     // Boolean cast results
     q = (bool)falseInt; // q = false
@@ -28,4 +29,17 @@ void foo() {
     z = (bool)falseFloat; // z = false
     z = (bool)trueFloat; // z = true
 
+    // These should not be converted
+    d = (int) 5;
+    w = (float) 5.3;
+    d = (int) intFun();
+
+}
+
+bool boolFun() {
+    return true;
+}
+
+int intFun() {
+    return 5;
 }

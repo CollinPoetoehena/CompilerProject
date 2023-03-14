@@ -4,6 +4,16 @@
  * Traversal: CompilingBooleanDisjunctionAndConjunction
  * UID      : CBDC
  *
+ * Milestone 9:
+ * The logical operators (&&, ||) are lazy evaluated, that means that the right expression
+ * is only evaluated if following the evaluation of the left operand
+ * the right operand determines the result of the operation. So, therefore a ternary operator
+ * node should be introduced to the AST and implement this functionality.
+ * 
+ * An example of this could be the following expression:
+ * funCallA() || funCallB()
+ * If funcallA() returns true, then funCallB() should not be executed. This is important
+ * because funCallB() can have side effects for example.
  *
  */
 
