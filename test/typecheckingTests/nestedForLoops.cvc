@@ -6,6 +6,15 @@ export int main() {
     for(int i=0, 10) {
         printInt(i);
         printSpaces(1);
+        for(int j=0, 4) {
+            printInt(i);
+            printInt(j);
+            for(int k=0, 4) {
+                printInt(i);
+                printInt(j);
+                printInt(k);
+            }
+        }
     }
 
     printNewlines(1);
@@ -28,6 +37,7 @@ export int main() {
         printInt(i);
         printSpaces(1);
     }
+
 
     for(int i=0, 5) {
         for(int j=0, 4) {

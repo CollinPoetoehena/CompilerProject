@@ -28,11 +28,17 @@ start phase RootPhase {
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
 // it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
 
+// TODO: ask Simon about transforming For nodes to While nodes, why and when and how???
 
-// TODO: DO NOT FORGET TO UNCOMMENT THE TRAVERSAL/PHASE OF THE CORRESPONDING TRAVERSAL*****************************
 // TODO: typechecking: are the operators correct??? Ask Simon
 
-// Milestone 10: what to do with type signature for casts????
+// TODO: Milestone 10: what to do with type signature for casts????
+
+// TODO: in milestone 9 this is also featured in the description at the end: when, why and how???
+// Note that CiviC also features eager disjunction (Boolean addition) and conjunction (Boolean
+// multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
+// by this milestone and can be compiled into corresponding VM instructions during code generation.
+
 
 
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
@@ -43,7 +49,7 @@ start phase RootPhase {
 
 
 // ************************************************************************************************************************************
-// milestones 8 and 11 are only for extensions, so not necessary for basic!!
+// TODO: not do milestones 8 and 11 they are only for extensions, so not necessary for basic!!
 
 traversal Print {
     uid = PRT
@@ -167,8 +173,8 @@ phase TypeChecking {
 };
 
 // TODO: Note that CiviC also features eager disjunction (Boolean addition) and conjunction (Boolean
-//multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
-//by this milestone and can be compiled into corresponding VM instructions during code generation.
+// multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
+// by this milestone and can be compiled into corresponding VM instructions during code generation.
 /*
 This traversal extends the intermediate representation of the compiler by conditional
 expressions as exemplified by the C ternary operator pred ?then :else and to systematically
@@ -184,10 +190,21 @@ traversal CompilingBooleanDisjunctionAndConjunction {
 // into semantically equivalent non-cast expressions (milestone 10)
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
-    //TODO: is this correct?
     // It traverses all Cast expressions that have a boolean result or bool cast
     nodes = { Cast, BinOp, FunCall, Bool }
 };
+
+//TODO: create
+// This phase is used for code generation
+// phase CodeGeneration {
+//     actions {
+//         // This traversal converts For nodes to While nodes
+//         traversal ConvertForToWhile {
+//             uid = CFTW,
+//             nodes = { For }
+//         };
+//     }
+// };
 
 enum Type {
     // T_ collides with bison/flex generated stuff.
@@ -226,9 +243,8 @@ nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
 
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
-// Link is used for the Symbol table to link a node to the symbol table
+// Link is used for the Symbol table to link a node (Var, VarLet or FunCall) to the symbol table
 nodeset Link = {SteVar, SteFun};
-// Link is voor na de symbol table om de symbol table entry te linken met de node (Var, Varlet, Funcall)
 
 root node Program {
     children {
@@ -552,7 +568,6 @@ node SteVar {
 node SteFun {
     children {
         // Parent wijst naar hogere nesting level
-        // TODO: with basic it can just be NULL always in creation, so set to null in traversal function!
         SteFun parent { constructor },
         // LinkedList data structure for next symbol table
         SteFun next { constructor }
