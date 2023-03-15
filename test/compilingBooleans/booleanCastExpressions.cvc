@@ -19,10 +19,12 @@ void foo() {
     w = (float)(b>d&&q); // w = 0.0
     w = (float)true;
     d = (int)false;
-    // nested bool casts
+    // Nested bool casts
     d = (int) ((bool)1);
     d = (int) boolFun();
     d = (int) ((bool) ((int) true));
+    // Very deeply nested bool cast
+    d = (int) ((bool) ((int) ((int)((bool) (((int) (bool) 1))))));
 
     // Boolean cast results
     q = (bool)falseInt; // q = false
@@ -30,7 +32,7 @@ void foo() {
     z = (bool)falseFloat; // z = false
     z = (bool)trueFloat; // z = true
 
-    // These should not be converted
+    // // These should not be converted
     d = (int) 5;
     w = (float) 5.3;
     d = (int) intFun();

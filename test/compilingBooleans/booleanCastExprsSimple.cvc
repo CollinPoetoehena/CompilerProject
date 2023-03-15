@@ -13,27 +13,27 @@ void foo() {
     float trueFloat = 1.0; // Everything higher than or equal 1 is true
 
     // Boolean cast results
-    d = (int)(b<d); //d = 1
-    d = (int)(a<b&&c>d); //d = 0
-    w = (float)(b>d||q); // w = 1.0
-    w = (float)(b>d&&q); // w = 0.0
-    w = (float)true;
-    d = (int)false;
+    // d = (int)(b<d); //d = 1
+    // d = (int)(a<b&&c>d); //d = 0
+    // w = (float)(b>d||q); // w = 1.0
+    // w = (float)(b>d&&q); // w = 0.0
+    // w = (float)true;
+    // d = (int)false;
     // nested bool casts
     d = (int) ((bool)1);
-    d = (int) boolFun();
-    d = (int) ((bool) ((int) true));
+    // d = (int) boolFun();
+    // d = (int) ((bool) ((int) true));
 
     // Boolean cast results
-    q = (bool)falseInt; // q = false
-    q = (bool)trueInt; // q = true
-    z = (bool)falseFloat; // z = false
-    z = (bool)trueFloat; // z = true
+    // q = (bool)falseInt; // q = false
+    // q = (bool)trueInt; // q = true
+    // z = (bool)falseFloat; // z = false
+    // z = (bool)trueFloat; // z = true
 
-    // These should not be converted
-    d = (int) 5;
-    w = (float) 5.3;
-    d = (int) intFun();
+    // // These should not be converted
+    // d = (int) 5;
+    // w = (float) 5.3;
+    // d = (int) intFun();
 }
 
 bool boolFun() {

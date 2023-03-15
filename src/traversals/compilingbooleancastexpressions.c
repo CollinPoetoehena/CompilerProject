@@ -53,6 +53,13 @@ char *getPrintTypeBooleanCastExprs(enum Type type) {
  */
 node_st *CBCEcast(node_st *node)
 {
+    // TODO: remove after debugging
+    char *tempType = getPrintTypeBooleanCastExprs(CAST_TYPE(node));
+    char *bool_strTest = operatorTypeIsBool ? "true" : "false";
+    printf("type: %s\n", tempType);
+    printf("boolean supposed to cast???: %s\n", bool_strTest);
+    // TODO: this is not working: d = (int) ((bool)1);
+
     // Reset the boolean value at the start for this Cast operator
     operatorTypeIsBool = false;
 
@@ -60,6 +67,7 @@ node_st *CBCEcast(node_st *node)
     TRAVexpr(node);
 
     // If the Cast type is bool than it needs to be converted
+    // Or if the result features boolean operators it needs to be converted
     if (CAST_TYPE(node) == CT_bool) {
         // Will be transformed to TernaryOp node: predicate  ? true : false
         // where the predicate will use the numbers num >=1 -> true; num < 1 -> false;
@@ -67,15 +75,19 @@ node_st *CBCEcast(node_st *node)
             ASTbool(false), CT_bool);
         // TODO: what to do with type signature, is it correct?
 
+        // Set temp variable for boolean operator to true because there is a bool cast
+        operatorTypeIsBool = true;
+
         // Return the new TernaryOp node
         return newConvertedNode;
-    }
-    // Or if the result features boolean operators it needs to be converted
-    if (operatorTypeIsBool && CAST_TYPE(node) == CT_int) {
+    } else if (operatorTypeIsBool && CAST_TYPE(node) == CT_int) {
         // Will be transformed to TernaryOp node: predicate ? 1 : 0
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTnum(1), 
             ASTnum(0), CT_bool);
         // TODO: what to do with type signature, is it correct?
+
+        // Set temp variable for boolean operator to true because there is a bool result cast
+        operatorTypeIsBool = true;
 
         // Return the new TernaryOp node
         return newConvertedNode;
@@ -84,6 +96,9 @@ node_st *CBCEcast(node_st *node)
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTfloat(1.0), 
             ASTfloat(0.0), CT_bool);
         // TODO: what to do with type signature, is it correct?
+
+        // Set temp variable for boolean operator to true because there is a bool result cast
+        operatorTypeIsBool = true;
 
         // Return the new TernaryOp node
         return newConvertedNode;
@@ -104,18 +119,12 @@ node_st *CBCEbinop(node_st *node)
     TRAVleft(node);
     TRAVright(node);
 
-    // TODO: remove after debugging
-    char *tempType = getPrintTypeBooleanCastExprs(BINOP_OPERATOR_TYPE_SIGNATURE(node));
-    printf("type signature of binop: %s\n", tempType);
-    // TODO: something with the binops is not printing correctly, fix with typechecking
-    // Normal binops are good, but binops with cast seem to not work correctly:
-    // d = (int)(b<d);
-
     // Then after traversing determine if the binop is a bool result
     if (BINOP_OPERATOR_TYPE_SIGNATURE(node) == CT_bool) {
         // Set the bool result value to true
         operatorTypeIsBool = true;
     }
+
     return node;
 }
 
