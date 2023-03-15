@@ -89,47 +89,47 @@ phase ContextAnalysis {
             }
         };
 
-        // // Create Variable Symboltables, linking will be done in a separate traversal
-        // traversal CreateVariableSymbolTableEntries {
-        //     uid = CVS,
-        //     nodes = { 
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // FunDef to use for the linking to the first SteVar 
-        //         FunDef,
-        //         // FunBody to traverse the VarDecls and Stmts
-        //         FunBody, 
-        //         // These nodes are used to create new Symbol Table entries
-        //         GlobDecl, GlobDef, VarDecl, Param, For
-        //         // TODO: Can For be removed now, because the induction variable has been removed!!!
-        //     }
-        // };
+        // Create Variable Symboltables, linking will be done in a separate traversal
+        traversal CreateVariableSymbolTableEntries {
+            uid = CVS,
+            nodes = { 
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for the linking to the first SteVar 
+                FunDef,
+                // FunBody to traverse the VarDecls and Stmts
+                FunBody, 
+                // These nodes are used to create new Symbol Table entries
+                GlobDecl, GlobDef, VarDecl, Param, For
+                // TODO: Can For be removed now, because the induction variable has been removed!!!
+            }
+        };
         
-        // // Create Function Symboltables, linking will be done in a separate traversal
-        // traversal CreateFunctionSymbolTableEntries {
-        //     uid = CFS,
-        //     nodes = {
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // FunDef to use for creating a new SteFun 
-        //         FunDef,
-        //         // Param node (= LinkedList) to link the params of a FunDef
-        //         Param
-        //     }
-        // };
+        // Create Function Symboltables, linking will be done in a separate traversal
+        traversal CreateFunctionSymbolTableEntries {
+            uid = CFS,
+            nodes = {
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for creating a new SteFun 
+                FunDef,
+                // Param node (= LinkedList) to link the params of a FunDef
+                Param
+            }
+        };
 
-        // // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        // traversal LinkSymbolTableEntries {
-        //     uid = LSTE,
-        //     nodes = { 
-        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-        //         Program,
-        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-        //         FunDef, 
-        //         // These nodes are used to update their link once they occur in a program
-        //         Var, Varlet, FunCall
-        //     }
-        // };
+        // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
+        traversal LinkSymbolTableEntries {
+            uid = LSTE,
+            nodes = { 
+                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+                Program,
+                // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+                FunDef, 
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet, FunCall
+            }
+        };
     }
 };
 

@@ -21,7 +21,7 @@ char *currentRenamedId = NULL;
 node_st *currentForNode = NULL;
 
 // This global variable is used for appending the for loop Var Assignment
-node_st *lastStmtsNode = NULL;
+node_st *lastStmtsNodeBeforeForLoop = NULL;
 // This global variable is used for appending the for loop start expr VarDecl to
 node_st *lastVarDeclNode = NULL;
 // TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
@@ -109,14 +109,15 @@ node_st *RFIvardecl(node_st *node)
 node_st *RFIstmts(node_st *node)
 {
     //TODO
-    // Check if the type is a For node: NT_FOR
+    // Check if the type of the Stmt is a For node: NT_FOR
     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
-        // Update last globdef node, this node will be used to append the __init FunDef to
-        lastStmtsNode = node;
+        // Update lastStmtsNodeBeforeForLoop, this node will be used to prepend for id assignment to
+        lastStmtsNodeBeforeForLoop = node;
     }
 
-    // Traverse the Stmts to traverse the For nodes
+    // Then, traverse the Stmts to traverse the For nodes
     TRAVstmt(node);
+
     TRAVnext(node);
 
     return node;
@@ -164,7 +165,16 @@ node_st *RFIfor(node_st *node)
     // it to the last VarDecl
     // TODO: maybe do it with CCNcopy if it gives an error of invalid pointer or segmentation
     // Append new For variable as a VarDecl node to the last VarDecl node of this FunDef and update it
-    node_st *newVarDeclNode = ASTvardecl(NULL, FOR_START_EXPR(node), NULL, FOR_VAR(node), CT_int);
+    // Expr init from the VarDecl node needs to be NULL because the Stmts should be done before the for loop
+    node_st *newVarDeclNode = ASTvardecl(NULL, NULL, NULL, FOR_VAR(node), CT_int);
+
+    // Also, save the start expression assignment, because this needs to be separated
+    // also applies to the regular assignments traversal that was done before ContextAnalysis
+    //FOR_START_EXPR(node);
+    // Prepend the assignment to this For node
+    // node_st *newStmtsNode = ASTstmts(ASTassign)
+    // STMTS_NEXT(lastStmtsNodeBeforeForLoop) = 
+    // TODO
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {

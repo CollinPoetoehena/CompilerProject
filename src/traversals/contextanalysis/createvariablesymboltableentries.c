@@ -295,7 +295,7 @@ node_st *CVSfor(node_st *node)
     local variable declarations on the level of the (innermost) function definition
     For var declaration always has type int and name is saved in For node
     */
-    createSymbolTableEntry(FOR_VAR(node), CT_int);
+    //createSymbolTableEntry(FOR_VAR(node), CT_int);
 
     // Go to stmts traversal functions
     TRAVblock(node);
