@@ -22,6 +22,7 @@ node_st *currentForNode = NULL;
 
 // This global variable is used for appending the for loop Var Assignment
 node_st *lastStmtsNodeBeforeForLoop = NULL;
+node_st *newForLoopAssignNode = NULL;
 // This global variable is used for appending the for loop start expr VarDecl to
 node_st *lastVarDeclNode = NULL;
 // TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
@@ -108,16 +109,39 @@ node_st *RFIvardecl(node_st *node)
  */
 node_st *RFIstmts(node_st *node)
 {
+    // 
     //TODO
     // Check if the type of the Stmt is a For node: NT_FOR
     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
         // Update lastStmtsNodeBeforeForLoop, this node will be used to prepend for id assignment to
+
+
+        // TODO: 1 extra variabele van de Stmts ervoor.
         lastStmtsNodeBeforeForLoop = node;
+
+        // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
+        TRAVstmt(node);
+
+        // if (newForLoopAssignNode != NULL) {
+        //     // update the sequence of Stmts nodes, the next is this Stmts node
+        //     STMTS_NEXT(node) = STMTS_NEXT(STMTS_NEXT(node));
+        //     node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+
+        //     printf("TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
+
+        //     // Reset the helper variable when assigned
+        //     newForLoopAssignNode = NULL;
+
+        //     // Return the new Stmts node
+        //     return prependStmtsNode;
+        // }
+
+    } else {
+        // Just traverse the Stmt witout updating the Stmts nodes
+        TRAVstmt(node);
     }
 
-    // Then, traverse the Stmts to traverse the For nodes
-    TRAVstmt(node);
-
+    // Then, traverse the next Stmts
     TRAVnext(node);
 
     return node;
@@ -148,7 +172,7 @@ node_st *RFIfor(node_st *node)
     // '_' because it is a valid identifier (see lexer)
     for( int i = 0; i < counter; i++ ){
         // Use for loop and concat an '_' for count times
-        FOR_VAR(node) = STRcat(FOR_VAR(node), "_");
+        FOR_VAR(node) = STRcat("_", FOR_VAR(node));
     }
 
     // Get the hash table from the travdata of the RFI traversal and save the current for identifiers in the hash table
@@ -175,6 +199,9 @@ node_st *RFIfor(node_st *node)
     // node_st *newStmtsNode = ASTstmts(ASTassign)
     // STMTS_NEXT(lastStmtsNodeBeforeForLoop) = 
     // TODO
+
+    // Save the For assignment Expr before updating it with the new Var node
+    newForLoopAssignNode = ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node));
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {

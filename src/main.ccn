@@ -20,10 +20,7 @@ start phase RootPhase {
 // This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
 
 //**********************************************************************************************************************************************
-// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
-// this is done before code generation because it has no for loops in the VM for example, like this:
-// int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
-// (step expr from for loop)
+
 
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
 // it is with this file: 
@@ -32,13 +29,8 @@ start phase RootPhase {
 // ./civicc ../test/contextAnalysisTest/nestedForLoops.cvc 
 // TODO: Can For be removed now, because the induction variable has been removed!!!
 
-// TODO: ask Simon about transforming For nodes to While nodes, why and when and how???
 
-// TODO: typechecking: are the operators correct??? Ask Simon
-// for example:         // TODO: can unary minus be done on bool values???
-// Check the getTypeSignatureMonOp and getTypeSignatureBinOp functions in the TypeMatchingAssignmentsFunCAlls traversal
-
-// TODO: Milestone 10: what to do with type signature for casts????
+// TODO: make a file and check if the -false gives a type error!
 
 // TODO: in milestone 9 this is also featured in the description at the end: when, why and how???
 // Note that CiviC also features eager disjunction (Boolean addition) and conjunction (Boolean
@@ -49,14 +41,6 @@ start phase RootPhase {
 
 // Ctrl + f on the below text (under CodeGeneration phase)
 // TODO: this is done during CodeGeneration, but when and how, etc???
-
-
-//TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
-// create a pass CodeGeneration with all the traversals in it and where to find what to do???
-// And how to start and how to test, etc.
-// traversal waar nodes met assembly code uitkomen bijvoorbeeld, maar vraag verder volgende keer!
-// Maak dan een phase CodeGeneration met de aparte traversals daarin, dat is denk ik het handigst, vraag of dat zo is???
-
 
 // ************************************************************************************************************************************
 // TODO: not do milestones 8 and 11 they are only for extensions, so not necessary for basic!!
@@ -205,16 +189,45 @@ traversal CompilingBooleanCastExpressions {
     nodes = { Cast, BinOp, FunCall, Bool }
 };
 
+// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
+// this is done before code generation because it has no for loops in the VM for example, like this:
+// int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
+// (step expr from for loop)
+// maakt niet uit waar, zolang het voor de assembly genereren is, gaat alleen over for naar while omzetten de rest kan hetzelfde
 //TODO: create
-// This phase is used for code generation
-// phase CodeGeneration {
-    // actions {
-    //     // This traversal converts For nodes to While nodes
-    //     traversal ConvertForToWhile {
-    //         uid = CFTW,
-    //         nodes = { For }
-    //     };
-    // }
+//     // This traversal converts For nodes to While nodes
+//     traversal ConvertForToWhile {
+//         uid = CFTW,
+//         nodes = { For }
+//     };
+
+/*
+TODO: 
+
+    Uitleg milestones 12, 13 en 14 voor assembly genereren
+    assembly uitprinten, ipv code printen ga je assembly code printen naar de output file die meegegeven is
+    main.c: regel 66:
+            global.output_file = optarg;
+    Standaard C om de file aan te maken, maak de file aan, de assembly code is een tekst bestand dat je gaat aanmaken
+    milestone 12,13, 14 zijn in 1 traversal die je uitbreidt op 1 file die je aanmaakt
+    gebruik de reference compiler om een voorbeeld te zien van assembly dat gegenereert wordt:
+    Zo kan je de reference compiler gebruiken: 
+    chmod +x ./civcc -> geeft permission voor alles
+    gebruik uit de /bin folder de reference compiler: civcc
+    run die compiler dan vervolgens op een .cvc file
+    hoeft niet 1 op 1 overeen te komen met jou compiler, zolang de output maar gelijk is.
+
+    Algemene tips:
+    functies zijn voornamelijk moeilijk, ruimte op de stack maken voor variabele
+    begin met de statements, dat is goed te doen, ga gewoon de milestones af.
+    Het is in principe minder tijd rovend dan de symbol tables, dat was het meeste tijd
+    Je kan een klein beetje kijken naar de print.c, sommige dingen zijn redelijk straight forward
+    zoals een BinOp is bijvoorbeeld in principe 2 dingen traversen en dan addition doen.
+*/
+// This traversal is used for assembly code generation
+// traversal AssemblyCodeGeneration {
+//     uid = ACG,
+
 // };
 
 /*
@@ -231,7 +244,7 @@ TODO: this is done during CodeGeneration, but when and how, etc???
 
         In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
         It is implemented by the multiplication operator (*).
-    */
+*/
 
 
 /*

@@ -191,8 +191,6 @@ enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
         Unary operators:
         '-' : int -> int
         '-' : float -> float
-        // TODO: can unary minus be done on bool values???
-        // '-' : bool x bool -> bool (implements negation)
         '!' : bool -> bool
         */
         if (operator == MO_neg) {
