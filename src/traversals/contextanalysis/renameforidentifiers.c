@@ -22,6 +22,8 @@ node_st *currentForNode = NULL;
 
 // This global variable is used for appending the for loop Var Assignment
 node_st *lastStmtsNodeBeforeForLoop = NULL;
+node_st *previousStmtsNode = NULL;
+
 node_st *newForLoopAssignNode = NULL;
 // This global variable is used for appending the for loop start expr VarDecl to
 node_st *lastVarDeclNode = NULL;
@@ -84,6 +86,8 @@ node_st *RFIfunbody(node_st *node)
     // First traverse the VarDecls to save the last VarDecl node to append the for identifiers to
     TRAVdecls(node);
 
+    // TODO: think about something to fill and VarDecls funbody because it does not work now
+
     // Then traverse the statements to convert and rename the for loop identifiers
     TRAVstmts(node);
 
@@ -115,32 +119,34 @@ node_st *RFIstmts(node_st *node)
     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
         // Update lastStmtsNodeBeforeForLoop, this node will be used to prepend for id assignment to
 
-
         // TODO: 1 extra variabele van de Stmts ervoor.
         lastStmtsNodeBeforeForLoop = node;
 
         // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
         TRAVstmt(node);
 
-        // if (newForLoopAssignNode != NULL) {
-        //     // update the sequence of Stmts nodes, the next is this Stmts node
-        //     STMTS_NEXT(node) = STMTS_NEXT(STMTS_NEXT(node));
-        //     node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+        if (newForLoopAssignNode != NULL) {
+            // update the sequence of Stmts nodes, the next is this Stmts node
+            STMTS_NEXT(node) = STMTS_NEXT(STMTS_NEXT(node));
+            node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
 
-        //     printf("TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
+            printf("TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
 
-        //     // Reset the helper variable when assigned
-        //     newForLoopAssignNode = NULL;
+            // Reset the helper variable when assigned
+            newForLoopAssignNode = NULL;
 
-        //     // Return the new Stmts node
-        //     return prependStmtsNode;
-        // }
+            // Return the new Stmts node
+            // TODO: is this necessaryy???
+            //return prependStmtsNode;
+        }
 
     } else {
         // Just traverse the Stmt witout updating the Stmts nodes
         TRAVstmt(node);
     }
 
+    // Before going to the next, save the previous Stmts node
+    previousStmtsNode = node;
     // Then, traverse the next Stmts
     TRAVnext(node);
 
@@ -162,8 +168,9 @@ node_st *RFIfor(node_st *node)
     // then after that the vars occur that are not renamed because the identifier is from the new for loop
     // TODO: skip for now, but ask in the lesson next week!
 
-    // This will rename all the iterators from the for loop to xCountUnderscores (with count x underscore)
-    // such as: 'i__'
+    // This will rename all the iterators from the for loop to <CountUnderscores><variableName>
+    // such as: '__i'
+    // This is done in this way because it is basically a variable that a user cannot create because it starts with an _
 
     // Save the old for loop id
     char *oldForIdentifier = FOR_VAR(node);
@@ -213,8 +220,11 @@ node_st *RFIfor(node_st *node)
         FOR_START_EXPR(node) = ASTvar(FOR_VAR(node));
     } else {
         // Otherwise, set the new VarDecl as the first one
-        lastVarDeclNode = newVarDeclNode;
+        lastVarDeclNode = CCNcopy(newVarDeclNode);
+        // Update the For node start expr to have a Var node that can be linked with Symbol tables later
+        FOR_START_EXPR(node) = ASTvar(FOR_VAR(node));
         // TODO: write a test for this in a .cvc file!
+        // TODO: this does not work, think about something that 
     }
 
     // Go to the traversal functions of the children

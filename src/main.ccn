@@ -20,30 +20,26 @@ start phase RootPhase {
 // This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
 
 //**********************************************************************************************************************************************
-
-
+// TODO: now make the rename identifiers of for loops and then uncomment everything again and test everything 
+// thorougly again! Simon approved of the explanation of for loops and there variable re structuring!
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
 // it is with this file: 
 // ./civicc ../test/basic/functional/for_to_while.cvc 
 // TODO: ask Simon: are the for loops correct like this?? use this file
 // ./civicc ../test/contextAnalysisTest/nestedForLoops.cvc 
-// TODO: Can For be removed now, because the induction variable has been removed!!!
+// TODO: Can For be removed from SteVar traversal now, because the induction variable has been removed!!!
 
 
 // TODO: make a file and check if the -false gives a type error!
 
-// TODO: in milestone 9 this is also featured in the description at the end: when, why and how???
-// Note that CiviC also features eager disjunction (Boolean addition) and conjunction (Boolean
-// multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
-// by this milestone and can be compiled into corresponding VM instructions during code generation.
+
+// TODO: how to generate the file for assembly in the traversal, is there code about that somewhere???? Ask Simon
 
 
 
-// Ctrl + f on the below text (under CodeGeneration phase)
-// TODO: this is done during CodeGeneration, but when and how, etc???
+// TODO: not do milestones 8 and 11 they are only for extensions, so not necessary for basic!!
 
 // ************************************************************************************************************************************
-// TODO: not do milestones 8 and 11 they are only for extensions, so not necessary for basic!!
 
 traversal Print {
     uid = PRT
@@ -73,47 +69,47 @@ phase ContextAnalysis {
             }
         };
 
-        // Create Variable Symboltables, linking will be done in a separate traversal
-        traversal CreateVariableSymbolTableEntries {
-            uid = CVS,
-            nodes = { 
-                // Program to link first symbol table entries of var and fun
-                Program,
-                // FunDef to use for the linking to the first SteVar 
-                FunDef,
-                // FunBody to traverse the VarDecls and Stmts
-                FunBody, 
-                // These nodes are used to create new Symbol Table entries
-                GlobDecl, GlobDef, VarDecl, Param, For
-                // TODO: Can For be removed now, because the induction variable has been removed!!!
-            }
-        };
+        // // Create Variable Symboltables, linking will be done in a separate traversal
+        // traversal CreateVariableSymbolTableEntries {
+        //     uid = CVS,
+        //     nodes = { 
+        //         // Program to link first symbol table entries of var and fun
+        //         Program,
+        //         // FunDef to use for the linking to the first SteVar 
+        //         FunDef,
+        //         // FunBody to traverse the VarDecls and Stmts
+        //         FunBody, 
+        //         // These nodes are used to create new Symbol Table entries
+        //         GlobDecl, GlobDef, VarDecl, Param, For
+        //         // TODO: Can For be removed now, because the induction variable has been removed!!!
+        //     }
+        // };
         
-        // Create Function Symboltables, linking will be done in a separate traversal
-        traversal CreateFunctionSymbolTableEntries {
-            uid = CFS,
-            nodes = {
-                // Program to link first symbol table entries of var and fun
-                Program,
-                // FunDef to use for creating a new SteFun 
-                FunDef,
-                // Param node (= LinkedList) to link the params of a FunDef
-                Param
-            }
-        };
+        // // Create Function Symboltables, linking will be done in a separate traversal
+        // traversal CreateFunctionSymbolTableEntries {
+        //     uid = CFS,
+        //     nodes = {
+        //         // Program to link first symbol table entries of var and fun
+        //         Program,
+        //         // FunDef to use for creating a new SteFun 
+        //         FunDef,
+        //         // Param node (= LinkedList) to link the params of a FunDef
+        //         Param
+        //     }
+        // };
 
-        // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        traversal LinkSymbolTableEntries {
-            uid = LSTE,
-            nodes = { 
-                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-                Program,
-                // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-                FunDef, 
-                // These nodes are used to update their link once they occur in a program
-                Var, Varlet, FunCall
-            }
-        };
+        // // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
+        // traversal LinkSymbolTableEntries {
+        //     uid = LSTE,
+        //     nodes = { 
+        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+        //         Program,
+        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+        //         FunDef, 
+        //         // These nodes are used to update their link once they occur in a program
+        //         Var, Varlet, FunCall
+        //     }
+        // };
     }
 };
 
@@ -203,6 +199,11 @@ traversal CompilingBooleanCastExpressions {
 
 /*
 TODO: 
+    milestone 15 is helemaal optioneel en om de bonus punten te krijgen moet je heel veel optimalisatie
+    doen om een beetje punten te krijgen, dus die niet doen!
+    milestone 14 is een beetje optioneel, probeer die wel te doen, maar als het niet lukt is het geen ramp!
+    milestone 12 en 13 zijn heel belangrijk, die moeten heel goed staan, test alles goed met de test suite
+    EN je eigen test files of die kloppen, test dit heel goed en grondig!
 
     Uitleg milestones 12, 13 en 14 voor assembly genereren
     assembly uitprinten, ipv code printen ga je assembly code printen naar de output file die meegegeven is
@@ -245,19 +246,6 @@ TODO: this is done during CodeGeneration, but when and how, etc???
         In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
         It is implemented by the multiplication operator (*).
 */
-
-
-/*
-TODO: first let your compiler generate assembly code and make sure that everything from that works!
-Then you can work on optimisations, make sure that you know that the optimisations can easily be turned off, 
-this can be done by creating a comment above a phase you made for CodeOptimisations. Then the teacher can 
-easily turn off the optimisations if something does go wrong! So, be careful with optimisations!
-*/
-// phase CodeOptimisation {
-//         actions {
-        
-//     }
-// };
 
 enum Type {
     // T_ collides with bison/flex generated stuff.
