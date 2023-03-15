@@ -31,6 +31,8 @@ start phase RootPhase {
 // TODO: ask Simon about transforming For nodes to While nodes, why and when and how???
 
 // TODO: typechecking: are the operators correct??? Ask Simon
+// for example:         // TODO: can unary minus be done on bool values???
+// Check the getTypeSignatureMonOp and getTypeSignatureBinOp functions in the TypeMatchingAssignmentsFunCAlls traversal
 
 // TODO: Milestone 10: what to do with type signature for casts????
 
@@ -39,6 +41,10 @@ start phase RootPhase {
 // multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
 // by this milestone and can be compiled into corresponding VM instructions during code generation.
 
+
+
+// Ctrl + f on the below text (under CodeGeneration phase)
+// TODO: this is done during CodeGeneration, but when and how, etc???
 
 
 //TODO: ask what to do with following milestones: milestone for week 7: 12 and 13
@@ -130,7 +136,7 @@ phase TypeChecking {
             uid = TMAF,
             nodes = {
                 /*
-                    These nodes are used for checking the types
+                        These nodes are used for checking the types
                 */
                 // Foreach function definition
                 FunDef,
@@ -149,12 +155,11 @@ phase TypeChecking {
                 Return,
                 // Then continue with next statement...
                 /*
-                    These nodes are used to infer the types of the Expression
+                        These nodes are used to infer the types of the Expression
                 */
                 // Case FunCall: Foreach argument expression: Infer argument type
                 // Compare with corresponding parameter type. Yield function return type
                 FunCall, Exprs,
-                // TODO: what to do with Cast???
                 Cast,
                 // Case BinOp: Infer left operand type. Infer right operand type. Yield operator result type
                 BinOp,
@@ -172,9 +177,6 @@ phase TypeChecking {
     }
 };
 
-// TODO: Note that CiviC also features eager disjunction (Boolean addition) and conjunction (Boolean
-// multiplication) with standard left-to-right operand evaluation semantics. They are not concerned
-// by this milestone and can be compiled into corresponding VM instructions during code generation.
 /*
 This traversal extends the intermediate representation of the compiler by conditional
 expressions as exemplified by the C ternary operator pred ?then :else and to systematically
@@ -186,8 +188,12 @@ traversal CompilingBooleanDisjunctionAndConjunction {
     nodes = { BinOp }
 };
 
-// This traversal should transform cast expressions with Boolean argument or result value
-// into semantically equivalent non-cast expressions (milestone 10)
+/*
+This traversal should transform cast expressions with Boolean argument or result value
+into semantically equivalent non-cast expressions (milestone 10).
+This is done after the CBDC traversal because the binops need to be traversed already for this
+traversal because a Cast can have a BinOp Expr child as well.
+*/
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     // It traverses all Cast expressions that have a boolean result or bool cast
@@ -205,6 +211,22 @@ traversal CompilingBooleanCastExpressions {
 //         };
 //     }
 // };
+
+/*
+TODO: this is done during CodeGeneration, but when and how, etc???
+    Explanation about Strict logic disjunction and conjunction:
+        Strict logic disjunction and conjunction are logical operations that implement the logical OR 
+        and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
+        conjunction, the operators are defined as arithmetic operators for addition and multiplication, respectively, 
+        and not as logical operators. This means that they operate on Boolean values as if they were integers, 
+        with the value true being treated as 1 and the value false being treated as 0.
+
+        In strict logic disjunction, the result is true if either or both operands are true, and false otherwise. 
+        It is implemented by the addition operator (+).
+
+        In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
+        It is implemented by the multiplication operator (*).
+    */
 
 enum Type {
     // T_ collides with bison/flex generated stuff.

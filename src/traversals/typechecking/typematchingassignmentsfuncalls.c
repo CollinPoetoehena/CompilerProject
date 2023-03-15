@@ -89,22 +89,7 @@ bool compareFunCallArgumentsTypes(enum Type argumentType) {
 
 // Helper function to get the type signature of the BinOp built-in operators
 enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
-    /*
-    // TODO: where to implement this and put this explanation??
-    Explanation about Strict logic disjunction and conjunction:
-        Strict logic disjunction and conjunction are logical operations that implement the logical OR 
-        and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
-        conjunction, the operators are defined as arithmetic operators for addition and multiplication, respectively, 
-        and not as logical operators. This means that they operate on Boolean values as if they were integers, 
-        with the value true being treated as 1 and the value false being treated as 0.
-
-        In strict logic disjunction, the result is true if either or both operands are true, and false otherwise. 
-        It is implemented by the addition operator (+).
-
-        In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
-        It is implemented by the multiplication operator (*).
-    */
-
+    // Check if the variables are not NULL to avoid Segmentation fault and bugs
     if (firstType != NULL && secondType != NULL && operator != NULL) {
         /*
         Arithmetic operators:
@@ -284,8 +269,6 @@ node_st *TMAFfunbody(node_st *node)
  */
 node_st *TMAFassign(node_st *node)
 {
-    // printf("assign in typechecking\n");
-
     // Traverse the expr type to infer the type of the expression
     TRAVexpr(node);
 
@@ -412,12 +395,10 @@ node_st *TMAFfor(node_st *node)
 /**
  * @fn TMAFreturn
  *
- * Case return: ...
+ * Case return: check return type with fundef return type
  */
 node_st *TMAFreturn(node_st *node)
 {
-    // TODO: what to do here with the return????
-
     // If the expression is not NULL check for a type, otherwise use void (== return;)
     if (RETURN_EXPR(node) != NULL) {
         TRAVexpr(node);
@@ -450,13 +431,8 @@ This part is for the type inference of the Expr
  */
 node_st *TMAFcast(node_st *node)
 {
-    // TODO: what to do with cast expression????
-    //TRAVexpr(node);
-
-    // Yield the type of the Cast for now
+    // Yield the type of the Cast
     tempType = CAST_TYPE(node);
-
-    // Check if it is a valid cast
 
     return node;
 }
@@ -486,10 +462,6 @@ node_st *TMAFfuncall(node_st *node)
 
     // Yield function return type after checking arguments
     tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
-    
-    // TODO: remove after debugging
-    // char *printingType = getTypeForPrinting(STEFUN_TYPE(FUNCALL_STE_LINK(node)));
-    // printf("return type for funcall is: %s\n", printingType);
 
     return node;
 }
@@ -550,8 +522,6 @@ node_st *TMAFbinop(node_st *node)
         tempType = inferedTypeBinOp;
         // Update this operator node with the type signature just obtained to use later in code generation
         BINOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeBinOp;
-        // TODO: remove after debugging
-        char *printexprType = getTypeForPrinting(BINOP_OPERATOR_TYPE_SIGNATURE(node));
     } else {
         // If the function returned CT_NULL than it could not infer a type, so error!
         // Prints the error when it occurs, so in this line
