@@ -287,6 +287,9 @@ node_st *CVSvardecl(node_st *node)
  */
 node_st *CVSfor(node_st *node)
 {
+    // TODO: move this comment to the rename for identifiers traversal and remove this
+    // because not necessary anymore right??? The VarDecl has been removed from the For node
+
     /*
     remove the declaration part from for-loop induction variables and create corresponding 
     local variable declarations on the level of the (innermost) function definition

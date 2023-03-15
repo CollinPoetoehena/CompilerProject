@@ -454,8 +454,11 @@ node_st *PRTdowhile(node_st *node)
  */
 node_st *PRTfor(node_st *node)
 {
+    // printf("for (int %s = ", FOR_VAR(node));
+    // TODO: the above can probably be removed, because no decl anymore in renameforidentifiers traversal
     // Start the for statement
-    printf("for (int %s = ", FOR_VAR(node));
+    printf("for (");
+
     // Print the start expression
     TRAVstart_expr(node);
 

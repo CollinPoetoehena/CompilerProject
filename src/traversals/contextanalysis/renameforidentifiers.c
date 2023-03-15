@@ -106,7 +106,7 @@ node_st *RFIvardecl(node_st *node)
 node_st *RFIstmts(node_st *node)
 {
     //TODO
-    // Check if the type is NT_FOR
+    // Check if the type is a For node: NT_FOR
     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
         // Update last globdef node, this node will be used to append the __init FunDef to
         lastStmtsNode = node;
@@ -138,7 +138,6 @@ node_st *RFIfor(node_st *node)
     // such as: 'i__'
 
     // Save the old for loop id
-    //currentRenamedId = FOR_VAR(node);
     char *oldForIdentifier = FOR_VAR(node);
 
     // Rename the identifier of the For node (do not create a new node, this is much easier!)
@@ -148,21 +147,18 @@ node_st *RFIfor(node_st *node)
         FOR_VAR(node) = STRcat(FOR_VAR(node), "_");
     }
 
+    // TODO: removed start expr and make the start expr the new occurrence and create a new VarDecl by appending
+    // it to the last VarDecl
+    // TODO: maybe do it with CCNcopy if it gives an error of invalid pointer or segmentation
+    // Append new For variable as a VarDecl node to the last VarDecl node of this FunDef and update it
+    VARDECL_NEXT(lastVarDeclNode) = CCNcopy(ASTvardecl(NULL, FOR_START_EXPR(node), NULL, ));
+
     // Get the hash table from the travdata of the RFI traversal and save the current for identifiers in the hash table
     struct data_rfi *data = DATA_RFI_GET();
 
-    // Allocate memory for a string of up to 99 characters in C to create a new memory block
-    //char *newForIdentifier = MEMmalloc(100 * sizeof(char));
-    // TODO: necessary???
-
-    // Insert newValue (= type char *)
+    // Insert newValue (== type char *)
     // Cast to void * because the parameter of the HTinsert is of type void *
     HTinsert(data->for_identifiers_table, oldForIdentifier, (void *) FOR_VAR(node));
-    // TODO
- 
-    // Save the For node in the global helper variable
-    // currentForNode = node;
-    // TODO: still necessary??? probably not right? Test this!
 
     // Update the counter
     counter++;
@@ -170,9 +166,8 @@ node_st *RFIfor(node_st *node)
     // Go to the traversal functions of the children
     TRAVblock(node);
 
-    // Remove current array item after traversing the block
-    // TODO or in a different spot, test it!
-    //HTremove
+    // Remove current old identifier from the for loop after traversing every for block. This is 
+    // mainly done for nested for loops so that the next nested for loop uses the right variable
     HTremove(data->for_identifiers_table, oldForIdentifier);
 
     return node;
@@ -196,6 +191,7 @@ node_st *RFIassign(node_st *node)
 {
     // Will go to the traversal functions of the Exprs
     TRAVexpr(node);
+
     // Will go to the varlet traversal function
     TRAVlet(node);
 
@@ -207,9 +203,8 @@ node_st *RFIassign(node_st *node)
  */
 node_st *RFIvarlet(node_st *node)
 {
-    printf("varlet\n");
+    //printf("varlet\n");
 
-    // TODO: convert to hash table
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
 
@@ -220,22 +215,7 @@ node_st *RFIvarlet(node_st *node)
     if (value != NULL) {
         // Create a copy of the id to avoid pointing to the same id of the For node
         VARLET_NAME(node) = STRcpy(value);
-
-        // TODO: remove after debugging
-        printf("var/varlet name: %s, value string: %s\n", VARLET_NAME(node), value);
-
-        // If the identifiers are the same as the old for identifier, rename it as well
-        // if (strcmp(value, VARLET_NAME(node)) == 0) {
-        //     // Create a copy of the id to avoid pointing to the same id of the For node
-        //     VARLET_NAME(node) = STRcpy(value);
-        // } else {
-        //     printf("value is not equal***********\n");
-        // }
-    } else {
-        printf("value is NULL!***********\n");
     }
-
-
 
 
     // Also rename the occurrence of the for identifier
@@ -258,9 +238,8 @@ node_st *RFIvarlet(node_st *node)
  */
 node_st *RFIvar(node_st *node)
 {
-    printf("varlet\n");
+    //printf("varlet\n");
 
-    // TODO: convert to hash table
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
 
@@ -271,22 +250,7 @@ node_st *RFIvar(node_st *node)
     if (value != NULL) {
         // Create a copy of the id to avoid pointing to the same id of the For node
         VAR_NAME(node) = STRcpy(value);
-
-        // TODO: remove after debugging
-        printf("var/varlet name: %s, value string: %s\n", VAR_NAME(node), value);
-
-        // // If the identifiers are the same as the old for identifier, rename it as well
-        // if (strcmp(value, VAR_NAME(node)) == 0) {
-        //     // Create a copy of the id to avoid pointing to the same id of the For node
-        //     VAR_NAME(node) = STRcpy(value);
-        // } else {
-        //     printf("value is not equal***********\n");
-        // }
-    } else {
-        printf("value is NULL!***********\n");
     }
-
-
 
 
     // Also rename the occurrence of the for identifier

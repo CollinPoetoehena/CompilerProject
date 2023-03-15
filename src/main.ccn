@@ -30,6 +30,7 @@ start phase RootPhase {
 // ./civicc ../test/basic/functional/for_to_while.cvc 
 // TODO: ask Simon: are the for loops correct like this?? use this file
 // ./civicc ../test/contextAnalysisTest/nestedForLoops.cvc 
+// TODO: Can For be removed now, because the induction variable has been removed!!!
 
 // TODO: ask Simon about transforming For nodes to While nodes, why and when and how???
 
@@ -100,6 +101,7 @@ phase ContextAnalysis {
         //         FunBody, 
         //         // These nodes are used to create new Symbol Table entries
         //         GlobDecl, GlobDef, VarDecl, Param, For
+        //         // TODO: Can For be removed now, because the induction variable has been removed!!!
         //     }
         // };
         
@@ -206,13 +208,13 @@ traversal CompilingBooleanCastExpressions {
 //TODO: create
 // This phase is used for code generation
 // phase CodeGeneration {
-//     actions {
-//         // This traversal converts For nodes to While nodes
-//         traversal ConvertForToWhile {
-//             uid = CFTW,
-//             nodes = { For }
-//         };
-//     }
+    // actions {
+    //     // This traversal converts For nodes to While nodes
+    //     traversal ConvertForToWhile {
+    //         uid = CFTW,
+    //         nodes = { For }
+    //     };
+    // }
 // };
 
 /*
@@ -230,6 +232,19 @@ TODO: this is done during CodeGeneration, but when and how, etc???
         In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
         It is implemented by the multiplication operator (*).
     */
+
+
+/*
+TODO: first let your compiler generate assembly code and make sure that everything from that works!
+Then you can work on optimisations, make sure that you know that the optimisations can easily be turned off, 
+this can be done by creating a comment above a phase you made for CodeOptimisations. Then the teacher can 
+easily turn off the optimisations if something does go wrong! So, be careful with optimisations!
+*/
+// phase CodeOptimisation {
+//         actions {
+        
+//     }
+// };
 
 enum Type {
     // T_ collides with bison/flex generated stuff.
