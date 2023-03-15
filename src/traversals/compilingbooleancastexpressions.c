@@ -25,6 +25,29 @@
 // Helper variable to determine if the Cast expression result is binop
 bool operatorTypeIsBool = false;
 
+//TODO: remove after debugging
+char *getPrintTypeBooleanCastExprs(enum Type type) {
+  // Get the type
+  char *printType = NULL;
+
+  switch (type) {
+    case CT_int:
+    printType = "int";
+    break;
+    case CT_float:
+    printType = "float";
+    break;
+    case CT_bool:
+    printType = "bool";
+    break;
+    case CT_void:
+    printType = "void";
+    break;
+  }
+
+  return printType;
+}
+
 /**
  * @fn CBCEcast
  */
@@ -80,6 +103,13 @@ node_st *CBCEbinop(node_st *node)
     // First traverse the children expressions to find other binops
     TRAVleft(node);
     TRAVright(node);
+
+    // TODO: remove after debugging
+    char *tempType = getPrintTypeBooleanCastExprs(BINOP_OPERATOR_TYPE_SIGNATURE(node));
+    printf("type signature of bool: %s\n", tempType);
+    // TODO: something with the binops is not printing correctly, fix with typechecking
+    // Normal binops are good, but binops with cast seem to not work correctly:
+    // d = (int)(b<d);
 
     // Then after traversing determine if the binop is a bool result
     if (BINOP_OPERATOR_TYPE_SIGNATURE(node) == CT_bool) {

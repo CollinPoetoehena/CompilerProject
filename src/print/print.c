@@ -178,9 +178,9 @@ node_st *PRTfuncall(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteFun link to this VarLet node
-    if (FUNCALL_STE_LINK(node) != NULL) {
-      printOneSteFun(FUNCALL_STE_LINK(node));
-    }
+    // if (FUNCALL_STE_LINK(node) != NULL) {
+    //   printOneSteFun(FUNCALL_STE_LINK(node));
+    // }
 
     return node;
 }
@@ -195,9 +195,9 @@ node_st *PRTvarlet(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteVar link to this VarLet node
-    if (VARLET_STE_LINK(node) != NULL) {
-      printOneSteVar(VARLET_STE_LINK(node));
-    }
+    // if (VARLET_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VARLET_STE_LINK(node));
+    // }
 
     // This prints it with the locations
     // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
@@ -214,9 +214,9 @@ node_st *PRTvar(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteVar link to this Var node
-    if (VAR_STE_LINK(node) != NULL) {
-      printOneSteVar(VAR_STE_LINK(node));
-    }
+    // if (VAR_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VAR_STE_LINK(node));
+    // }
 
     return node;
 }
