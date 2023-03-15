@@ -20,8 +20,10 @@ char *currentRenamedId = NULL;
 // Global currentForNode is used to save the new for loop node in and 
 node_st *currentForNode = NULL;
 
-// This global variable is used for appending the for loop Var assignment in front of
+// This global variable is used for appending the for loop Var Assignment
 node_st *lastStmtsNode = NULL;
+// This global variable is used for appending the for loop start expr VarDecl to
+node_st *lastVarDeclNode = NULL;
 // TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
 // again use CCNcopy like regular assignments if it gives an error of invalid pointer or segmentation, first try without!
 
@@ -74,16 +76,45 @@ void RFIinit() {
 void RFIfini() { return; }
 
 /**
+ * @fn RFIfunbody
+ */
+node_st *RFIfunbody(node_st *node)
+{
+    // First traverse the VarDecls to save the last VarDecl node to append the for identifiers to
+    TRAVdecls(node);
+
+    // Then traverse the statements to convert and rename the for loop identifiers
+    TRAVstmts(node);
+
+    return node;
+}
+
+/**
+ * @fn RFIvardecl
+ */
+node_st *RFIvardecl(node_st *node)
+{
+    // Update last VarDecl node
+    lastVarDeclNode = node;
+
+    return node;
+}
+
+/**
  * @fn RFIstmts
  */
 node_st *RFIstmts(node_st *node)
 {
     //TODO
     // Check if the type is NT_FOR
-    if (NODE_TYPE(STMTS_STMT(node)) == NT_GLOBDEF) {
+    if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
         // Update last globdef node, this node will be used to append the __init FunDef to
         lastStmtsNode = node;
     }
+
+    // Traverse the Stmts to traverse the For nodes
+    TRAVstmt(node);
+    TRAVnext(node);
 
     return node;
 }
@@ -142,6 +173,7 @@ node_st *RFIfor(node_st *node)
     // Remove current array item after traversing the block
     // TODO or in a different spot, test it!
     //HTremove
+    HTremove(data->for_identifiers_table, oldForIdentifier);
 
     return node;
 }
@@ -175,20 +207,32 @@ node_st *RFIassign(node_st *node)
  */
 node_st *RFIvarlet(node_st *node)
 {
+    printf("varlet\n");
+
     // TODO: convert to hash table
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
 
     // Get the value from the identifier from the hash table
-    char *value = (char *) HTlookup(data->for_identifiers_table, VAR_NAME(node));
+    char *value = (char *) HTlookup(data->for_identifiers_table, VARLET_NAME(node));
 
     // If the value is in the hash table, rename it
     if (value != NULL) {
+        // Create a copy of the id to avoid pointing to the same id of the For node
+        VARLET_NAME(node) = STRcpy(value);
+
+        // TODO: remove after debugging
+        printf("var/varlet name: %s, value string: %s\n", VARLET_NAME(node), value);
+
         // If the identifiers are the same as the old for identifier, rename it as well
-        if (strcmp(value, VARLET_NAME(node)) == 0) {
-            // Create a copy of the id to avoid pointing to the same id of the For node
-            VARLET_NAME(node) = STRcpy(value);
-        }
+        // if (strcmp(value, VARLET_NAME(node)) == 0) {
+        //     // Create a copy of the id to avoid pointing to the same id of the For node
+        //     VARLET_NAME(node) = STRcpy(value);
+        // } else {
+        //     printf("value is not equal***********\n");
+        // }
+    } else {
+        printf("value is NULL!***********\n");
     }
 
 
@@ -214,17 +258,48 @@ node_st *RFIvarlet(node_st *node)
  */
 node_st *RFIvar(node_st *node)
 {
+    printf("varlet\n");
+
+    // TODO: convert to hash table
+    // Get the hash table from the travdata of the RFI traversal
+    struct data_rfi *data = DATA_RFI_GET();
+
+    // Get the value from the identifier from the hash table
+    char *value = (char *) HTlookup(data->for_identifiers_table, VAR_NAME(node));
+
+    // If the value is in the hash table, rename it
+    if (value != NULL) {
+        // Create a copy of the id to avoid pointing to the same id of the For node
+        VAR_NAME(node) = STRcpy(value);
+
+        // TODO: remove after debugging
+        printf("var/varlet name: %s, value string: %s\n", VAR_NAME(node), value);
+
+        // // If the identifiers are the same as the old for identifier, rename it as well
+        // if (strcmp(value, VAR_NAME(node)) == 0) {
+        //     // Create a copy of the id to avoid pointing to the same id of the For node
+        //     VAR_NAME(node) = STRcpy(value);
+        // } else {
+        //     printf("value is not equal***********\n");
+        // }
+    } else {
+        printf("value is NULL!***********\n");
+    }
+
+
+
+
     // Also rename the occurrence of the for identifier
     // No need to check for other variables, because there is only the globdecl and globdef that can have
     // the same name and they will not be changed by this. Also, the same identifier in the scope of the
     // for loop identifier will give a context analysis error because that identifier of the for loop
     // needs to be saved in the scope above the for loop!
-    if (currentRenamedId != NULL && currentForNode != NULL) {
-        if (strcmp(currentRenamedId, VAR_NAME(node)) == 0) {
-            // Create a copy of the id to avoid pointing to the same id of the For node
-            VAR_NAME(node) = STRcpy(FOR_VAR(currentForNode));
-        }
-    }
+    // if (currentRenamedId != NULL && currentForNode != NULL) {
+    //     if (strcmp(currentRenamedId, VAR_NAME(node)) == 0) {
+    //         // Create a copy of the id to avoid pointing to the same id of the For node
+    //         VAR_NAME(node) = STRcpy(FOR_VAR(currentForNode));
+    //     }
+    // }
 
     return node;
 }
