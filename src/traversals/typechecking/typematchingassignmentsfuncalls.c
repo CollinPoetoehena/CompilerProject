@@ -188,7 +188,7 @@ enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
     // Create type signatures for MonOp nodes
     if (firstType != NULL && operator != NULL) {
         /*
-         Unary operators:
+        Unary operators:
         '-' : int -> int
         '-' : float -> float
         // TODO: can unary minus be done on bool values???
@@ -401,6 +401,7 @@ node_st *TMAFreturn(node_st *node)
 {
     // If the expression is not NULL check for a type, otherwise use void (== return;)
     if (RETURN_EXPR(node) != NULL) {
+        // Traverse the expr to also find potential type signatures for BinOps or MonOps
         TRAVexpr(node);
     } else {
         tempType = CT_void;
@@ -431,6 +432,9 @@ This part is for the type inference of the Expr
  */
 node_st *TMAFcast(node_st *node)
 {
+    // First traverse the expr to save the type signature of potential BinOp or MonOp nodes!
+    TRAVexpr(node);
+
     // Yield the type of the Cast
     tempType = CAST_TYPE(node);
 

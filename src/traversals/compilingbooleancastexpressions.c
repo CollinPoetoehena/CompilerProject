@@ -106,7 +106,7 @@ node_st *CBCEbinop(node_st *node)
 
     // TODO: remove after debugging
     char *tempType = getPrintTypeBooleanCastExprs(BINOP_OPERATOR_TYPE_SIGNATURE(node));
-    printf("type signature of bool: %s\n", tempType);
+    printf("type signature of binop: %s\n", tempType);
     // TODO: something with the binops is not printing correctly, fix with typechecking
     // Normal binops are good, but binops with cast seem to not work correctly:
     // d = (int)(b<d);
