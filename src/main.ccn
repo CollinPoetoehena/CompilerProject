@@ -26,7 +26,10 @@ start phase RootPhase {
 // (step expr from for loop)
 
 // TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
-// it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
+// it is with this file: 
+// ./civicc ../test/basic/functional/for_to_while.cvc 
+// TODO: ask Simon: are the for loops correct like this?? use this file
+// 
 
 // TODO: ask Simon about transforming For nodes to While nodes, why and when and how???
 

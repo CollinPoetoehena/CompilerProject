@@ -409,7 +409,8 @@ node_st *TMAFreturn(node_st *node)
 
     // Check with FunDef node type
     if (tempFundefSteLink != NULL) {
-        if (tempType != STEFUN_TYPE(tempFundefSteLink)) {
+        // Void function does not have a return type
+        if (tempType != STEFUN_TYPE(tempFundefSteLink) && STEFUN_TYPE(tempFundefSteLink) != CT_void) {
             // Prints the error when it occurs, so in this line
             CTI(CTI_ERROR, true, "type error in return statement for function '%s'", STEFUN_NAME(tempFundefSteLink));
             // Create error action, will stop the current compilation at the end of this Phase

@@ -20,6 +20,11 @@ char *currentRenamedId = NULL;
 // Global currentForNode is used to save the new for loop node in and 
 node_st *currentForNode = NULL;
 
+// This global variable is used for appending the for loop Var assignment in front of
+node_st *lastStmtsNode = NULL;
+// TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
+// again use CCNcopy like regular assignments if it gives an error of invalid pointer or segmentation, first try without!
+
 // TODO: hash table String maken met de variabele en na elke for loop die eruit halen
 // use the travdata, like 1.6
 
@@ -73,6 +78,12 @@ void RFIfini() { return; }
 node_st *RFIstmts(node_st *node)
 {
     //TODO
+    // Check if the type is NT_FOR
+    if (NODE_TYPE(STMTS_STMT(node)) == NT_GLOBDEF) {
+        // Update last globdef node, this node will be used to append the __init FunDef to
+        lastStmtsNode = node;
+    }
+
     return node;
 }
 
@@ -100,6 +111,10 @@ node_st *RFIfor(node_st *node)
         // Use for loop and concat an '_' for count times
         FOR_VAR(node) = STRcat(FOR_VAR(node), "_");
     }
+
+    // Save the current for identifiers in the hash table
+    // Allocate memory for a string of up to 99 characters in C to create a new memory block
+    int *newForIdentifier = MEMmalloc(100 * sizeof(char));
  
     // Save the For node in the global helper variable
     currentForNode = node;

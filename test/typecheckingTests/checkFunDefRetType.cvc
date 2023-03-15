@@ -4,6 +4,11 @@ void foo(int a, bool b, float c) {
     return;
 }
 
+void fooWithoutReturn(int a, bool b, float c) {
+    // no return should be valid for void
+    int d;
+}
+
 bool boolFun(bool a, bool b) {
     return a && b;
 }
@@ -17,10 +22,6 @@ float floatFun(float a) {
 }
 
 // Check Failure
-void fooErr(int a, bool b, float c) {
-    return a;
-}
-
 bool boolFunErr(bool a, bool b, int c) {
     return c;
 }
