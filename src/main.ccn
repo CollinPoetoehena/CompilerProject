@@ -29,7 +29,7 @@ start phase RootPhase {
 // it is with this file: 
 // ./civicc ../test/basic/functional/for_to_while.cvc 
 // TODO: ask Simon: are the for loops correct like this?? use this file
-// 
+// ./civicc ../test/contextAnalysisTest/nestedForLoops.cvc 
 
 // TODO: ask Simon about transforming For nodes to While nodes, why and when and how???
 

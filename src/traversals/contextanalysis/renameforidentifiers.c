@@ -65,6 +65,7 @@ void RFIinit() {
     // initialize hash table, makes sure there is a hash table
     htable_st *hash_table = HTnew_String(100);
 
+    // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
     data->for_identifiers_table = hash_table;
 
@@ -92,6 +93,9 @@ node_st *RFIstmts(node_st *node)
  */
 node_st *RFIfor(node_st *node)
 {
+    // TODO: afterwards check if any global variables are also not renamed, probably not because before it did not as well! but check still!
+
+
     // TODO this file does not work correctly: ./civicc ../test/basic/functional/for_to_while.cvc
     // nested for loops and its i do not work correctly
     // the i from the previous for loop is not renamed in the nested for loop, fix that
@@ -103,7 +107,8 @@ node_st *RFIfor(node_st *node)
     // such as: 'i__'
 
     // Save the old for loop id
-    currentRenamedId = FOR_VAR(node);
+    //currentRenamedId = FOR_VAR(node);
+    char *oldForIdentifier = FOR_VAR(node);
 
     // Rename the identifier of the For node (do not create a new node, this is much easier!)
     // '_' because it is a valid identifier (see lexer)
@@ -112,12 +117,21 @@ node_st *RFIfor(node_st *node)
         FOR_VAR(node) = STRcat(FOR_VAR(node), "_");
     }
 
-    // Save the current for identifiers in the hash table
+    // Get the hash table from the travdata of the RFI traversal and save the current for identifiers in the hash table
+    struct data_rfi *data = DATA_RFI_GET();
+
     // Allocate memory for a string of up to 99 characters in C to create a new memory block
-    int *newForIdentifier = MEMmalloc(100 * sizeof(char));
+    //char *newForIdentifier = MEMmalloc(100 * sizeof(char));
+    // TODO: necessary???
+
+    // Insert newValue (= type char *)
+    // Cast to void * because the parameter of the HTinsert is of type void *
+    HTinsert(data->for_identifiers_table, oldForIdentifier, (void *) FOR_VAR(node));
+    // TODO
  
     // Save the For node in the global helper variable
-    currentForNode = node;
+    // currentForNode = node;
+    // TODO: still necessary??? probably not right? Test this!
 
     // Update the counter
     counter++;
@@ -126,7 +140,8 @@ node_st *RFIfor(node_st *node)
     TRAVblock(node);
 
     // Remove current array item after traversing the block
-    // TODO
+    // TODO or in a different spot, test it!
+    //HTremove
 
     return node;
 }
@@ -160,17 +175,36 @@ node_st *RFIassign(node_st *node)
  */
 node_st *RFIvarlet(node_st *node)
 {
+    // TODO: convert to hash table
+    // Get the hash table from the travdata of the RFI traversal
+    struct data_rfi *data = DATA_RFI_GET();
+
+    // Get the value from the identifier from the hash table
+    char *value = (char *) HTlookup(data->for_identifiers_table, VAR_NAME(node));
+
+    // If the value is in the hash table, rename it
+    if (value != NULL) {
+        // If the identifiers are the same as the old for identifier, rename it as well
+        if (strcmp(value, VARLET_NAME(node)) == 0) {
+            // Create a copy of the id to avoid pointing to the same id of the For node
+            VARLET_NAME(node) = STRcpy(value);
+        }
+    }
+
+
+
+
     // Also rename the occurrence of the for identifier
     // No need to check for other variables, because there is only the globdecl and globdef that can have
     // the same name and they will not be changed by this. Also, the same identifier in the scope of the
     // for loop identifier will give a context analysis error because that identifier of the for loop
     // needs to be saved in the scope above the for loop!
-    if (currentRenamedId != NULL && currentForNode != NULL) {
-        if (strcmp(currentRenamedId, VARLET_NAME(node)) == 0) {
-            // Create a copy of the id to avoid pointing to the same id of the For node
-            VARLET_NAME(node) = STRcpy(FOR_VAR(currentForNode));
-        }
-    }
+    // if (currentRenamedId != NULL && currentForNode != NULL) {
+        // if (strcmp(currentRenamedId, VARLET_NAME(node)) == 0) {
+        //     // Create a copy of the id to avoid pointing to the same id of the For node
+        //     VARLET_NAME(node) = STRcpy(FOR_VAR(currentForNode));
+        // }
+    // }
 
     return node;
 }
