@@ -25,42 +25,12 @@
 // Helper variable to determine if the Cast expression result is binop
 bool operatorTypeIsBool = false;
 
-//TODO: remove after debugging
-char *getPrintTypeBooleanCastExprs(enum Type type) {
-  // Get the type
-  char *printType = NULL;
-
-  switch (type) {
-    case CT_int:
-    printType = "int";
-    break;
-    case CT_float:
-    printType = "float";
-    break;
-    case CT_bool:
-    printType = "bool";
-    break;
-    case CT_void:
-    printType = "void";
-    break;
-  }
-
-  return printType;
-}
-
 /**
  * @fn CBCEcast
  */
 node_st *CBCEcast(node_st *node)
 {
-    // TODO: remove after debugging
-    char *tempType = getPrintTypeBooleanCastExprs(CAST_TYPE(node));
-    char *bool_strTest = operatorTypeIsBool ? "true" : "false";
-    printf("type: %s\n", tempType);
-    printf("boolean supposed to cast???: %s\n", bool_strTest);
-    // TODO: this is not working: d = (int) ((bool)1);
-
-    // Reset the boolean value at the start for this Cast operator
+    // Reset the boolean value at the start for every Cast node
     operatorTypeIsBool = false;
 
     // First traverse the expression to also convert those Cast nodes first if they are Casts
@@ -104,8 +74,6 @@ node_st *CBCEcast(node_st *node)
         return newConvertedNode;
     }
 
-    // TODO: all Cast nodes are turned into TernaryOp, not correct only bool cast and bool expr
-
     // If no changes were made, just return the original Cast node again
     return node;
 }
@@ -133,7 +101,7 @@ node_st *CBCEbinop(node_st *node)
  */
 node_st *CBCEfuncall(node_st *node)
 {
-    // TODO: get SteFun link and see if it is a bool return type, then set to true, otherwise nothing
+    // Get SteFun link and see if it is a bool return type, then set to true, otherwise do nothing
     if (STEFUN_TYPE(FUNCALL_STE_LINK(node)) == CT_bool) {
         // Set the bool result value to true
         operatorTypeIsBool = true;

@@ -25,6 +25,7 @@ void foo() {
     d = (int) ((bool) ((int) true));
     // Very deeply nested bool cast
     d = (int) ((bool) ((int) ((int)((bool) (((int) (bool) 1))))));
+    z = (bool) ((int)(a<b&&c>d));
 
     // Boolean cast results
     q = (bool)falseInt; // q = false
