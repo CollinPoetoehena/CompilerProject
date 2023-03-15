@@ -97,6 +97,9 @@ node_st *RFIvardecl(node_st *node)
     // Update last VarDecl node
     lastVarDeclNode = node;
 
+    // Traverse to the next VarDecl
+    TRAVnext(node);
+
     return node;
 }
 
@@ -147,12 +150,6 @@ node_st *RFIfor(node_st *node)
         FOR_VAR(node) = STRcat(FOR_VAR(node), "_");
     }
 
-    // TODO: removed start expr and make the start expr the new occurrence and create a new VarDecl by appending
-    // it to the last VarDecl
-    // TODO: maybe do it with CCNcopy if it gives an error of invalid pointer or segmentation
-    // Append new For variable as a VarDecl node to the last VarDecl node of this FunDef and update it
-    VARDECL_NEXT(lastVarDeclNode) = CCNcopy(ASTvardecl(NULL, FOR_START_EXPR(node), NULL, ));
-
     // Get the hash table from the travdata of the RFI traversal and save the current for identifiers in the hash table
     struct data_rfi *data = DATA_RFI_GET();
 
@@ -163,8 +160,30 @@ node_st *RFIfor(node_st *node)
     // Update the counter
     counter++;
 
+    // TODO: removed start expr and make the start expr the new occurrence and create a new VarDecl by appending
+    // it to the last VarDecl
+    // TODO: maybe do it with CCNcopy if it gives an error of invalid pointer or segmentation
+    // Append new For variable as a VarDecl node to the last VarDecl node of this FunDef and update it
+    node_st *newVarDeclNode = ASTvardecl(NULL, FOR_START_EXPR(node), NULL, FOR_VAR(node), CT_int);
+    
+    // If there is an existing lastVarDeclNode, update it
+    if (lastVarDeclNode != NULL) {
+        // Update the next vardecl
+        VARDECL_NEXT(lastVarDeclNode) = newVarDeclNode;
+        // Update the last VarDecl with the new VarDecl to append the next For identifier to
+        lastVarDeclNode = newVarDeclNode;
+        // Update the For node start expr to have a Var node that can be linked with Symbol tables later
+        FOR_START_EXPR(node) = ASTvar(FOR_VAR(node));
+    } else {
+        // Otherwise, set the new VarDecl as the first one
+        lastVarDeclNode = newVarDeclNode;
+        // TODO: write a test for this in a .cvc file!
+    }
+
     // Go to the traversal functions of the children
     TRAVblock(node);
+    
+    // TODO: why does it only do the first vardecl???
 
     // Remove current old identifier from the for loop after traversing every for block. This is 
     // mainly done for nested for loops so that the next nested for loop uses the right variable
