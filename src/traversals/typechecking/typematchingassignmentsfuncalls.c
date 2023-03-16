@@ -504,6 +504,11 @@ node_st *TMAFfuncall(node_st *node)
         // Then, traverse to the arguments to infer the type of each argument using these variables
         TRAVargs(node);
 
+        // TODO: nested funcalls with arguments do not work correctly now, fix it, it is with the arguments checking
+        // Think about how to solve this issue and test it thorougly again! Maybe hash tables again?? or think of an 
+        // easier solution! Draw it on paper to see exactly what needs to happen and what is currently happening in these
+        // funcalls, etc!
+
         // Reset global type helper variables after traversing arguments. 
         // This is done here for nested funcalls to avoid Segmentation fault!
         tempType = CT_NULL; // CT_NULL is the NULL type

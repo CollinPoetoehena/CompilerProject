@@ -7,8 +7,8 @@ start phase RootPhase {
         ContextAnalysis;
         // TODO: finish and uncomment above parts if this is finished and tested
         TypeChecking;
-        // CompilingBooleanDisjunctionAndConjunction;
-        // CompilingBooleanCastExpressions;
+        CompilingBooleanDisjunctionAndConjunction;
+        CompilingBooleanCastExpressions;
         print;
     }
 };
