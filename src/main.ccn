@@ -7,8 +7,8 @@ start phase RootPhase {
         ContextAnalysis;
         // TODO: finish and uncomment above parts if this is finished and tested
         TypeChecking;
-        CompilingBooleanDisjunctionAndConjunction;
-        CompilingBooleanCastExpressions;
+        // CompilingBooleanDisjunctionAndConjunction;
+        // CompilingBooleanCastExpressions;
         print;
     }
 };
@@ -87,6 +87,7 @@ phase ContextAnalysis {
             // Also rename all the occurrences of the for variable
             nodes = { FunBody, VarDecl, Stmts, For, FunCall, Assign, Var, VarLet },
             travdata {
+                // Hash tables are used to handle converting nested for loops
                 user htable_ptr for_identifiers_table,
                 user htable_ptr for_assignNodes_table
             }

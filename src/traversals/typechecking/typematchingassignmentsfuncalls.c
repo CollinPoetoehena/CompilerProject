@@ -234,6 +234,8 @@ bool checkConditionExpression(enum Type conditionType, char *statementType) {
  */
 node_st *TMAFfundef(node_st *node)
 {
+    printf("fundef\n");
+
      // Save the fundef return type by using the Ste
     tempFundefSteLink = FUNDEF_SYMBOL_TABLE(node);
 
@@ -251,6 +253,8 @@ node_st *TMAFfundef(node_st *node)
  */
 node_st *TMAFfunbody(node_st *node)
 {
+        printf("funbody\n");
+
     // Traverse the VarDecls
     TRAVdecls(node);
 
@@ -267,6 +271,8 @@ node_st *TMAFfunbody(node_st *node)
  */
 node_st *TMAFassign(node_st *node)
 {
+        printf("assign\n");
+
     // Traverse the expr type to infer the type of the expression
     TRAVexpr(node);
 
@@ -292,6 +298,8 @@ node_st *TMAFassign(node_st *node)
  */
 node_st *TMAFifelse(node_st *node)
 {
+        printf("ifelse\n");
+
     // Traverse the expr type to infer the type of the expression
     TRAVcond(node);
 
@@ -316,6 +324,8 @@ node_st *TMAFifelse(node_st *node)
  */
 node_st *TMAFwhile(node_st *node)
 {
+        printf("while\n");
+
     // Traverse the expr type to infer the type of the expression
     TRAVcond(node);
 
@@ -339,6 +349,8 @@ node_st *TMAFwhile(node_st *node)
  */
 node_st *TMAFdowhile(node_st *node)
 {
+        printf("dowhile\n");
+
     // Traverse the expr type to infer the type of the expression
     TRAVcond(node);
 
@@ -362,6 +374,8 @@ node_st *TMAFdowhile(node_st *node)
  */
 node_st *TMAFfor(node_st *node)
 {
+        printf("for\n");
+
     // Traverse the expr type to infer the type of the expression
     TRAVstop(node);
     // Save the tempType variable to save the stop expression type
@@ -415,6 +429,8 @@ node_st *TMAFfor(node_st *node)
  */
 node_st *TMAFreturn(node_st *node)
 {
+        printf("return\n");
+
     // If the expression is not NULL check for a type, otherwise use void (== return;)
     if (RETURN_EXPR(node) != NULL) {
         // Traverse the expr to also find potential type signatures for BinOps or MonOps
@@ -426,7 +442,13 @@ node_st *TMAFreturn(node_st *node)
     // Check with FunDef node type
     if (tempFundefSteLink != NULL) {
         // Void function does not have a return type
-        if (tempType != STEFUN_TYPE(tempFundefSteLink) && STEFUN_TYPE(tempFundefSteLink) != CT_void) {
+        if (STEFUN_TYPE(tempFundefSteLink) == CT_void && 
+            (tempType == CT_bool || tempType == CT_int || tempType == CT_float)) {
+            // Prints the error when it occurs, so in this line
+            CTI(CTI_ERROR, true, "type error in return statement for function '%s'", STEFUN_NAME(tempFundefSteLink));
+            // Create error action, will stop the current compilation at the end of this Phase
+            CCNerrorPhase();
+        } else if (tempType != STEFUN_TYPE(tempFundefSteLink) && STEFUN_TYPE(tempFundefSteLink) != CT_void) {
             // Prints the error when it occurs, so in this line
             CTI(CTI_ERROR, true, "type error in return statement for function '%s'", STEFUN_NAME(tempFundefSteLink));
             // Create error action, will stop the current compilation at the end of this Phase
@@ -449,6 +471,8 @@ This part is for the type inference of the Expr
  */
 node_st *TMAFcast(node_st *node)
 {
+        printf("cast\n");
+
     // First traverse the expr to save the type signature of potential BinOp or MonOp nodes!
     TRAVexpr(node);
 
@@ -466,20 +490,29 @@ node_st *TMAFcast(node_st *node)
  */
 node_st *TMAFfuncall(node_st *node)
 {
+        printf("funcall\n");
+
     // Start the tempArgumentIndex at 0
     tempArgumentIndex = 0;
     // Save the FunCall link to use for checking the arguments
     tempSteFunCallLink = FUNCALL_STE_LINK(node);
     // Save the FunCall node itself for giving a specific type error
     tempSteFunCallNode = node;
-    // Then, traverse to the arguments to infer the type of each argument using these variables
-    TRAVargs(node);
 
-    // Reset global type helper variables after traversing arguments
-    tempType = CT_NULL; // CT_NULL is the NULL type
-    tempSteFunCallLink = NULL;
-    tempSteFunCallNode = NULL;
-    tempArgumentIndex = 0;
+    if (FUNCALL_ARGS(node) != NULL) {
+        printf("Some args to check!\n");
+        // Then, traverse to the arguments to infer the type of each argument using these variables
+        TRAVargs(node);
+
+        // Reset global type helper variables after traversing arguments. 
+        // This is done here for nested funcalls to avoid Segmentation fault!
+        tempType = CT_NULL; // CT_NULL is the NULL type
+        tempSteFunCallLink = NULL;
+        tempSteFunCallNode = NULL;
+        tempArgumentIndex = 0;
+    } else {
+        printf("No args to check!\n");
+    }
 
     // Yield function return type after checking arguments
     tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
@@ -494,6 +527,9 @@ node_st *TMAFfuncall(node_st *node)
  */
 node_st *TMAFexprs(node_st *node)
 {
+        printf("exprs\n");
+
+
     // Traverse the first expr
     TRAVexpr(node);
     // Save the tempType variable to save the stop expression type
@@ -526,6 +562,8 @@ node_st *TMAFexprs(node_st *node)
  */
 node_st *TMAFbinop(node_st *node)
 {
+        printf("binop\n");
+
     // Infer left operand type
     TRAVleft(node);
     // Save the tempType variable to save expression type
@@ -561,6 +599,8 @@ node_st *TMAFbinop(node_st *node)
  */
 node_st *TMAFmonop(node_st *node)
 {
+        printf("monop\n");
+
     // Infer operand type
     TRAVoperand(node);
     // Save the tempType variable to save expression type
@@ -590,6 +630,8 @@ node_st *TMAFmonop(node_st *node)
  */
 node_st *TMAFvar(node_st *node)
 {
+        printf("var\n");
+
     // Yield type from Ste link
     tempType = STEVAR_TYPE(VAR_STE_LINK(node));
 
@@ -603,6 +645,8 @@ node_st *TMAFvar(node_st *node)
  */
 node_st *TMAFnum(node_st *node)
 {    
+        printf("num\n");
+
     // Yield int
     tempType = CT_int;
 
@@ -616,6 +660,8 @@ node_st *TMAFnum(node_st *node)
  */
 node_st *TMAFfloat(node_st *node)
 {
+        printf("float\n");
+
     // Yield float
     tempType = CT_float;
 
@@ -629,6 +675,8 @@ node_st *TMAFfloat(node_st *node)
  */
 node_st *TMAFbool(node_st *node)
 {        
+        printf("bool\n");
+
     // Yield bool
     tempType = CT_bool;
 

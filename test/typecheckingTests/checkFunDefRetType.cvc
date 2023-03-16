@@ -22,6 +22,10 @@ float floatFun(float a) {
 }
 
 // Check Failure
+void faa() {
+    return true;
+}
+
 bool boolFunErr(bool a, bool b, int c) {
     return c;
 }

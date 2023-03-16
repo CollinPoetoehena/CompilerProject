@@ -1,0 +1,15 @@
+bool a() {
+    return true;
+}
+
+bool b() {
+    return true;
+}
+
+int c() {
+
+}
+
+void foo(bool b) {
+    foo(c() + 1);
+}

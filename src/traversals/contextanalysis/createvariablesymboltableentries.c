@@ -279,30 +279,6 @@ node_st *CVSvardecl(node_st *node)
     return node;
 }
 
-/**
- * @fn CVSfor
- *
- * Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-   Renaming of for loop identifiers has been done in a separate traversal
- */
-node_st *CVSfor(node_st *node)
-{
-    // TODO: move this comment to the rename for identifiers traversal and remove this
-    // because not necessary anymore right??? The VarDecl has been removed from the For node
-
-    /*
-    remove the declaration part from for-loop induction variables and create corresponding 
-    local variable declarations on the level of the (innermost) function definition
-    For var declaration always has type int and name is saved in For node
-    */
-    //createSymbolTableEntry(FOR_VAR(node), CT_int);
-
-    // Go to stmts traversal functions
-    //TRAVblock(node);
-
-    return node;
-}
-
 // Prints a chain of SteVar's using the LinkedList structure
 // TODO: remove at the end of the compiler project, this is handy to print a chain of Ste's for debugging!
 void printSteVar(node_st *steParentNode) {

@@ -7,10 +7,24 @@ void foo(int a, float b, bool c) {
     foo(5, 5.45645, true);
     foo(a, b, c);
     foo(d, e, f);
+    foo(d, e, (a() && b()));
 
     // Error
-    // foo(true, 5.5646, 2);
+    //foo(true, 5.5646, 2);
     // foo(c, b, a);
     // foo(f, e, d);
     // foo(a, a, a);
+}
+
+int integerFun(bool z) {
+    int a;
+    return a;
+}
+
+bool a() {
+    return true;
+}
+
+bool b() {
+    return false;
 }
