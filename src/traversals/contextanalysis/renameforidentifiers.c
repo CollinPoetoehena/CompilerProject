@@ -136,32 +136,90 @@ node_st *RFIstmts(node_st *node)
         TRAVstmt(node);
 
         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
-        // if (newForLoopAssignNode != NULL) {
-        //     // Create the new Stmts node with the Assign node from the For node
-        //     node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
-        //     // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
-        //     if (previousStmtsNode == NULL) {
-        //         printf("FIRST DOING THE IF\n");
-        //         // Update this node by appending the current Stmts node to this new Stmts node
-        //         STMTS_NEXT(prependStmtsNode) = node;
+        if (newForLoopAssignNode != NULL) {
+            // Create the new Stmts node with the Assign node from the For node
+            // node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
 
-        //         return prependStmtsNode;
-        //     } else {
-        //         printf("FIRST DOING THE ELSE\n");
-        //         // printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
-        //         // printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
-        //         STMTS_NEXT(prependStmtsNode) = node;
+            // TODO: this is a try to do it differently by only changing this node
+            node_st *prependStmtsNode = CCNcopy(node);
+            node = ASTstmts(newForLoopAssignNode, prependStmtsNode);
+            //node_st *tempStmts = STMTS_STMT(node);
+            // STMTS_STMT(node) = prependStmtsNode;
 
-        //         // STMTS_NEXT(previousStmtsNode) = prependStmtsNode;
-        //         // STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
-        //     }
-        // }
+            previousStmtsNode = node;
+
+            // Skip traversing this node again to avoid a loop, instead go to the next of the next node
+            TRAVnext(STMTS_NEXT(node));
+
+            return node;
+
+
+
+            // // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+            // if (previousStmtsNode == NULL) {
+            //     printf("FIRST DOING THE IF\n");
+            //     // Update this node by appending the current Stmts node to this new Stmts node
+            //     //STMTS_NEXT(prependStmtsNode) = node;
+            //     STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
+
+            //     //return prependStmtsNode;
+            // } else {
+            //     printf("FIRST DOING THE ELSE\n");
+            //     // printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
+            //     // printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
+            //     STMTS_NEXT(prependStmtsNode) = node;
+
+            //     // STMTS_NEXT(previousStmtsNode) = prependStmtsNode;
+            //     // STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
+            // }
+        }
+
+
+    //     if (lastStmtsNodeBeforeForLoop != NULL) {
+    //     // Create the new Stmts node with the Assign node from the For node
+    //     node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
+    //     // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+    //     if (previousStmtsNode == NULL) {
+    //         printf("FIRST DOING THE IF\n");
+    //         // Update this node by appending the current Stmts node to this new Stmts node
+    //         // node_st *tempStmts = lastStmtsNodeBeforeForLoop;
+    //         // lastStmtsNodeBeforeForLoop = prependStmtsNode;
+           
+    //         // TODO: this funbody does not update anything
+    //         // if i do this code exactly in the funbody itself then it works, how???
+    //         // it does work with the decls this works, how???: FUNBODY_DECLS(lastFunBodyNode) = NULL;
+
+    //         //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
+
+    //         // TODO: this does not yet work
+    //         // tested if the assign node works correctly and it does if you append it to the lastStmtsNodeBeforeForLoop
+    //         // So this works, but now it needs to be prepended!
+    //         //         node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
+    //                     //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
+    //                     STMTS_STMT(lastStmtsNodeBeforeForLoop) = NULL;
+    //                     //STMTS_NEXT(prependStmtsNode) = prependStmtsNode;
+
+    //         // Otherwise, set the new VarDecl as the first one to the current FunBody node
+    //         // FUNBODY_STMTS(lastFunBodyNode) = prependStmtsNode;
+
+
+    //         // STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
+
+    //         //return prependStmtsNode;
+    //     } else {
+    //         printf("FIRST DOING THE ELSE\n");
+    //         // printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
+    //         // printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
+
+    //         STMTS_NEXT(previousStmtsNode) = prependStmtsNode;
+    //         STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
+    //     }
+    // }
 
         // TODO: probably better to do it in the For node to insert it in between
 
         printf("THEN DOING THE NEXT TRAV\n");
-        previousStmtsNode = node;
-        TRAVnext(node);
+        // 
     } else {
         TRAVstmt(node);
         previousStmtsNode = node;
@@ -310,44 +368,46 @@ node_st *RFIfor(node_st *node)
     printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
                 printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
 
-    if (lastStmtsNodeBeforeForLoop != NULL) {
-        // Create the new Stmts node with the Assign node from the For node
-        node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
-        // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
-        if (previousStmtsNode == NULL) {
-            printf("FIRST DOING THE IF\n");
-            // Update this node by appending the current Stmts node to this new Stmts node
-            // node_st *tempStmts = lastStmtsNodeBeforeForLoop;
-            // lastStmtsNodeBeforeForLoop = prependStmtsNode;
-            STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
-            
-            printf("lastFunBodyNode is NULL??? %s\n", lastFunBodyNode == NULL ? "true" : "false");
-            FUNBODY_STMTS(lastFunBodyNode) = NULL;  // TODO: this funbody does not update anything
+    // if (lastStmtsNodeBeforeForLoop != NULL) {
+    //     // Create the new Stmts node with the Assign node from the For node
+    //     node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
+    //     // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+    //     if (previousStmtsNode == NULL) {
+    //         printf("FIRST DOING THE IF\n");
+    //         // Update this node by appending the current Stmts node to this new Stmts node
+    //         // node_st *tempStmts = lastStmtsNodeBeforeForLoop;
+    //         // lastStmtsNodeBeforeForLoop = prependStmtsNode;
+           
+    //         // TODO: this funbody does not update anything
+    //         // if i do this code exactly in the funbody itself then it works, how???
+    //         // it does work with the decls this works, how???: FUNBODY_DECLS(lastFunBodyNode) = NULL;
 
-            //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
+    //         //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
 
-            // TODO: this does not yet work
-            // tested if the assign node works correctly and it does if you append it to the lastStmtsNodeBeforeForLoop
-            // So this works, but now it needs to be prepended!
-            //         node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
-            //             STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
+    //         // TODO: this does not yet work
+    //         // tested if the assign node works correctly and it does if you append it to the lastStmtsNodeBeforeForLoop
+    //         // So this works, but now it needs to be prepended!
+    //         //         node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
+    //                     //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
+    //                     STMTS_STMT(lastStmtsNodeBeforeForLoop) = NULL;
+    //                     //STMTS_NEXT(prependStmtsNode) = prependStmtsNode;
 
-            // Otherwise, set the new VarDecl as the first one to the current FunBody node
-            // FUNBODY_STMTS(lastFunBodyNode) = prependStmtsNode;
+    //         // Otherwise, set the new VarDecl as the first one to the current FunBody node
+    //         // FUNBODY_STMTS(lastFunBodyNode) = prependStmtsNode;
 
 
-            // STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
+    //         // STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
 
-            //return prependStmtsNode;
-        } else {
-            printf("FIRST DOING THE ELSE\n");
-            // printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
-            // printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
+    //         //return prependStmtsNode;
+    //     } else {
+    //         printf("FIRST DOING THE ELSE\n");
+    //         // printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
+    //         // printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
 
-            STMTS_NEXT(previousStmtsNode) = prependStmtsNode;
-            STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
-        }
-    }
+    //         STMTS_NEXT(previousStmtsNode) = prependStmtsNode;
+    //         STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
+    //     }
+    // }
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
