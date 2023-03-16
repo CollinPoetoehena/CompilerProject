@@ -87,7 +87,8 @@ phase ContextAnalysis {
             // Also rename all the occurrences of the for variable
             nodes = { FunBody, VarDecl, Stmts, For, FunCall, Assign, Var, VarLet },
             travdata {
-                user htable_ptr for_identifiers_table
+                user htable_ptr for_identifiers_table,
+                user htable_ptr for_assignNodes_table
             }
         };
 

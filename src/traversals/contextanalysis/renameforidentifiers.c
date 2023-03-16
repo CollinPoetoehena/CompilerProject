@@ -28,6 +28,9 @@ node_st *newForLoopAssignNode = NULL;
 // This global variable is used for appending the for loop start expr VarDecl to
 node_st *lastVarDeclNode = NULL;
 node_st *lastFunBodyNode = NULL;
+
+char *currentForVariableForHashTable = NULL;
+
 // TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
 // again use CCNcopy like regular assignments if it gives an error of invalid pointer or segmentation, first try without!
 
@@ -70,10 +73,12 @@ void foo() {
 void RFIinit() { 
     // initialize hash table, makes sure there is a hash table
     htable_st *hash_table = HTnew_String(100);
+    htable_st *hash_table_assignNodes = HTnew_String(100);
 
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
     data->for_identifiers_table = hash_table;
+    data->for_assignNodes_table = hash_table_assignNodes;
 
     return; 
 }
@@ -135,21 +140,42 @@ node_st *RFIstmts(node_st *node)
 
         TRAVstmt(node);
 
+        // Get the hash table from the travdata of the RFI traversal
+        struct data_rfi *data = DATA_RFI_GET();
+
+        // Get the value from the identifier from the hash table
+        node_st *value = (node_st *) HTlookup(data->for_assignNodes_table, FOR_VAR(STMTS_STMT(node)));
+
+        printf("IS assign node????  %s\n***************", NODE_TYPE(value) == NT_ASSIGN ? "true" : "false");
+
+        printf("Variable of current For node: %s***********************\n", FOR_VAR(STMTS_STMT(node)));
+
+
+
+        // TODO: add getting something from the hash table here
+
+        // then replace NULL check with that one
+
         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
-        if (newForLoopAssignNode != NULL) {
+        // if (newForLoopAssignNode != NULL) {
+        if (value != NULL) {
             // Create the new Stmts node with the Assign node from the For node
             // node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
 
             // TODO: this is a try to do it differently by only changing this node
             node_st *prependStmtsNode = CCNcopy(node);
-            node = ASTstmts(newForLoopAssignNode, prependStmtsNode);
+            // node = ASTstmts(newForLoopAssignNode, prependStmtsNode);
+            node = ASTstmts(value, prependStmtsNode);
 
             previousStmtsNode = node;
 
             // TODO: minor bug: it renames the assignments of the deepest for loop when nested, otherwise it works fine with one for
+            // probably same solution as renaming, hash table with assignment nodes and identifiers of last Stmts!
 
             // Skip traversing this node again to avoid a loop, instead go to the next of the next node
             TRAVnext(STMTS_NEXT(node));
+
+            //TODO: then remove it from the hash table again
 
             //return node;
         }
@@ -296,51 +322,13 @@ node_st *RFIfor(node_st *node)
     // TODO
 
     // Save the For assignment Expr before updating it with the new Var node
-    newForLoopAssignNode = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
+    node_st *newForLoopAssignNodeTest = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
     // TODO: same here for the AST assign node with CCNcopy???
-    printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
-                printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
 
-    // if (lastStmtsNodeBeforeForLoop != NULL) {
-    //     // Create the new Stmts node with the Assign node from the For node
-    //     node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
-    //     // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
-    //     if (previousStmtsNode == NULL) {
-    //         printf("FIRST DOING THE IF\n");
-    //         // Update this node by appending the current Stmts node to this new Stmts node
-    //         // node_st *tempStmts = lastStmtsNodeBeforeForLoop;
-    //         // lastStmtsNodeBeforeForLoop = prependStmtsNode;
-           
-    //         // TODO: this funbody does not update anything
-    //         // if i do this code exactly in the funbody itself then it works, how???
-    //         // it does work with the decls this works, how???: FUNBODY_DECLS(lastFunBodyNode) = NULL;
-
-    //         //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
-
-    //         // TODO: this does not yet work
-    //         // tested if the assign node works correctly and it does if you append it to the lastStmtsNodeBeforeForLoop
-    //         // So this works, but now it needs to be prepended!
-    //         //         node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
-    //                     //STMTS_NEXT(lastStmtsNodeBeforeForLoop) = prependStmtsNode;
-    //                     STMTS_STMT(lastStmtsNodeBeforeForLoop) = NULL;
-    //                     //STMTS_NEXT(prependStmtsNode) = prependStmtsNode;
-
-    //         // Otherwise, set the new VarDecl as the first one to the current FunBody node
-    //         // FUNBODY_STMTS(lastFunBodyNode) = prependStmtsNode;
-
-
-    //         // STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
-
-    //         //return prependStmtsNode;
-    //     } else {
-    //         printf("FIRST DOING THE ELSE\n");
-    //         // printf("previousStmtsNode is NULL??? %s\n", previousStmtsNode == NULL ? "true" : "false");
-    //         // printf("lastStmtsNodeBeforeForLoop is NULL??? %s\n", lastStmtsNodeBeforeForLoop == NULL ? "true" : "false");
-
-    //         STMTS_NEXT(previousStmtsNode) = prependStmtsNode;
-    //         STMTS_NEXT(prependStmtsNode) = lastStmtsNodeBeforeForLoop;
-    //     }
-    // }
+    //TODO: save in hash table for assign nodes
+    HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNodeTest);
+    // Update current For node variable for searching in the hashtable
+    currentForVariableForHashTable = FOR_VAR(node);
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
