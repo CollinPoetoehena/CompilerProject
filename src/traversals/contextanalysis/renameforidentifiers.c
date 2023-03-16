@@ -27,6 +27,7 @@ node_st *previousStmtsNode = NULL;
 node_st *newForLoopAssignNode = NULL;
 // This global variable is used for appending the for loop start expr VarDecl to
 node_st *lastVarDeclNode = NULL;
+node_st *lastFunBodyNode = NULL;
 // TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
 // again use CCNcopy like regular assignments if it gives an error of invalid pointer or segmentation, first try without!
 
@@ -83,13 +84,22 @@ void RFIfini() { return; }
  */
 node_st *RFIfunbody(node_st *node)
 {
-    // First traverse the VarDecls to save the last VarDecl node to append the for identifiers to
-    TRAVdecls(node);
+    // No VarDecl nodes, so first For node identifiers should also become first VarDecl node
+    if (FUNBODY_DECLS(node) == NULL) {
+        // Save this FunBody node to the global helper variable
+        lastFunBodyNode = node;
+    } else {
+        // First traverse the VarDecls to save the last VarDecl node to append the for identifiers to
+        TRAVdecls(node);
+    }
 
     // TODO: think about something to fill and VarDecls funbody because it does not work now
 
     // Then traverse the statements to convert and rename the for loop identifiers
     TRAVstmts(node);
+
+    // Reset last FunBody after every FunBody traversal
+    lastFunBodyNode = NULL;
 
     return node;
 }
@@ -126,17 +136,17 @@ node_st *RFIstmts(node_st *node)
         TRAVstmt(node);
 
         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
-        if (newForLoopAssignNode != NULL) {
-            // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
-            if (previousStmtsNode == NULL) {
-                // Create the new Stmts node with the Assign node from the For node
-                node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
-                // Update this node by appending the current Stmts node to this new Stmts node
-                STMTS_NEXT(prependStmtsNode) = node;
+        // if (newForLoopAssignNode != NULL) {
+        //     // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+        //     if (previousStmtsNode == NULL) {
+        //         // Create the new Stmts node with the Assign node from the For node
+        //         node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+        //         // Update this node by appending the current Stmts node to this new Stmts node
+        //         STMTS_NEXT(prependStmtsNode) = node;
 
-                return prependStmtsNode;
-            }
-        }
+        //         return prependStmtsNode;
+        //     }
+        // }
 
         // TODO: return new node???
         // TODO: design something that resets the newForLoopAssignNode 
@@ -242,10 +252,10 @@ node_st *RFIfor(node_st *node)
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
-        //Update the next vardecl, 
+        //Update the next vardecl
         VARDECL_NEXT(lastVarDeclNode) = newVarDeclNode;
         // Update the last VarDecl with the new VarDecl to append the next For identifier to
-        // No need to copy here because it is a pointer only used in this traversal file, not in the AST
+        // No need to copy here because it is a global pointer only used in this traversal file, not in the AST
         lastVarDeclNode = newVarDeclNode;
         /*
         Update the For node start expr to have a Var node that can be linked with Symbol tables later
@@ -255,7 +265,10 @@ node_st *RFIfor(node_st *node)
         */
         FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
     } else {
-        // Otherwise, set the new VarDecl as the first one
+        printf("no existing VarDecls!\n");
+        // Otherwise, set the new VarDecl as the first one to the current FunBody node
+        FUNBODY_DECLS(lastFunBodyNode) = newVarDeclNode;
+        // Update the last VarDecl with the new VarDecl to append the next For identifier to
         lastVarDeclNode = newVarDeclNode;
         // Update the For node start expr to have a Var node that can be linked with Symbol tables later
         FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
