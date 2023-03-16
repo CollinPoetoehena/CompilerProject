@@ -93,9 +93,8 @@ node_st *RFIfunbody(node_st *node)
         TRAVdecls(node);
     }
 
-    // TODO: think about something to fill and VarDecls funbody because it does not work now
-
     // Then traverse the statements to convert and rename the for loop identifiers
+    //previousStmtsNode = NULL;
     TRAVstmts(node);
 
     // Reset last FunBody after every FunBody traversal
@@ -123,74 +122,121 @@ node_st *RFIvardecl(node_st *node)
  */
 node_st *RFIstmts(node_st *node)
 {
-    // 
-    //TODO
-    // Check if the type of the Stmt is a For node: NT_FOR
+    // TODO:
     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
-        // Update lastStmtsNodeBeforeForLoop, this node will be used to prepend for id assignment to
-
-        // TODO: 1 extra variabele van de Stmts ervoor.
+        // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
         lastStmtsNodeBeforeForLoop = node;
 
-        // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
         TRAVstmt(node);
 
         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
-        // if (newForLoopAssignNode != NULL) {
-        //     // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
-        //     if (previousStmtsNode == NULL) {
-        //         // Create the new Stmts node with the Assign node from the For node
-        //         node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
-        //         // Update this node by appending the current Stmts node to this new Stmts node
-        //         STMTS_NEXT(prependStmtsNode) = node;
+        if (newForLoopAssignNode != NULL) {
+            // Create the new Stmts node with the Assign node from the For node
+            node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+            // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+            if (previousStmtsNode == NULL) {
+                printf("FIRST DOING THE IF\n");
+                // Update this node by appending the current Stmts node to this new Stmts node
+                STMTS_NEXT(prependStmtsNode) = node;
 
-        //         return prependStmtsNode;
-        //     }
-        // }
+                return prependStmtsNode;
+            } else {
+                printf("FIRST DOING THE ELSE\n");
 
-        // TODO: return new node???
-        // TODO: design something that resets the newForLoopAssignNode 
-        // then also add in the if newForLoopAssignNode != NULL, to not update it again!
-        // maybe this can be at the top if statement
-        // TODO: CREATE NEW TEST CASES TO TEST THIS FUNCTIONALITY FOR FOR LOOPS
-        // TODO: THEN AFTER EVERYTHING IS TESTED, TEST EVERYTHING THOROUGLY AND GOOD WITH EVERYTHING ON
-        // SO ALL THE COMPILER FEATURES ON UNTIL MILESTONE 10, THEN TEST ALL OF THAT THOROUGLY, THEN YOU
-        // KNOW FOR SURE THAT EVERYTHING BEFORE CODE GENERATION WORKS PERFECTLY!
-        // TODO: THEN AFTER THAT, UPDATE THE REPORT WITH EVERYTHING UP UNTIL THE LAST MILESTONE (10)
+                
+            }
+        }
 
-        // if (newForLoopAssignNode != NULL) {
-        //     // update the sequence of Stmts nodes, the next is this Stmts node
-        //     //STMTS_NEXT(node) = STMTS_NEXT(STMTS_NEXT(node));
-            // node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
-
-        //     printf("TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
-
-        //     // Reset the helper variable when assigned
-        //     newForLoopAssignNode = NULL;
-
-        //     // Return the new Stmts node
-        //     // TODO: is this necessaryy???
-        //     //return prependStmtsNode;
-        // }
-
+        printf("THEN DOING THE NEXT TRAV\n");
+        previousStmtsNode = node;
+        TRAVnext(node);
     } else {
-        // Just traverse the Stmt witout updating the Stmts nodes
         TRAVstmt(node);
+        previousStmtsNode = node;
+        TRAVnext(node);
     }
-
-    // Before going to the next, save the previous Stmts node
-    previousStmtsNode = node;
-    // Then, traverse the next Stmts
-    TRAVnext(node);
 
     return node;
 }
+
+// /**
+//  * @fn RFIstmts
+//  */
+// node_st *RFIstmts(node_st *node)
+// {
+//     // 
+//     //TODO: remove after debugging
+//     printf("Node type is For??? %s\n", NODE_TYPE(STMTS_STMT(node)) == NT_FOR ? "true" : "false");
+
+
+//     // Check if the type of the Stmt is a For node: NT_FOR
+//     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
+//         printf("for stmts\n");
+//         // Update lastStmtsNodeBeforeForLoop, this node will be used to prepend for id assignment to
+
+//         // TODO: 1 extra variabele van de Stmts ervoor.
+//         printf("UPDATING LAST STMTS NODE BEFORE FOR LOOP*****\n");
+//         lastStmtsNodeBeforeForLoop = node;
+
+//         // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
+//         printf("TRAVAERSING NODE FOR\n");
+//         TRAVstmt(node);
+
+//         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
+//         if (newForLoopAssignNode != NULL) {
+//             printf("newForLoop ... is not NULL!\n");
+//             // Create the new Stmts node with the Assign node from the For node
+//             node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+//             // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+//             if (previousStmtsNode == NULL) {
+//                 printf("Getting into previous is NULL!\n");
+//                 // Update this node by appending the current Stmts node to this new Stmts node
+//                 STMTS_NEXT(prependStmtsNode) = node;
+
+//                 return prependStmtsNode;
+//             } else {
+//                 // Otherwise, insert it in between the Stmts
+
+//                 printf("Getting into previous is NOTTTTT NULL!\n");
+//             }
+//         } else {
+//             printf("newForLoop ... is NULLLLLLL!\n");
+//         }
+
+//         printf("getting here?????**************************\n");
+
+//         // TODO: return new node???
+//         // TODO: design something that resets the newForLoopAssignNode 
+//         // then also add in the if newForLoopAssignNode != NULL, to not update it again!
+//         // maybe this can be at the top if statement
+//         // TODO: CREATE NEW TEST CASES TO TEST THIS FUNCTIONALITY FOR FOR LOOPS
+//         // TODO: THEN AFTER EVERYTHING IS TESTED, TEST EVERYTHING THOROUGLY AND GOOD WITH EVERYTHING ON
+//         // SO ALL THE COMPILER FEATURES ON UNTIL MILESTONE 10, THEN TEST ALL OF THAT THOROUGLY, THEN YOU
+//         // KNOW FOR SURE THAT EVERYTHING BEFORE CODE GENERATION WORKS PERFECTLY!
+//         // TODO: THEN AFTER THAT, UPDATE THE REPORT WITH EVERYTHING UP UNTIL THE LAST MILESTONE (10)
+//     } else {
+//         // Just traverse the Stmt witout updating the Stmts nodes
+//         printf("TRAVAERSING NODE STMTS THAT IS NOT FOR, NOTHING HERE, JUST DO NEXT\n");
+//         //TRAVstmt(node);
+//     }
+
+//     // Before going to the next, save the previous Stmts node
+//     // Then, traverse the next Stmts
+//     printf("TRAVERSING NEXT STMTS!***********\n");
+//     printf("updating************\n");
+//     // TODO: this is getting done before 
+//     //previousStmtsNode = node;
+//     TRAVnext(node);
+
+//     return node;
+// }
 
 /**
  * @fn RFIfor
  */
 node_st *RFIfor(node_st *node)
 {
+    printf("GETTING INTO FOR TRAVERSAL FUNCTION!!!***\n");
     // TODO: afterwards check if any global variables are also not renamed, probably not because before it did not as well! but check still!
 
 
@@ -247,7 +293,7 @@ node_st *RFIfor(node_st *node)
     // TODO
 
     // Save the For assignment Expr before updating it with the new Var node
-    newForLoopAssignNode = ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node));
+    newForLoopAssignNode = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
     // TODO: same here for the AST assign node with CCNcopy???
     
     // If there is an existing lastVarDeclNode, update it
@@ -265,22 +311,17 @@ node_st *RFIfor(node_st *node)
         */
         FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
     } else {
-        printf("no existing VarDecls!\n");
         // Otherwise, set the new VarDecl as the first one to the current FunBody node
         FUNBODY_DECLS(lastFunBodyNode) = newVarDeclNode;
         // Update the last VarDecl with the new VarDecl to append the next For identifier to
         lastVarDeclNode = newVarDeclNode;
         // Update the For node start expr to have a Var node that can be linked with Symbol tables later
         FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
-        // TODO: write a test for this in a .cvc file!
-        // TODO: this does not work, think about something that 
     }
 
     // Go to the traversal functions of the children
     TRAVblock(node);
     
-    // TODO: why does it only do the first vardecl???
-
     // Remove current old identifier from the for loop after traversing every for block. This is 
     // mainly done for nested for loops so that the next nested for loop uses the right variable
     HTremove(data->for_identifiers_table, oldForIdentifier);
