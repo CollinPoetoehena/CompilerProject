@@ -28,8 +28,11 @@ In short:
         FOR_START_EXRP(node) = ASTvar(FOR_VAR(node));
         because otherwise you would still have a memory issue because now FOR_START_EXRP(node) and
         FOR_VAR(node) point to the same char * in memory! So, it should look like this ASTvar(STRcpy(FOR_VAR(node)))
-        
-This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
+
+PRO TIP:
+    Try to make changes to the AST in the traversal functions of that node, try to avoid changing a node outside of 
+    its traversal function as much as possible because it can lead to unpredictable behaviour otherwise! Unless
+    it is absolutely unavoidable you can try doing it, but be careful and test everything thorougly again then!
 */
 
 //TODO: remove when done, these are common commands:

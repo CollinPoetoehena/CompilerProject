@@ -374,6 +374,11 @@ block: CURLYBRACE_L stmts CURLYBRACE_R
       {
         $$ = $2;
       }
+    | CURLYBRACE_L CURLYBRACE_R
+      {
+        // Empty block, return NULL
+        $$ = NULL;
+      }
     | stmt
       {
         $$ = ASTstmts($1, NULL);
