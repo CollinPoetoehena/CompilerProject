@@ -298,7 +298,7 @@ node_st *CVSfor(node_st *node)
     //createSymbolTableEntry(FOR_VAR(node), CT_int);
 
     // Go to stmts traversal functions
-    TRAVblock(node);
+    //TRAVblock(node);
 
     return node;
 }

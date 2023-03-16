@@ -2,7 +2,7 @@ void foo() {
     // TODO: also test without VarDecls if it still works!
     // int a;
     // int i;
-    // int j;
+    int j;
 
     // for (int i = 0, 10) {
     //     for (int j = 1, 10) {
@@ -18,7 +18,8 @@ void foo() {
 
     for (int i = 0, 10) {
         if (i == 5) {
-
+            for (int j = 5, 10) {
+            }
         }
     }
 

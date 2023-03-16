@@ -4,7 +4,27 @@
  * Traversal: RenameForIdentifiers
  * UID      : RFI
  *
+ * This traversal renams all identifiers from all For nodes and creates a VarDecl
+ * for it without an init Expr and appends it to the last VarDecl.
+ * Then it creates an Assign node and inserts it BEFORE the For node it came from.
+ * The VarDecl will be unique with an _ per for loop extra. Nested for loops should
+ * have unique identifiers, but for loops in the same scope level of the FunDef node
+ * can have the same identifier. For example:
+ * for (int i = 0, 10) {
+ *   for (int i = 0, 10) {
+ *  }
+ * }
+ * THIS IS NOT A VALID SYNTAX because there are two i's in the For scope, but this is valid:
+ * for (int i = 0, 10) {
+ *   for (int j = 0, 10) {
+ *  }
+ * }
  *
+ * And this is also valid:
+ * for (int i = 0, 10) {
+ * }
+ * for (int i = 0, 10) {
+ * }
  */
 
 #include "ccn/ccn.h"
