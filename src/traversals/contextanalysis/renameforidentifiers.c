@@ -13,15 +13,10 @@
 #include "palm/str.h"
 #include  <string.h>
 
-// Global counter for renaming the identifiers
+// Global counter for renaming the identifiers with a number of _
 int counter = 1;
-// Global currentRenamedId is used to rename the occurrences of the old for loop id
-char *currentRenamedId = NULL;
-// Global currentForNode is used to save the new for loop node in and 
-node_st *currentForNode = NULL;
 
-// This global variable is used for appending the for loop Var Assignment
-node_st *lastStmtsNodeBeforeForLoop = NULL;
+
 node_st *previousStmtsNode = NULL;
 
 node_st *newForLoopAssignNode = NULL;
@@ -89,15 +84,6 @@ void RFIfini() { return; }
  */
 node_st *RFIfunbody(node_st *node)
 {
-    // // No VarDecl nodes, so first For node identifiers should also become first VarDecl node
-    // if (FUNBODY_DECLS(node) == NULL) {
-    //     // Save this FunBody node to the global helper variable
-    //     lastFunBodyNode = node;
-    // } else {
-        // First traverse the VarDecls to save the last VarDecl node to append the for identifiers to
-    //     TRAVdecls(node);
-    // }
-
     // Save this FunBody node to the global helper variable
     lastFunBodyNode = node;
 
@@ -133,153 +119,48 @@ node_st *RFIvardecl(node_st *node)
  */
 node_st *RFIstmts(node_st *node)
 {
-    // TODO:
+    // Check if the type of the Stmt is a For node: NT_FOR, if so, traverse the For node
     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
         // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
-        lastStmtsNodeBeforeForLoop = node;
-
         TRAVstmt(node);
 
         // Get the hash table from the travdata of the RFI traversal
         struct data_rfi *data = DATA_RFI_GET();
 
-        // Get the value from the identifier from the hash table
+        // Get the value from the assignNodes hash table
+        // Use the updated Var identifier from this For Stmt node to find the correct new Assign node
         node_st *value = (node_st *) HTlookup(data->for_assignNodes_table, FOR_VAR(STMTS_STMT(node)));
 
-        printf("IS assign node????  %s\n***************", NODE_TYPE(value) == NT_ASSIGN ? "true" : "false");
-
-        printf("Variable of current For node: %s***********************\n", FOR_VAR(STMTS_STMT(node)));
-
-
-
-        // TODO: add getting something from the hash table here
-
-        // then replace NULL check with that one
-
         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
-        // if (newForLoopAssignNode != NULL) {
         if (value != NULL) {
             // Create the new Stmts node with the Assign node from the For node
-            // node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, NULL);
-
-            // TODO: this is a try to do it differently by only changing this node
-            node_st *prependStmtsNode = CCNcopy(node);
-            // node = ASTstmts(newForLoopAssignNode, prependStmtsNode);
-            node = ASTstmts(value, prependStmtsNode);
-
-            previousStmtsNode = node;
-
-            // TODO: minor bug: it renames the assignments of the deepest for loop when nested, otherwise it works fine with one for
-            // probably same solution as renaming, hash table with assignment nodes and identifiers of last Stmts!
+            // Create a copy of the old Stmts node you want to prepend the new Assign node to
+            node_st *oldStmtsNode = CCNcopy(node);
+            // Replace the current node with the new Stmts node containing the new Assign node
+            // and a next reference to the oldStmtsNode
+            node = ASTstmts(value, oldStmtsNode);
 
             // Skip traversing this node again to avoid a loop, instead go to the next of the next node
             TRAVnext(STMTS_NEXT(node));
-
-            //TODO: then remove it from the hash table again
-
-            //return node;
         }
     } else {
-        TRAVstmt(node);
-        previousStmtsNode = node;
+        // Otherwise, just traverse the next Stmt because nothing to do with a non For Stmts node
         TRAVnext(node);
     }
 
     return node;
 }
 
-// /**
-//  * @fn RFIstmts
-//  */
-// node_st *RFIstmts(node_st *node)
-// {
-//     // 
-//     //TODO: remove after debugging
-    // printf("Node type is For??? %s\n", NODE_TYPE(STMTS_STMT(node)) == NT_FOR ? "true" : "false");
-
-
-//     // Check if the type of the Stmt is a For node: NT_FOR
-//     if (NODE_TYPE(STMTS_STMT(node)) == NT_FOR) {
-//         printf("for stmts\n");
-//         // Update lastStmtsNodeBeforeForLoop, this node will be used to prepend for id assignment to
-
-//         // TODO: 1 extra variabele van de Stmts ervoor.
-//         printf("UPDATING LAST STMTS NODE BEFORE FOR LOOP*****\n");
-//         lastStmtsNodeBeforeForLoop = node;
-
-//         // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
-//         printf("TRAVAERSING NODE FOR\n");
-//         TRAVstmt(node);
-
-//         // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
-//         if (newForLoopAssignNode != NULL) {
-//             printf("newForLoop ... is not NULL!\n");
-//             // Create the new Stmts node with the Assign node from the For node
-//             node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
-//             // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
-//             if (previousStmtsNode == NULL) {
-//                 printf("Getting into previous is NULL!\n");
-//                 // Update this node by appending the current Stmts node to this new Stmts node
-//                 STMTS_NEXT(prependStmtsNode) = node;
-
-//                 return prependStmtsNode;
-//             } else {
-//                 // Otherwise, insert it in between the Stmts
-
-//                 printf("Getting into previous is NOTTTTT NULL!\n");
-//             }
-//         } else {
-//             printf("newForLoop ... is NULLLLLLL!\n");
-//         }
-
-//         printf("getting here?????**************************\n");
-
-//         // TODO: return new node???
-//         // TODO: design something that resets the newForLoopAssignNode 
-//         // then also add in the if newForLoopAssignNode != NULL, to not update it again!
-//         // maybe this can be at the top if statement
-//         // TODO: CREATE NEW TEST CASES TO TEST THIS FUNCTIONALITY FOR FOR LOOPS
-//         // TODO: THEN AFTER EVERYTHING IS TESTED, TEST EVERYTHING THOROUGLY AND GOOD WITH EVERYTHING ON
-//         // SO ALL THE COMPILER FEATURES ON UNTIL MILESTONE 10, THEN TEST ALL OF THAT THOROUGLY, THEN YOU
-//         // KNOW FOR SURE THAT EVERYTHING BEFORE CODE GENERATION WORKS PERFECTLY!
-//         // TODO: THEN AFTER THAT, UPDATE THE REPORT WITH EVERYTHING UP UNTIL THE LAST MILESTONE (10)
-//     } else {
-//         // Just traverse the Stmt witout updating the Stmts nodes
-//         printf("TRAVAERSING NODE STMTS THAT IS NOT FOR, NOTHING HERE, JUST DO NEXT\n");
-//         //TRAVstmt(node);
-//     }
-
-//     // Before going to the next, save the previous Stmts node
-//     // Then, traverse the next Stmts
-//     printf("TRAVERSING NEXT STMTS!***********\n");
-//     printf("updating************\n");
-//     // TODO: this is getting done before 
-//     //previousStmtsNode = node;
-//     TRAVnext(node);
-
-//     return node;
-// }
-
 /**
  * @fn RFIfor
+ *
+ * This will rename all the iterators from the for loop to 
+ * <CountUnderscores><variableName>, such as: '__i'
+ * This is done in this way because it is basically a variable that a user 
+ * cannot create because it starts with an _
  */
 node_st *RFIfor(node_st *node)
 {
-    printf("GETTING INTO FOR TRAVERSAL FUNCTION!!!***\n");
-    // TODO: afterwards check if any global variables are also not renamed, probably not because before it did not as well! but check still!
-
-
-    // TODO this file does not work correctly: ./civicc ../test/basic/functional/for_to_while.cvc
-    // nested for loops and its i do not work correctly
-    // the i from the previous for loop is not renamed in the nested for loop, fix that
-    // The problem is because it first goes in to the block part, wich is a new for loop first, and
-    // then after that the vars occur that are not renamed because the identifier is from the new for loop
-    // TODO: skip for now, but ask in the lesson next week!
-
-    // This will rename all the iterators from the for loop to <CountUnderscores><variableName>
-    // such as: '__i'
-    // This is done in this way because it is basically a variable that a user cannot create because it starts with an _
-
     // Save the old for loop id
     char *oldForIdentifier = FOR_VAR(node);
 
@@ -390,11 +271,13 @@ node_st *RFIassign(node_st *node)
 
 /**
  * @fn RFIvarlet
+ *
+ * Also rename the occurrence of the for identifier in the For node
+ * No need to check for other variables because the For node traversal function traverses that body
+ * so only variables in that body will be changed that are also in the hash table
  */
 node_st *RFIvarlet(node_st *node)
 {
-    //printf("varlet\n");
-
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
 
@@ -407,29 +290,18 @@ node_st *RFIvarlet(node_st *node)
         VARLET_NAME(node) = STRcpy(value);
     }
 
-
-    // Also rename the occurrence of the for identifier
-    // No need to check for other variables, because there is only the globdecl and globdef that can have
-    // the same name and they will not be changed by this. Also, the same identifier in the scope of the
-    // for loop identifier will give a context analysis error because that identifier of the for loop
-    // needs to be saved in the scope above the for loop!
-    // if (currentRenamedId != NULL && currentForNode != NULL) {
-        // if (strcmp(currentRenamedId, VARLET_NAME(node)) == 0) {
-        //     // Create a copy of the id to avoid pointing to the same id of the For node
-        //     VARLET_NAME(node) = STRcpy(FOR_VAR(currentForNode));
-        // }
-    // }
-
     return node;
 }
 
 /**
  * @fn RFIvar
+ *
+ * Also rename the occurrence of the for identifier in the For node
+ * No need to check for other variables because the For node traversal function traverses that body
+ * so only variables in that body will be changed that are also in the hash table
  */
 node_st *RFIvar(node_st *node)
 {
-    //printf("varlet\n");
-
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
 
@@ -441,19 +313,6 @@ node_st *RFIvar(node_st *node)
         // Create a copy of the id to avoid pointing to the same id of the For node
         VAR_NAME(node) = STRcpy(value);
     }
-
-
-    // Also rename the occurrence of the for identifier
-    // No need to check for other variables, because there is only the globdecl and globdef that can have
-    // the same name and they will not be changed by this. Also, the same identifier in the scope of the
-    // for loop identifier will give a context analysis error because that identifier of the for loop
-    // needs to be saved in the scope above the for loop!
-    // if (currentRenamedId != NULL && currentForNode != NULL) {
-    //     if (strcmp(currentRenamedId, VAR_NAME(node)) == 0) {
-    //         // Create a copy of the id to avoid pointing to the same id of the For node
-    //         VAR_NAME(node) = STRcpy(FOR_VAR(currentForNode));
-    //     }
-    // }
 
     return node;
 }
