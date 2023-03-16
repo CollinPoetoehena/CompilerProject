@@ -129,8 +129,12 @@ node_st *RFIstmts(node_st *node)
         if (newForLoopAssignNode != NULL) {
             // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
             if (previousStmtsNode == NULL) {
+                // Create the new Stmts node with the Assign node from the For node
                 node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+                // Update this node by appending the current Stmts node to this new Stmts node
+                STMTS_NEXT(prependStmtsNode) = node;
 
+                return prependStmtsNode;
             }
         }
 
@@ -216,7 +220,13 @@ node_st *RFIfor(node_st *node)
     // TODO: maybe do it with CCNcopy if it gives an error of invalid pointer or segmentation
     // Append new For variable as a VarDecl node to the last VarDecl node of this FunDef and update it
     // Expr init from the VarDecl node needs to be NULL because the Stmts should be done before the for loop
-    node_st *newVarDeclNode = ASTvardecl(NULL, NULL, NULL, FOR_VAR(node), CT_int);
+
+    /*
+    Create a new VarDecl node, use CCNcopy here because you are saving this new AST node to the AST without 
+    returning it in this traversal function, otherwise it is lost. Do it here because otherwise the chain 
+    of VarDecl nodes will not be correctly appended in the below if statement with multiple for loops!
+    */
+    node_st *newVarDeclNode = CCNcopy(ASTvardecl(NULL, NULL, NULL, FOR_VAR(node), CT_int));
 
     // Also, save the start expression assignment, because this needs to be separated
     // also applies to the regular assignments traversal that was done before ContextAnalysis
@@ -228,20 +238,27 @@ node_st *RFIfor(node_st *node)
 
     // Save the For assignment Expr before updating it with the new Var node
     newForLoopAssignNode = ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node));
+    // TODO: same here for the AST assign node with CCNcopy???
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
-        // Update the next vardecl
+        //Update the next vardecl, 
         VARDECL_NEXT(lastVarDeclNode) = newVarDeclNode;
         // Update the last VarDecl with the new VarDecl to append the next For identifier to
+        // No need to copy here because it is a pointer only used in this traversal file, not in the AST
         lastVarDeclNode = newVarDeclNode;
-        // Update the For node start expr to have a Var node that can be linked with Symbol tables later
-        FOR_START_EXPR(node) = ASTvar(FOR_VAR(node));
+        /*
+        Update the For node start expr to have a Var node that can be linked with Symbol tables later
+        Create a copy of the string to avoid pointing to the FOR_VAR(node) twice
+        No need to use CCNcopy here because you are changing this node in this traversal function
+        and you are returning this node at the end, so therefore CCNcopy is not necessary here
+        */
+        FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
     } else {
         // Otherwise, set the new VarDecl as the first one
-        lastVarDeclNode = CCNcopy(newVarDeclNode);
+        lastVarDeclNode = newVarDeclNode;
         // Update the For node start expr to have a Var node that can be linked with Symbol tables later
-        FOR_START_EXPR(node) = ASTvar(FOR_VAR(node));
+        FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
         // TODO: write a test for this in a .cvc file!
         // TODO: this does not work, think about something that 
     }

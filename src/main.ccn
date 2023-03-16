@@ -11,7 +11,24 @@ start phase RootPhase {
         // CompilingBooleanCastExpressions;
         print;
     }
-}; 
+};
+
+/*
+SHORT MEMORY TUTORIAL IN COCONUT AND C:
+
+Use CCNcopy when you update something in the AST that you are not returning, otherwise it is lost 
+or can cause a double free error because a global variable in a traversal.c file will be freed by CoCoNut
+after that traversal, and then anything can still point to this already freed global variable and cause an error.
+In short:
+    - changes to the node of a traversal function of that node are saved because this 
+        node is returned at the end, so no CCNcopy required.
+    - changes to the AST outside this node, such as the VarDecl nodes changed in renameforidentifiers.c traversal
+        require a CCNcopy because otherwise the result is lost and can cause a memory leak or a double free, etcetera!
+    - one thing to keep in mind is that you still need to copy some things, such as STRcopy for setting the
+        FOR_START_EXRP(node) = ASTvar(FOR_VAR(node));
+        because otherwise you would still have a memory issue because now FOR_START_EXRP(node) and
+        FOR_VAR(node) point to the same char * in memory! So, it should look like this ASTvar(STRcpy(FOR_VAR(node)))
+*/
 
 //TODO: remove when done, these are common commands:
 // make

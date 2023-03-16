@@ -95,8 +95,8 @@ node_st *RAprogram(node_st *node)
         // (not the GlobDecls because GlobDecls) do not have an initialization
         node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
             NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
-        // Create a copy of the created node because otherwise the node is lost after the traversal
-        // because it is cleaned after this traversal, so create a copy for it
+        // Create a copy of the created node because otherwise the node is lost after the traversal because it is cleaned 
+        // after this traversal, so create a copy for it when you are updating the AST and not returning this node
         DECLS_NEXT(lastGlobDefDeclsNode) = CCNcopy(newDeclsNode);
     }
 
