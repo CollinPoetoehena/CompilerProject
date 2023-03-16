@@ -16,15 +16,10 @@
 // Global counter for renaming the identifiers with a number of _
 int counter = 1;
 
-
-node_st *previousStmtsNode = NULL;
-
-node_st *newForLoopAssignNode = NULL;
 // This global variable is used for appending the for loop start expr VarDecl to
 node_st *lastVarDeclNode = NULL;
+// This global helper variable is used to update the last FunBody with its VarDecl nodes
 node_st *lastFunBodyNode = NULL;
-
-char *currentForVariableForHashTable = NULL;
 
 // TODO: for loop VarDecl can be appended at the end of the VarDecls, maybe also add FunBody node then??
 // again use CCNcopy like regular assignments if it gives an error of invalid pointer or segmentation, first try without!
@@ -91,7 +86,6 @@ node_st *RFIfunbody(node_st *node)
     TRAVdecls(node);
 
     // Then traverse the statements to convert and rename the for loop identifiers
-    //previousStmtsNode = NULL;
     TRAVstmts(node);
 
     // Reset last FunBody after every FunBody traversal
@@ -144,7 +138,8 @@ node_st *RFIstmts(node_st *node)
             TRAVnext(STMTS_NEXT(node));
         }
     } else {
-        // Otherwise, just traverse the next Stmt because nothing to do with a non For Stmts node
+        // Otherwise, just traverse the other Stmts nodes and Stmt nodes
+        TRAVstmt(node);
         TRAVnext(node);
     }
 
@@ -165,7 +160,7 @@ node_st *RFIfor(node_st *node)
     char *oldForIdentifier = FOR_VAR(node);
 
     // Rename the identifier of the For node (do not create a new node, this is much easier!)
-    // '_' because it is a valid identifier (see lexer)
+    // '_' because it is a valid identifier that the use will not use
     for( int i = 0; i < counter; i++ ){
         // Use for loop and concat an '_' for count times
         FOR_VAR(node) = STRcat("_", FOR_VAR(node));
@@ -193,23 +188,10 @@ node_st *RFIfor(node_st *node)
     of VarDecl nodes will not be correctly appended in the below if statement with multiple for loops!
     */
     node_st *newVarDeclNode = CCNcopy(ASTvardecl(NULL, NULL, NULL, FOR_VAR(node), CT_int));
-
-    // Also, save the start expression assignment, because this needs to be separated
-    // also applies to the regular assignments traversal that was done before ContextAnalysis
-    //FOR_START_EXPR(node);
-    // Prepend the assignment to this For node
-    // node_st *newStmtsNode = ASTstmts(ASTassign)
-    // STMTS_NEXT(lastStmtsNodeBeforeForLoop) = 
-    // TODO
-
-    // Save the For assignment Expr before updating it with the new Var node
-    node_st *newForLoopAssignNodeTest = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
-    // TODO: same here for the AST assign node with CCNcopy???
-
-    //TODO: save in hash table for assign nodes
-    HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNodeTest);
-    // Update current For node variable for searching in the hashtable
-    currentForVariableForHashTable = FOR_VAR(node);
+    // Save the For assignment Expr before updating it with the new Var node in the below if statement
+    node_st *newForLoopAssignNode = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
+    // Save the assignment node in the hash table to insert in the Stmts nodes in the AST later
+    HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNode);
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
