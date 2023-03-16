@@ -90,7 +90,7 @@ bool compareFunCallArgumentsTypes(enum Type argumentType) {
 // Helper function to get the type signature of the BinOp built-in operators
 enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
     // Check if the variables are not NULL to avoid Segmentation fault and bugs
-    if (firstType != NULL && secondType != NULL && operator != NULL) {
+    if (firstType != CT_NULL && secondType != CT_NULL && operator != BO_NULL) {
         /*
         Arithmetic operators:
 
@@ -186,7 +186,7 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
 // Helper function to get the type signature of the MonOp built-in operators
 enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
     // Create type signatures for MonOp nodes
-    if (firstType != NULL && operator != NULL) {
+    if (firstType != CT_NULL && operator != MO_NULL) {
         /*
         Unary operators:
         '-' : int -> int
@@ -369,19 +369,37 @@ node_st *TMAFfor(node_st *node)
     // Reset global type helper variable before going to the next for Expr
     tempType = CT_NULL;
 
-    // Then traverse into the step expression to find the step Expression type 
-    TRAVstep(node);
-    // Save the tempType variable to save the step expression type
-    enum Type forStepExprType = tempType;
+    // If the step expression is not NULL, check that type to, otherwise skip that part
+    enum Type forStepExprType;
+    if (FOR_STEP(node) != NULL) {
+        // Then traverse into the step expression to find the step Expression type 
+        TRAVstep(node);
+        // Save the tempType variable to save the step expression type
+        forStepExprType = tempType;
+    }
 
-    // Check if the stop expr is an Integer, if so, traverse into the loop body
-    if (forStopExprType == CT_int && forStepExprType == CT_int) {
-        TRAVblock(node);
+    if (FOR_STEP(node) != NULL) {
+        // Perform checks with step expression (no step expr in the for synax means NULL step Expr)
+        if (forStopExprType == CT_int && forStepExprType == CT_int) {
+            // Check if the stop expr is an Integer, if so, traverse into the loop body
+            TRAVblock(node);
+        } else {
+            // Prints the error when it occurs, so in this line
+            CTI(CTI_ERROR, true, "type error in for-loop: stop and/or step expression is not an int expression");
+            // Create error action, will stop the current compilation at the end of this Phase
+            CCNerrorPhase();
+        }
     } else {
-        // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in for-loop: stop and/or step expressions is not an int expression");
-        // Create error action, will stop the current compilation at the end of this Phase
-        CCNerrorPhase();
+        // Perform checks without step expression is it is NULL
+        if (forStopExprType == CT_int) {
+            // Check if the stop expr is an Integer, if so, traverse into the loop body
+            TRAVblock(node);
+        } else {
+            // Prints the error when it occurs, so in this line
+            CTI(CTI_ERROR, true, "type error in for-loop: stop expression is not an int expression");
+            // Create error action, will stop the current compilation at the end of this Phase
+            CCNerrorPhase();
+        }
     }
 
     // Reset global type helper variable at the end

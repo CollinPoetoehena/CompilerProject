@@ -193,14 +193,8 @@ node_st *RFIfor(node_st *node)
     // Cast to void * because the parameter of the HTinsert is of type void *
     HTinsert(data->for_identifiers_table, oldForIdentifier, (void *) FOR_VAR(node));
 
-    // Update the counter
+    // Update the counter for the next For node
     counter++;
-
-    // TODO: removed start expr and make the start expr the new occurrence and create a new VarDecl by appending
-    // it to the last VarDecl
-    // TODO: maybe do it with CCNcopy if it gives an error of invalid pointer or segmentation
-    // Append new For variable as a VarDecl node to the last VarDecl node of this FunDef and update it
-    // Expr init from the VarDecl node needs to be NULL because the Stmts should be done before the for loop
 
     /*
     Create a new VarDecl node, use CCNcopy here because you are saving this new AST node to the AST without 
@@ -215,7 +209,7 @@ node_st *RFIfor(node_st *node)
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
-        //Update the next vardecl
+        // Update the next vardecl to append the new VarDecl to the already existing VarDecl nodes
         VARDECL_NEXT(lastVarDeclNode) = newVarDeclNode;
         // Update the last VarDecl with the new VarDecl to append the next For identifier to
         // No need to copy here because it is a global pointer only used in this traversal file, not in the AST

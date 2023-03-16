@@ -147,9 +147,9 @@ node_st *PRTfundef(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the ste's of the variables as a structured comment
-    // printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
-    // // Print its own symbol table for its function definition
-    // printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
+    printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
+    // Print its own symbol table for its function definition
+    printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
 
     return node;
 }
@@ -178,9 +178,9 @@ node_st *PRTfuncall(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteFun link to this VarLet node
-    // if (FUNCALL_STE_LINK(node) != NULL) {
-    //   printOneSteFun(FUNCALL_STE_LINK(node));
-    // }
+    if (FUNCALL_STE_LINK(node) != NULL) {
+      printOneSteFun(FUNCALL_STE_LINK(node));
+    }
 
     return node;
 }
@@ -214,9 +214,9 @@ node_st *PRTvar(node_st *node)
 
     // TODO: uncomment and comment the ones you do not want to print!
     // Print the SteVar link to this Var node
-    // if (VAR_STE_LINK(node) != NULL) {
-    //   printOneSteVar(VAR_STE_LINK(node));
-    // }
+    if (VAR_STE_LINK(node) != NULL) {
+      printOneSteVar(VAR_STE_LINK(node));
+    }
 
     return node;
 }
