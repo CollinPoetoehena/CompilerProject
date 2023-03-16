@@ -125,20 +125,39 @@ node_st *RFIstmts(node_st *node)
         // Then traverse the Stmt that is a for loop and come back here and update the sequence of Stmts
         TRAVstmt(node);
 
+        // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
         if (newForLoopAssignNode != NULL) {
-            // update the sequence of Stmts nodes, the next is this Stmts node
-            STMTS_NEXT(node) = STMTS_NEXT(STMTS_NEXT(node));
-            node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+            // If the previousStmtsNode is still NULL, that means that the For node is the first Stmts
+            if (previousStmtsNode == NULL) {
+                node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
 
-            printf("TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
-
-            // Reset the helper variable when assigned
-            newForLoopAssignNode = NULL;
-
-            // Return the new Stmts node
-            // TODO: is this necessaryy???
-            //return prependStmtsNode;
+            }
         }
+
+        // TODO: return new node???
+        // TODO: design something that resets the newForLoopAssignNode 
+        // then also add in the if newForLoopAssignNode != NULL, to not update it again!
+        // maybe this can be at the top if statement
+        // TODO: CREATE NEW TEST CASES TO TEST THIS FUNCTIONALITY FOR FOR LOOPS
+        // TODO: THEN AFTER EVERYTHING IS TESTED, TEST EVERYTHING THOROUGLY AND GOOD WITH EVERYTHING ON
+        // SO ALL THE COMPILER FEATURES ON UNTIL MILESTONE 10, THEN TEST ALL OF THAT THOROUGLY, THEN YOU
+        // KNOW FOR SURE THAT EVERYTHING BEFORE CODE GENERATION WORKS PERFECTLY!
+        // TODO: THEN AFTER THAT, UPDATE THE REPORT WITH EVERYTHING UP UNTIL THE LAST MILESTONE (10)
+
+        // if (newForLoopAssignNode != NULL) {
+        //     // update the sequence of Stmts nodes, the next is this Stmts node
+        //     //STMTS_NEXT(node) = STMTS_NEXT(STMTS_NEXT(node));
+            // node_st *prependStmtsNode = ASTstmts(newForLoopAssignNode, node);
+
+        //     printf("TRUEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEE\n");
+
+        //     // Reset the helper variable when assigned
+        //     newForLoopAssignNode = NULL;
+
+        //     // Return the new Stmts node
+        //     // TODO: is this necessaryy???
+        //     //return prependStmtsNode;
+        // }
 
     } else {
         // Just traverse the Stmt witout updating the Stmts nodes

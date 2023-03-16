@@ -1,4 +1,7 @@
 void foo() {
+    // TODO: also test without VarDecls if it still works!
+    int a;
+
     for (int i = 2, 10) {
         foo();
     }
