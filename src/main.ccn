@@ -186,7 +186,7 @@ phase TypeChecking {
                 // Hash tables are used to handle checking nested funcalls
                 // This hash table is used to save the Ste link
                 //user htable_ptr funcalls_id_stelink,
-                user htable_ptr funcalls_id_paramIndex,
+                user htable_ptr funcalls_funcallIndex_paramIndex,
                 // This hash table is used to save the funcall index to get the last funcall node
                 user htable_ptr funcalls_funcallIndex_node
             }

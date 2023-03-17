@@ -41,7 +41,7 @@ void TMAFinit() {
 
     // initialize hash table, ensures there is a hash table
     //htable_st *hash_table = HTnew_String(100);
-    htable_st *hash_table_paramIndex = HTnew_String(100);
+    htable_st *hash_table_paramIndex = HTnew_Int(100);
     htable_st *hash_table_funCallCount = HTnew_Int(100);
 
     // // initialize the funcallCount to use in the hash tables to find funcall names
@@ -52,7 +52,7 @@ void TMAFinit() {
     // Get the hash table from the travdata of the TMAF traversal
     struct data_tmaf *data = DATA_TMAF_GET();
     //data->funcalls_id_stelink = hash_table;
-    data->funcalls_id_paramIndex = hash_table_paramIndex;
+    data->funcalls_funcallIndex_paramIndex = hash_table_paramIndex;
     data->funcalls_funcallIndex_node = hash_table_funCallCount;
 
     return; 
@@ -509,25 +509,8 @@ node_st *TMAFfuncall(node_st *node)
 
     // Check if the link is correctly added in ContextAnalysis
     if (FUNCALL_STE_LINK(node) != NULL && FUNCALL_ARGS(node) != NULL) {
-        printf("in ste link and args part!********************\n");
         // Get the hash table from the travdata of the TMAF traversal
         struct data_tmaf *data = DATA_TMAF_GET();
-
-        // Allocate new memory for an int in C to create a new memory block
-        int *newArgumentIndexCounter = MEMmalloc(sizeof(int));
-        // Dereference newArgumentIndexCounter pointer and make it equal to 0 before traversing the args
-        *newArgumentIndexCounter = 0;
-        // First save the new name and newArgumentIndexCounter in the hash table (for every funcall)
-        // Cast to void * because the parameter of the HTinsert is of type void *
-        HTinsert(data->funcalls_id_paramIndex, FUNCALL_NAME(node), (void *) newArgumentIndexCounter);
-                printf("value of funcall count for in hash table: %d**********************************************\n", *newArgumentIndexCounter);
-
-        printf("1********************************************************************************************************************\n");
-
-        // Update the last FunCall name before traversing the args to lookup the ste link in the hash table
-        //lastFunCallName = FUNCALL_NAME(node);
-        // TODO: if the name does not work, then i can increment and decrement a global counter with an index
-        // for a hash table int and the corresponding Funcall name to use that 
 
         // Increment currentFunCallIndex for every funcall before saving it to the hash table
         currentFunCallIndex++;
@@ -542,11 +525,19 @@ node_st *TMAFfuncall(node_st *node)
         HTinsert(data->funcalls_funcallIndex_node, funcallCountHashTable, (void *) node);
         currentFunCallIndexHashTablePointer = funcallCountHashTable;
 
+        // Allocate new memory for an int in C to create a new memory block
+        int *newArgumentIndexCounter = MEMmalloc(sizeof(int));
+        // Dereference newArgumentIndexCounter pointer and make it equal to 0 before traversing the args
+        *newArgumentIndexCounter = 0;
+        // First save the new name and newArgumentIndexCounter in the hash table (for every funcall)
+        // Cast to void * because the parameter of the HTinsert is of type void *
+        HTinsert(data->funcalls_funcallIndex_paramIndex, funcallCountHashTable, (void *) newArgumentIndexCounter);
+
         // Then traverse the args
         TRAVargs(node);
 
         // After traversing the args, remove this entry from the hash table, to support another funcall
-        HTremove(data->funcalls_id_paramIndex, FUNCALL_NAME(node));
+        HTremove(data->funcalls_funcallIndex_paramIndex, funcallCountHashTable);
         HTremove(data->funcalls_funcallIndex_node, funcallCountHashTable);
         // Decrement the currentFunCallIndex after traversing args of a FunCall
         currentFunCallIndex--;
@@ -573,7 +564,7 @@ node_st *TMAFexprs(node_st *node)
     // Get the current FunCall node to use for checking
     node_st *currentFunCallNode = (node_st *) HTlookup(data->funcalls_funcallIndex_node, currentFunCallIndexHashTablePointer);
     // Get the param count from the hash table to check the corresponding param
-    int *currentParamIndexFunCall = (int *) HTlookup(data->funcalls_id_paramIndex, FUNCALL_NAME(currentFunCallNode));
+    int *currentParamIndexFunCall = (int *) HTlookup(data->funcalls_funcallIndex_paramIndex, currentFunCallIndexHashTablePointer);
 
     // TODO: segmentation fault
 
