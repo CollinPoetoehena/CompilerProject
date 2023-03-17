@@ -26,6 +26,9 @@ node_st *globalFirstSteFunLinking = NULL;
 node_st *fundefFirstSteVarLinking = NULL;
 node_st *fundefFirstSteFunLinking = NULL;
 
+// This helper VarDecl node is used for checking if a Var is the same as the declaration (then use global var first)
+node_st *currentVarDeclNode = NULL;
+
 // Helper to avoid code duplication. Returns the name of an Ste
 char *getSteName(node_st *steNode, char *steType) {
     if (strcmp("var", steType) == 0) {
@@ -209,6 +212,26 @@ node_st *LSTEfuncall(node_st *node)
 
     // Go to the traversal functions of the args (Exprs node type) to traverse the parameters
     TRAVargs(node);
+
+    return node;
+}
+
+/**
+ * @fn LSTEvardecl
+ */
+node_st *LSTEvardecl(node_st *node)
+{
+    currentVarDeclNode = node;
+
+    // Traverse the init Expr to find potential links
+    TRAVinit(node);
+
+    // Then traverse the next VarDecl node
+    TRAVnext(node);
+
+    // TODO: after this fixing of the scopes, test everything thorougly again with the Regular Assignments
+    // do this with every file and see if the linking is good, then after only seeing the linking
+    // do it all over again without the linking to see if everything else works
 
     return node;
 }
