@@ -72,8 +72,10 @@ node_st *RFIfunbody(node_st *node)
     // Then traverse the statements to convert and rename the for loop identifiers
     TRAVstmts(node);
 
-    // Reset last FunBody after every FunBody traversal
+    // Reset last FunBody after every FunBody traversal for the next FunBody
     lastFunBodyNode = NULL;
+    // Also reset the last VarDecl helper variable for the next FunBody
+    lastVarDeclNode = NULL;
 
     return node;
 }
