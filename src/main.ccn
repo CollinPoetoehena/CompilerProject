@@ -7,11 +7,11 @@ start phase RootPhase {
         // Then convert variable initializations into regular assignments, after ContextAnalysis
         RegularAssignments;
         // Then perform TypeChecking
-        TypeChecking;
-        // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
-        CompilingBooleanDisjunctionAndConjunction;
-        // then compile boolean cast (type and result type) expressions with the TernaryOp node
-        CompilingBooleanCastExpressions;
+        // TypeChecking;
+        // // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
+        // CompilingBooleanDisjunctionAndConjunction;
+        // // then compile boolean cast (type and result type) expressions with the TernaryOp node
+        // CompilingBooleanCastExpressions;
         // Then print the output of the compiler
         print;
     }
@@ -80,6 +80,8 @@ When making the VarLet and Var in RegularAssignments traversal, these need to be
 of the already existing links, so use them and add them manually!
 
 Then if that works, remove the old solution of the extra traversal!
+
+Then uncomment the other actions in the start phase and test everything thorougly again!
 */
 
 

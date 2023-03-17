@@ -85,27 +85,44 @@ node_st *findSteLink(char *name, char *steType) {
     }
 
     /*
+    If the current VarDecl is not equal to NULL and the name of the VarDecl is equal
+    equal to 0 (means the name of the ste link and the VarDecl name are equal), 
+    then skip the current fundef chain and search in the global chain only!
+    If not:
     First search in the fundef chain because you want the closest Ste to be linked.
     If it is not in the current fundef chain, then search in the global chain.
     If it is not in the global chain then give an error that there is no link found!
     */
-    if (firstSteFunDefChain != NULL) {
-        node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteFunDefChain, name, steType);
-        if (foundSteNodeInChain != NULL) {
-            // Return Ste found, automatically stops the execution of this function with the return
-            return foundSteNodeInChain;
+    if (currentVarDeclNode != NULL && strcmp(VARDECL_NAME(currentVarDeclNode), name) == 0) {
+        // Search in the global chain only, skip searching in the current fundef chain
+        if (firstSteGlobalChain != NULL) {
+            node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteGlobalChain, name, steType);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
         }
-    }
+    } else {
+        // First search in the current FunDef chain
+        if (firstSteFunDefChain != NULL) {
+            node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteFunDefChain, name, steType);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
 
-    // Search in the global chain if fundef chain is NULL or symbol not found there
-    // If the return statement of the previous search is not called it will get to this part
-    if (firstSteGlobalChain != NULL) {
-        node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteGlobalChain, name, steType);
-        if (foundSteNodeInChain != NULL) {
-            // Return Ste found, automatically stops the execution of this function with the return
-            return foundSteNodeInChain;
+        // Search in the global chain if fundef chain is NULL or symbol not found there
+        // If the return statement of the previous search is not called it will get to this part
+        if (firstSteGlobalChain != NULL) {
+            node_st *foundSteNodeInChain = findSteNodeInSteChain(firstSteGlobalChain, name, steType);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
         }
     }
+    
 
     // No existing symbol found, return NULL
     return NULL;
@@ -221,6 +238,7 @@ node_st *LSTEfuncall(node_st *node)
  */
 node_st *LSTEvardecl(node_st *node)
 {
+    // Update the current vardecl node
     currentVarDeclNode = node;
 
     // Traverse the init Expr to find potential links
@@ -228,6 +246,9 @@ node_st *LSTEvardecl(node_st *node)
 
     // Then traverse the next VarDecl node
     TRAVnext(node);
+
+    // Reset the currentVarDeclNode to NULL at the end to not link it unnecessary later
+    currentVarDeclNode = NULL;
 
     // TODO: after this fixing of the scopes, test everything thorougly again with the Regular Assignments
     // do this with every file and see if the linking is good, then after only seeing the linking
