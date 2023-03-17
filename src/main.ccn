@@ -181,6 +181,10 @@ phase TypeChecking {
                 Float,
                 // Case BoolConstant: Yield bool
                 Bool
+            },
+            travdata {
+                // Hash tables are used to handle checking nested funcalls
+                user htable_ptr funcalls_id_stelink
             }
         };
     }
