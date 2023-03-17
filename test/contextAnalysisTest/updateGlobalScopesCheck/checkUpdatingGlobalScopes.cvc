@@ -13,10 +13,15 @@ int b = 10;
 
 void bar() {
     // initializer uses global variable 'a'
-    int a = a + 1;
+    int a = a + a + 1;
+    int b = b + b + intFun(b) + a; // 'a' here should refer to the local 'a'
     int c = a; // references local 'a'
     // printInt(a);
     // printNewlines(1);
+}
+
+int intFun(int a) {
+    return a;
 }
 
 // void baz() {

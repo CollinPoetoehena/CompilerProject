@@ -54,6 +54,8 @@
 node_st *globalFirstSymbolTableEntryVar = NULL;
 // This variable is used to save the current assign node in for the hash table
 node_st *currentAssignNode = NULL;
+// This helper variable is used to also update the Var nodes in the same Assign node expression
+bool isUpdating = false;
 
 void UGVSinit() {
     // initialize hash table, ensures there is a hash table
@@ -78,7 +80,9 @@ void UGVSfini() {
 // Helper to avoid code duplication. Returns a found Ste node or NULL if no match is found
 node_st *findSteNodeInGlobalSteChain(char *name) {
     // First check if the global Ste chain exists, otherwise, do nothing and return NULL
-    if (globalFirstSymbolTableEntryVar = NULL) {
+    if (globalFirstSymbolTableEntryVar != NULL) {
+            printf("GETTING HERE ! *****************\n");
+
         node_st *steIterator = globalFirstSymbolTableEntryVar;
         do {
             // Match found, return Ste node. Use string comparison 
@@ -94,10 +98,22 @@ node_st *findSteNodeInGlobalSteChain(char *name) {
             // Update steIterator
             steIterator = STEVAR_NEXT(steIterator);
         } while (steIterator != NULL);
+    } else {
+                    printf("GLOBAL CHAIN IS NULL ! *****************\n");
+
     }
     
     // No link found
     return NULL;
+}
+
+// TODO: remove after debugging
+void * printElement(void * key, void * item) {
+    // Dereference int with * operator, char * == type string
+    printf("name in hash table: %s\n", (char *) key);
+
+    // Return nothing to avoid warning
+    return 0;
 }
 
 /**
@@ -107,9 +123,16 @@ node_st *UGVSprogram(node_st *node)
 {
     // Save global Ste's to search in later in the linking process
     globalFirstSymbolTableEntryVar = PROGRAM_FIRST_STE_VARIABLES(node);
+    printf("IS IT NULL IN PROGRAM, THE CHAIN?? %s\n", PROGRAM_FIRST_STE_VARIABLES(node) == NULL ? "true" : "false");
 
     // Go to the traversal functions of the children
     TRAVchildren(node);
+
+    // TODO: remove after debugging
+    // Get travdata from CI traversal
+    struct data_ugvs *data = DATA_UGVS_GET();
+    // Print hash table
+    HTmapWithKey(data->assign_var_occurred, printElement);
 
     return node;
 }
@@ -123,11 +146,10 @@ node_st *UGVSassign(node_st *node)
     currentAssignNode = node;
 
     TRAVexpr(node);
+    printf("back from trav expr*****************\n");
 
-    // After traversing the expression, save the VarLet name in the hash table
-    // so that a next assign with the same Var name will not be updated
-    struct data_ugvs *data = DATA_UGVS_GET();
-    HTinsert(data->assign_var_occurred, VARLET_NAME(ASSIGN_LET(node)), (void *) node);
+    // After traversing the expression, set the isUpdating to false for the next Assign node
+    isUpdating = false;
 
     return node;
 }
@@ -153,8 +175,11 @@ node_st *UGVSvar(node_st *node)
         If it is not in the hash table, it means that it was from the original VarDecl and 
         it should therefore be updated to the SteVar from the global scope if it is in the global
         SteVar chain, if it is not in that chain, then not update anything.
+
+        Or if the isUpdating variable is true, that means that this is still the sequence
+        of the same Assign node, so also then update the link.
         */
-        if (assignNodeFromVar == NULL) {
+        if (assignNodeFromVar == NULL || isUpdating) {
             printf("name: %s\n", VAR_NAME(node));
             node_st *globalSteLinkVar = findSteNodeInGlobalSteChain(VAR_NAME(node));
             // If it is not in the global chain, not update the link
@@ -162,6 +187,17 @@ node_st *UGVSvar(node_st *node)
                 printf("LINK UPDATED!********************\n");
                 VAR_STE_LINK(node) = globalSteLinkVar;
             }
+
+            // Set updating to true
+            isUpdating = true;
+
+            // If the assign node is NULL, then insert this one to not update future Assign node
+            // because this was the first VarDecl of this node before the RegularAssignments traversal
+            if (assignNodeFromVar == NULL) {
+                HTinsert(data->assign_var_occurred, VAR_NAME(node), (void *) currentAssignNode);
+            }
+        } else {
+            printf("IT IS NOT NULL IN VAR!*****************\n");
         }
     }
 
