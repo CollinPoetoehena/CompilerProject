@@ -18,11 +18,11 @@
 // Include error functionality
 #include "palm/ctinfo.h"
 
-// These node is are used for searching the global Ste's
+// These node are used for searching the global Ste's
 node_st *globalFirstSteVarLinking = NULL;
 node_st *globalFirstSteFunLinking = NULL;
 
-// These node is are used for searching the fundef Ste's
+// These node are used for searching the fundef Ste's
 node_st *fundefFirstSteVarLinking = NULL;
 node_st *fundefFirstSteFunLinking = NULL;
 

@@ -124,9 +124,34 @@ phase ContextAnalysis {
                 // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
                 Program,
                 // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-                FunDef, 
+                FunDef,
                 // These nodes are used to update their link once they occur in a program
                 Var, Varlet, FunCall
+            }
+        };
+
+        /*
+        This traversal is used to fix the scoping of the RegularAssignment traversal for Assign 
+        nodes. The scoping of Assign nodes is not correctly done in the above traversal because we
+        chose to do the RegularAssignment traversal before ContextAnalysis, these benefits outweigh the
+        drawbacks of having it after ContextAnalysis, however, to fix the scoping that is not 
+        correctly done because of that this traversal is needed to fix that.
+        */
+        traversal UpdateGlobalVardeclScopes {
+            uid = UGVS,
+            nodes = { 
+                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+                Program,
+                // Assign node is used to update the scope to global of the Var in the Assign node
+                // if it needs to be updated
+                Assign,
+                // Var node is used to check and update the ste link if necssary
+                Var
+            },
+            travdata {
+                // A hash table is used to save the Var occurrences in to see if the scope of 
+                // the ste link has to be updated
+                user htable_ptr assign_var_occurred
             }
         };
     }
