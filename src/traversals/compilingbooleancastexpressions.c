@@ -98,6 +98,9 @@ node_st *CBCEbinop(node_st *node)
  */
 node_st *CBCEfuncall(node_st *node)
 {
+    // First traverse the args to convert them if they need to be converted
+    TRAVargs(node);
+
     // Get SteFun link and see if it is a bool return type, then set to true, otherwise do nothing
     if (STEFUN_TYPE(FUNCALL_STE_LINK(node)) == CT_bool) {
         // Set the bool result value to true
