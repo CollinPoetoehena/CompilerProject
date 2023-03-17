@@ -233,16 +233,32 @@ traversal CompilingBooleanCastExpressions {
 TODO: 
     milestone 15 is helemaal optioneel en om de bonus punten te krijgen moet je heel veel optimalisatie
     doen om een beetje punten te krijgen, dus die niet doen!
-    milestone 14 is een beetje optioneel, probeer die wel te doen, maar als het niet lukt is het geen ramp!
-    milestone 12 en 13 zijn heel belangrijk, die moeten heel goed staan, test alles goed met de test suite
-    EN je eigen test files of die kloppen, test dit heel goed en grondig!
+    milestone 14 is een beetje optioneel, probeer die alleen te doen als je nog veel tijd over hebt
+    na milestones 12 en 13, 12 en 13 moet je echt sowieso goed krijgen!
+    
+    ***************************************************************************************************************************
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    DUS HET PLAN NU: 
+    MILESTONE 12 EN 13 MAKEN EN ZORG DAT DIE HELEMAAL GOED ZIJN EN PERFECT MET ALLE TESTS, SCHRIJF HIER OOK EXTRA TESTS VOOR ZELF!
+    FOCUS GEWOON DAAROP NU EN MILESTONE 14 EN 15 MOET JE GEWOON OVERSLAAN, DIE ZIJN TOCH OPTIONEEL EIGENLIJK!
+    DUS:
+    MILESTONE 12 EN 13 MAKEN TOT HET EIND
+    MILESTONE 14 EN 15 OVERSLAAN EN NIET DOEN WANT DAT IS DE TIJD NIET WAARD, ZORG DAT MILESTONE 12 EN 13 GEWOON PERFECT STAAN EN HEEL
+    GOED GETEST ZIJN! 14 EN 15 KRIJG JE AMPER TOT GEEN PUNTEN VOOR EN JE MOET ER HEEL VEEL VOOR DOEN, DUS SLA DIE NU OVER!
+    DUS MIILESTONE 12 EN 13 MAKEN EN DAN ALLES HEEEEEEL GOED TESTEN DE KOMENDE 2 WEKEN EN DAN VOOR DE REST FOCUSSEN OP PROGRAMMEERTALEN
+    LEREN VOOR HET TENTAMEN! DAN KOMT HET HELEMAAL GOED EN HEBBEN WE GEWOON ROND DE 7 VOOR HET COMPILER PROJECT EN DAT IS AL HEEL 
+    GOED, MET EEN VOLDOENDE IS HET AL HEEL GOED, KOMT GOED, DUS NU MILESTONE 12 EN 13 AFMAKEN :)!
+    ***************************************************************************************************************************
 
-    Uitleg milestones 12, 13 en 14 voor assembly genereren
+    milestone 12 en 13 zijn super belangrijk, die moeten heel goed staan, test alles goed met de test suite
+    EN je eigen test files of die kloppen, test dit heel goed en grondig, dit moet goed zijn!
+
+    Uitleg milestones 12 en 13 voor assembly genereren:
     assembly uitprinten, ipv code printen ga je assembly code printen naar de output file die meegegeven is
     main.c: regel 66:
             global.output_file = optarg;
     Standaard C om de file aan te maken, maak de file aan, de assembly code is een tekst bestand dat je gaat aanmaken
-    milestone 12,13, 14 zijn in 1 traversal die je uitbreidt op 1 file die je aanmaakt
+    milestone 12 en 13 zijn in 1 traversal die je uitbreidt op 1 file die je aanmaakt
     gebruik de reference compiler om een voorbeeld te zien van assembly dat gegenereert wordt:
     Zo kan je de reference compiler gebruiken: 
     chmod +x ./civcc -> geeft permission voor alles
