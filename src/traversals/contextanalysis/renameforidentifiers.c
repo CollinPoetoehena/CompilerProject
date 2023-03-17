@@ -32,6 +32,9 @@
 // Palm library for easy working with strings
 #include "palm/str.h"
 #include  <string.h>
+// Include hash tables and memory from Palm
+#include "palm/hash_table.h"
+#include "palm/memory.h"
 
 // Global counter for renaming the identifiers with a number of _
 int counter = 1;

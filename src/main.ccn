@@ -184,7 +184,11 @@ phase TypeChecking {
             },
             travdata {
                 // Hash tables are used to handle checking nested funcalls
-                user htable_ptr funcalls_id_stelink
+                // This hash table is used to save the Ste link
+                //user htable_ptr funcalls_id_stelink,
+                user htable_ptr funcalls_id_paramIndex,
+                // This hash table is used to save the funcall index to get the last funcall node
+                user htable_ptr funcalls_funcallIndex_node
             }
         };
     }
