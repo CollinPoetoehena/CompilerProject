@@ -519,6 +519,8 @@ node_st *TMAFfuncall(node_st *node)
         // First save the new name and newArgumentIndexCounter in the hash table (for every funcall)
         // Cast to void * because the parameter of the HTinsert is of type void *
         HTinsert(data->funcalls_id_paramIndex, FUNCALL_NAME(node), (void *) newArgumentIndexCounter);
+                printf("value of funcall count for in hash table: %d**********************************************\n", *newArgumentIndexCounter);
+
 
         // Update the last FunCall name before traversing the args to lookup the ste link in the hash table
         //lastFunCallName = FUNCALL_NAME(node);
@@ -531,10 +533,8 @@ node_st *TMAFfuncall(node_st *node)
         // Update funcall count index before traversing to the args to find the funcall node
         // initialize the currentFunCallIndex to use in the hash tables to find funcall names
         int *funcallCountHashTable = MEMmalloc(sizeof(int));
-        // Dereference funcallCount and make it equal to the global helper variable
+        // Dereference funcallCount and make it equal to the global helper variable of type int
         *funcallCountHashTable = currentFunCallIndex;
-
-        printf("value of funcall count for in hash table: %d\n**********************************************", *funcallCountHashTable);
 
         // Insert the current FunCall node to the hash table with its current index
         HTinsert(data->funcalls_funcallIndex_node, funcallCountHashTable, (void *) node);
@@ -595,9 +595,9 @@ node_st *TMAFfuncall(node_st *node)
 }
 
 // Helper function to check if an argument type is the same as the parameter type
-bool compareFunCallArgumentsTypes(enum Type argumentType, int *paramIndex, node_st *steLink) {
+bool compareFunCallArgumentsTypes(enum Type argumentType, int paramIndex, node_st *steLink) {
     printf("name of stelink fundef is: %s********************\n", STEFUN_NAME(steLink));
-    printf("*********************************************tempArgumentIndex: %d\n", paramIndex);
+    printf("**********************************************************************************************tempArgumentIndex: %d\n", paramIndex);
 
     // Check if the link is not NULL
     if (steLink != NULL) {
@@ -649,9 +649,12 @@ node_st *TMAFexprs(node_st *node)
 
     printf("param index funcall in exprs: %d*************\n", *currentParamIndexFunCall);
 
+        printf("param index funcall in exprs: %d*************\n", currentParamIndexFunCall);
+
+
         // TODO: the param index is not going to well
 
-        
+
 
     // Get the SteLink to use for checking the parameters with
     node_st *currentSteLink = FUNCALL_STE_LINK(currentFunCallNode);
@@ -662,15 +665,15 @@ node_st *TMAFexprs(node_st *node)
     enum Type currentArgumentType = tempType;
 
     // Check the types of the corresponding parameters
-    bool typeCheckResult = compareFunCallArgumentsTypes(currentArgumentType, currentParamIndexFunCall, currentSteLink);
+    bool typeCheckResult = compareFunCallArgumentsTypes(currentArgumentType, *currentParamIndexFunCall, currentSteLink);
     // Dereference the currentParamIndexFunCall and increment it by one for the next param
-    *currentParamIndexFunCall = currentParamIndexFunCall + 1;
+    *currentParamIndexFunCall = *currentParamIndexFunCall + 1;
 
     // Then check if the current argument type matches the corresponding parameter type
     if (currentFunCallNode != NULL && !typeCheckResult) {
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "type error in funcall '%s': argument number %d's type does not match corresponding parameter type",
-            lastFunCallName, (currentParamIndexFunCall+1));
+            FUNCALL_NAME(currentFunCallNode), (*currentParamIndexFunCall));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }

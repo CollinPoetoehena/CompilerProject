@@ -7,7 +7,7 @@ void foo(int a, float b, bool c) {
     // foo(5, 5.45645, true);
     // foo(a, b, c);
     // foo(d, e, f);
-    foo(d, e, (a() && b(true)));
+    foo(d, e, (a() && b()));
 
     // Error
     //foo(true, 5.5646, 2);
@@ -25,6 +25,6 @@ bool a() {
     return true;
 }
 
-bool b(int a) {
+bool b() {
     return false;
 }
