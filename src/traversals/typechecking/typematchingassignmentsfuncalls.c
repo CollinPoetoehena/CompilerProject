@@ -37,17 +37,10 @@ int currentFunCallIndex = 0;
 int *currentFunCallIndexHashTablePointer = NULL;
 
 void TMAFinit() { 
-        // TODO: see if it can be removed, the commented hash table
-
     // initialize hash table, ensures there is a hash table
-    //htable_st *hash_table = HTnew_String(100);
+    // Use Int hash tables to work with an index, this way we can support funcalls with the same name
     htable_st *hash_table_paramIndex = HTnew_Int(100);
     htable_st *hash_table_funCallCount = HTnew_Int(100);
-
-    // // initialize the funcallCount to use in the hash tables to find funcall names
-    // funcallCount = MEMmalloc(sizeof(int));
-    // // Dereference funcallCount and make it equal to 0 to start the funcallCount
-    // *funcallCount = 0;
 
     // Get the hash table from the travdata of the TMAF traversal
     struct data_tmaf *data = DATA_TMAF_GET();
@@ -99,7 +92,6 @@ bool compareFunCallArgumentsTypes(enum Type argumentType, int paramIndex, node_s
             do {
                 // Found parameter in SteFun link
                 if (counter == paramIndex) {
-                    printf("argumenttype is: %s, param type is: %s\n", getTypeForPrinting(argumentType), getTypeForPrinting(PARAM_TYPE(paramIterator)));
                     if (argumentType == PARAM_TYPE(paramIterator)) {
                         // Return true if the argument and the corresponding parameter type match
                         return true;
@@ -505,8 +497,6 @@ node_st *TMAFcast(node_st *node)
  */
 node_st *TMAFfuncall(node_st *node)
 {
-    printf("funcall\n");
-
     // Check if the link is correctly added in ContextAnalysis
     if (FUNCALL_STE_LINK(node) != NULL && FUNCALL_ARGS(node) != NULL) {
         // Get the hash table from the travdata of the TMAF traversal
@@ -565,10 +555,6 @@ node_st *TMAFexprs(node_st *node)
     node_st *currentFunCallNode = (node_st *) HTlookup(data->funcalls_funcallIndex_node, currentFunCallIndexHashTablePointer);
     // Get the param count from the hash table to check the corresponding param
     int *currentParamIndexFunCall = (int *) HTlookup(data->funcalls_funcallIndex_paramIndex, currentFunCallIndexHashTablePointer);
-
-    // TODO: segmentation fault
-
-
 
     // Get the SteLink to use for checking the parameters with
     node_st *currentSteLink = FUNCALL_STE_LINK(currentFunCallNode);

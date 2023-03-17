@@ -43,7 +43,6 @@ node_st *CBCEcast(node_st *node)
         // where the predicate will use the numbers num >=1 -> true; num < 1 -> false;
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTbool(true), 
             ASTbool(false), CT_float);
-        // TODO: what to do with type signature, is it correct?
 
         // Set temp variable for boolean operator to true because there is a bool cast
         operatorTypeIsBool = true;
@@ -54,7 +53,6 @@ node_st *CBCEcast(node_st *node)
         // Will be transformed to TernaryOp node: predicate ? 1 : 0
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTnum(1), 
             ASTnum(0), CT_int);
-        // TODO: what to do with type signature, is it correct?
 
         // Set temp variable for boolean operator to true because there is a bool result cast
         operatorTypeIsBool = true;
@@ -65,7 +63,6 @@ node_st *CBCEcast(node_st *node)
         // Will be transformed to TernaryOp node: predicate ? 1.0 : 0.0
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTfloat(1.0), 
             ASTfloat(0.0), CT_bool);
-        // TODO: what to do with type signature, is it correct?
 
         // Set temp variable for boolean operator to true because there is a bool result cast
         operatorTypeIsBool = true;

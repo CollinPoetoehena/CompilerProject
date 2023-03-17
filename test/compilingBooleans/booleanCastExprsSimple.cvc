@@ -1,39 +1,7 @@
 void foo() {
-    int a=1;
-    int b=2;
-    int c=3;
     int d=4;
-    float w=1.0;
-    float x=2.0;
-    bool q = true;
-    bool z = false;
-    int falseInt = 0;
-    int trueInt = 1;
-    float falseFloat = 0.7; // Everything smaller than 1 is false
-    float trueFloat = 1.0; // Everything higher than or equal 1 is true
 
-    // Boolean cast results
-    // d = (int)(b<d); //d = 1
-    // d = (int)(a<b&&c>d); //d = 0
-    // w = (float)(b>d||q); // w = 1.0
-    // w = (float)(b>d&&q); // w = 0.0
-    // w = (float)true;
-    // d = (int)false;
-    // nested bool casts
-    d = (int) ((bool)1);
-    // d = (int) boolFun();
-    // d = (int) ((bool) ((int) true));
-
-    // Boolean cast results
-    // q = (bool)falseInt; // q = false
-    // q = (bool)trueInt; // q = true
-    // z = (bool)falseFloat; // z = false
-    // z = (bool)trueFloat; // z = true
-
-    // // These should not be converted
-    // d = (int) 5;
-    // w = (float) 5.3;
-    // d = (int) intFun();
+    d = (int) ((bool) ((int) ((int)((bool) (((int) (bool) 1))))));
 }
 
 bool boolFun() {
