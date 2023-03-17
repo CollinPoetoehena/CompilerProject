@@ -45,10 +45,8 @@ void updateGlobSymbolTablesSteFun(node_st *newSte) {
     }
 }
 
-// Check if a symbol is unique
+// Check if the name is not already present in the symbol table entries (use linear search)
 bool isSymbolUniqueSteFun(char *name) {
-    // Check if the name is not already present in the symbol table entries (use linear search)
-
     // Only one scope for basic for fundefs: global (0)
     node_st *symtbolTableChainFun = firstSymbolTableFun;
     // Go through the current chain to check if it contains the symbol already

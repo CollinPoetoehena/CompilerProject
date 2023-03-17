@@ -1,14 +1,18 @@
 start phase RootPhase {
-    // Comment unfinished actions because they might cause an error!
+    // TODO: Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        // TODO: uncomment when done with testing RA traversal, otherwise it might cause an error or bug!
+        // First convert variable initializations into regular assignments, before ContextAnalysis
         RegularAssignments;
+        // Then perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
-        // TODO: finish and uncomment above parts if this is finished and tested
+        // Then perform TypeChecking
         TypeChecking;
+        // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
         CompilingBooleanDisjunctionAndConjunction;
+        // then compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
+        // Then print the output of the compiler
         print;
     }
 };
@@ -29,7 +33,7 @@ In short:
         because otherwise you would still have a memory issue because now FOR_START_EXRP(node) and
         FOR_VAR(node) point to the same char * in memory! So, it should look like this ASTvar(STRcpy(FOR_VAR(node)))
 
-PRO TIP:
+PRO TIP (from experience :)):
     Try to make changes to the AST in the traversal functions of that node, try to avoid changing a node outside of 
     its traversal function as much as possible because it can lead to unpredictable behaviour otherwise! Unless
     it is absolutely unavoidable you can try doing it, but be careful and test everything thorougly again then!
@@ -42,24 +46,15 @@ PRO TIP:
 // This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
 
 //**********************************************************************************************************************************************
-// TODO: now make the rename identifiers of for loops and then uncomment everything again and test everything 
-// thorougly again! Simon approved of the explanation of for loops and there variable re structuring!
-// TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, use hashtable, see traversal for TODO!
-// it is with this file: 
-// ./civicc ../test/basic/functional/for_to_while.cvc 
-// TODO: ask Simon: are the for loops correct like this?? use this file
-// ./civicc ../test/contextAnalysisTest/nestedForLoops.cvc 
-// TODO: Can For be removed from SteVar traversal now, because the induction variable has been removed!!!
+// TODO: implement the last milestones :) -> milestone 12 and 13 and test them very thorougly 
+//and make them perfect! I have untill the end of the period because milestone 14 and 15 can be skipped,
+// so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
+//for the exam and some less stress, etc :)!!!
 
-
-// TODO: make a file and check if the -false gives a type error!
 
 
 // TODO: how to generate the file for assembly in the traversal, is there code about that somewhere???? Ask Simon
 
-
-
-// TODO: not do milestones 8 and 11 they are only for extensions, so not necessary for basic!!
 
 // ************************************************************************************************************************************
 
@@ -183,12 +178,11 @@ phase TypeChecking {
                 Bool
             },
             travdata {
-                // Hash tables are used to handle checking nested funcalls
-                // This hash table is used to save the Ste link
-                //user htable_ptr funcalls_id_stelink,
-                user htable_ptr funcalls_funcallIndex_paramIndex,
+                // Hash tables are used to handle type checking nested funcalls
                 // This hash table is used to save the funcall index to get the last funcall node
-                user htable_ptr funcalls_funcallIndex_node
+                user htable_ptr funcalls_funcallIndex_node,
+                // This hash table is used to save the funcall index to get the last parmam index of that funcall
+                user htable_ptr funcalls_funcallIndex_paramIndex
             }
         };
     }
@@ -201,7 +195,6 @@ transform all Boolean operations in question into semantically equivalent condit
 */
 traversal CompilingBooleanDisjunctionAndConjunction {
     uid = CBDC,
-    // TODO: create print traversal for the TernaryOp
     nodes = { BinOp }
 };
 
@@ -213,7 +206,7 @@ traversal because a Cast can have a BinOp Expr child as well.
 */
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
-    // It traverses all Cast expressions that have a boolean result or bool cast
+    // It traverses all Cast expressions that have a boolean result or bool cast type
     nodes = { Cast, BinOp, FunCall, Bool }
 };
 

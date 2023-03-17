@@ -25,15 +25,9 @@ node_st *tempFundefSteLink = NULL;
 // Global helper variable to save the type in
 enum Type tempType = CT_NULL; // CT_NULL is the NULL type
 
-// These global variables are used for typechecking for FunCall arguments
-node_st *tempSteFunCallLink = NULL;
-node_st *tempSteFunCallNode = NULL;
-int tempArgumentIndex = 0;
-
-char *lastFunCallName = NULL;
 // Save the currentFunCallIndex to use for getting the last funcall node from the hash table
 int currentFunCallIndex = 0;
-
+// This pointer variable is used to get something from the hash table
 int *currentFunCallIndexHashTablePointer = NULL;
 
 void TMAFinit() { 
@@ -51,33 +45,6 @@ void TMAFinit() {
     return; 
 }
 void TMAFfini() { return; }
-
-// TODO: remove after debugging!
-// Helper function to get the string type of the enum Type
-// Define at the top to avoid C return type error
-char *getTypeForPrinting(enum Type type) {
-  // Get the type
-  char *printType = NULL;
-
-  switch (type) {
-    case CT_int:
-    printType = "int";
-    break;
-    case CT_float:
-    printType = "float";
-    break;
-    case CT_bool:
-    printType = "bool";
-    break;
-    case CT_void:
-    printType = "void";
-    break;
-    case CT_NULL:
-    DBUG_ASSERT(false, "unknown type detected!");
-  }
-
-  return printType;
-}
 
 // Helper function to check if an argument type is the same as the parameter type
 bool compareFunCallArgumentsTypes(enum Type argumentType, int paramIndex, node_st *steLink) {
@@ -162,8 +129,8 @@ enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum 
         On Boolean operands they complement strict logic disjunction and conjunction 
         in supporting all potential relationships between two Boolean values.
         
-        '==' : T x T -> bool, where T is any basic type
-        '!=' : T x T -> bool, where T is any basic type
+        '==' : T x T -> bool, where T is any basic type, where T must be the same as the other T after x
+        '!=' : T x T -> bool, where T is any basic type, where T must be the same as the other T after x
 
         The remaining four relational operators are only defined for integer and floating point numbers as operand values.
         '<' : int x int -> bool
@@ -655,6 +622,7 @@ node_st *TMAFmonop(node_st *node)
 /**
  * @fn TMAFvar
  *
+ * Case var: get type from Ste and yield that type
  */
 node_st *TMAFvar(node_st *node)
 {

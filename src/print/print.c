@@ -57,7 +57,10 @@ node_st *PRTprogram(node_st *node)
     printf("\n\n\n****************************************************************************************************************************************************************************** \
     \t\tStart of the print traversal:\n\n");
 
-    // TODO: uncomment and comment the ones you do not want to print!
+    /*
+    Uncomment and comment the ones you do and do not want to print!
+    This is left here with a purpose for teachers to if they would like to see the Ste's!
+    */
     // Print the ste's for the global variables and global fundefs here on the top!
     // printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
     // printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
@@ -145,7 +148,10 @@ node_st *PRTfundef(node_st *node)
       }
     }
 
-    // TODO: uncomment and comment the ones you do not want to print!
+    /*
+    Uncomment and comment the ones you do and do not want to print!
+    This is left here with a purpose for teachers to if they would like to see the Ste's!
+    */
     // Print the ste's of the variables as a structured comment
     // printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
     // // Print its own symbol table for its function definition
@@ -176,7 +182,10 @@ node_st *PRTfuncall(node_st *node)
     // End funcall with a semicolon and a new line
     printf(";\n");
 
-    // TODO: uncomment and comment the ones you do not want to print!
+    /*
+    Uncomment and comment the ones you do and do not want to print!
+    This is left here with a purpose for teachers to if they would like to see the Ste's!
+    */
     // Print the SteFun link to this VarLet node
     // if (FUNCALL_STE_LINK(node) != NULL) {
     //   printOneSteFun(FUNCALL_STE_LINK(node));
@@ -193,7 +202,10 @@ node_st *PRTvarlet(node_st *node)
     // Print varlet (variable in assignment)
     printf("%s", VARLET_NAME(node));
 
-    // TODO: uncomment and comment the ones you do not want to print!
+    /*
+    Uncomment and comment the ones you do and do not want to print!
+    This is left here with a purpose for teachers to if they would like to see the Ste's!
+    */
     // Print the SteVar link to this VarLet node
     // if (VARLET_STE_LINK(node) != NULL) {
     //   printOneSteVar(VARLET_STE_LINK(node));
@@ -212,7 +224,10 @@ node_st *PRTvar(node_st *node)
     // Print var (variable in an expression)
     printf("%s", VAR_NAME(node));
 
-    // TODO: uncomment and comment the ones you do not want to print!
+    /*
+    Uncomment and comment the ones you do and do not want to print!
+    This is left here with a purpose for teachers to if they would like to see the Ste's!
+    */
     // Print the SteVar link to this Var node
     // if (VAR_STE_LINK(node) != NULL) {
     //   printOneSteVar(VAR_STE_LINK(node));
@@ -454,8 +469,6 @@ node_st *PRTdowhile(node_st *node)
  */
 node_st *PRTfor(node_st *node)
 {
-    // printf("for (int %s = ", FOR_VAR(node));
-    // TODO: the above can probably be removed, because no decl anymore in renameforidentifiers traversal
     // Start the for statement
     printf("for (");
 
@@ -738,7 +751,6 @@ node_st *PRTmonop(node_st *node)
  */
 node_st *PRTternaryop(node_st *node)
 {
-    //TODO: create print for the TernaryOp node
     // Start TernaryOp
     printf( "( ");
 
@@ -946,99 +958,3 @@ void printSteFunChain(node_st *steFunFirstNode) {
     printf("\n\tEnd of SteFun chain\n****************************************************\n\n");
   }
 }
-
-// TODO: remove at the end of the project, but maybe handy with the memory of params creation, etc!
-// void printSte(node_st *steVarFirstNode) {
-//   if (steVarFirstNode != NULL) {
-//     // Get the type
-//     char *type = NULL;
-
-//     switch (STE_TYPE(steVarFirstNode)) {
-//       case CT_int:
-//       type = "int";
-//       break;
-//       case CT_float:
-//       type = "float";
-//       break;
-//       case CT_bool:
-//       type = "bool";
-//       break;
-//       case CT_void:
-//       type = "void";
-//       break;
-//       case CT_NULL:
-//       DBUG_ASSERT(false, "unknown type detected!");
-//     }
-            
-//     // Get the SymbolTableType
-//     char *stType = NULL;
-//     switch (STE_SYMBOL_TYPE(steVarFirstNode)) {
-//       case STT_var:
-//       stType = "var";
-//       break;
-//       case STT_varlet:
-//       stType = "varlet";
-//       break;
-//       case STT_function:
-//       stType = "function";
-//       break;
-//       case STT_NULL:
-//       DBUG_ASSERT(false, "unknown SymbolTableType detected!");
-//     }
-
-//     // Print the Ste
-//     if (STE_SYMBOL_TYPE(steVarFirstNode) == STT_function) {
-//       // Print function Ste: "funName: returnType (param types)"
-//       // Declare a C string array with space for 5 strings of 20 characters each
-//       char *paramsPrint = MEMmalloc(100 * sizeof(char)); // allocate memory for a string of up to 99 characters
-//       // Initialize with empty string to avoid weird memory address value being used at the start
-//       strcpy(paramsPrint, "");
-      
-//       if (STE_PARAMS(steVarFirstNode) != NULL) {
-//           // Get the first param from the Ste
-//           node_st *paramIterator = STE_PARAMS(steVarFirstNode);
-//           do {
-//               // Get the type
-//               char *tmp = NULL;
-//               switch (PARAM_TYPE(paramIterator)) {
-//                   case CT_int:
-//                   tmp = "int";
-//                   break;
-//                   case CT_float:
-//                   tmp = "float";
-//                   break;
-//                   case CT_bool:
-//                   tmp = "bool";
-//                   break;
-//                   case CT_void:
-//                   tmp = "void";
-//                   break;
-//                   case CT_NULL:
-//                   DBUG_ASSERT(false, "unknown type detected!");
-//               }
-
-//               // Add the param to the params string to print the fundef
-//               strcat(paramsPrint, tmp);
-//               // Add a comma after every value, except the last one
-//               if (PARAM_NEXT(paramIterator) != NULL) {
-//                   strcat(paramsPrint, ", ");
-//               }
-
-//               // Update parameter
-//               paramIterator = PARAM_NEXT(paramIterator);
-//           } while (paramIterator != NULL);
-//       }
-
-//       // Print the function symbol table
-//       printf("Symbol table entry:\n %s : %s (%s) \nsymbol type: %s, nesting level: %d\n", 
-//           STE_NAME(steVarFirstNode), type, paramsPrint, stType, STE_NESTING_LEVEL(steVarFirstNode));
-
-//       // Free the params memory when done because it is not needed anymore
-//       MEMfree(paramsPrint);
-//     } else {
-//       // Print var Ste: "name, type"
-//       printf("Symbol table entry:\n %s : %s\nsymbol type: %s, nesting level: %d\n", 
-//           STE_NAME(steVarFirstNode), type, stType, STE_NESTING_LEVEL(steVarFirstNode));
-//     }
-//   }
-// }
