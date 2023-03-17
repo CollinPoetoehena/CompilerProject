@@ -86,38 +86,39 @@ char *getTypeForPrinting(enum Type type) {
   return printType;
 }
 
-// // Helper function to check if an argument type is the same as the parameter type
-// bool compareFunCallArgumentsTypes(enum Type argumentType) {
-//     // Check if the link is not NULL
-//     if (tempSteFunCallLink != NULL) {
-//         // Check if there are any params
-//         if (STEFUN_PARAMS(tempSteFunCallLink) != NULL) {
-//             // Get the first param from the SteFun node
-//             node_st *paramIterator = STEFUN_PARAMS(tempSteFunCallLink);
-//             int counter = 0;
-//             // Go to the nTh argument using the linkedlist of the Params
-//             do {
-//                 // Found parameter in SteFun link
-//                 if (counter == tempArgumentIndex) {
-//                     if (argumentType == PARAM_TYPE(paramIterator)) {
-//                         // Return true if the argument and the corresponding parameter type match
-//                         return true;
-//                     }
-//                 }
+// Helper function to check if an argument type is the same as the parameter type
+bool compareFunCallArgumentsTypes(enum Type argumentType, int paramIndex, node_st *steLink) {
+    // Check if the link is not NULL
+    if (steLink != NULL) {
+        // Check if there are any params
+        if (STEFUN_PARAMS(steLink) != NULL) {
+            // Get the first param from the SteFun node
+            node_st *paramIterator = STEFUN_PARAMS(steLink);
+            int counter = 0;
+            // Go to the nTh argument using the linkedlist of the Params
+            do {
+                // Found parameter in SteFun link
+                if (counter == paramIndex) {
+                    printf("argumenttype is: %s, param type is: %s\n", getTypeForPrinting(argumentType), getTypeForPrinting(PARAM_TYPE(paramIterator)));
+                    if (argumentType == PARAM_TYPE(paramIterator)) {
+                        // Return true if the argument and the corresponding parameter type match
+                        return true;
+                    }
+                }
 
-//                 // Update parameter and counter
-//                 paramIterator = PARAM_NEXT(paramIterator);
-//                 counter++;
-//             } while (paramIterator != NULL && counter <= tempArgumentIndex);
-//         } else {
-//             // No params in FunDef, so no types to check, return true
-//             return true;
-//         }
-//     }
+                // Update parameter and counter
+                paramIterator = PARAM_NEXT(paramIterator);
+                counter++;
+            } while (paramIterator != NULL && counter <= paramIndex);
+        } else {
+            // No params in FunDef, so no types to check, return true
+            return true;
+        }
+    }
     
-//     // Not equal argument and parameter type
-//     return false;
-// }
+    // Not equal argument and parameter type
+    return false;
+}
 
 // Helper function to get the type signature of the BinOp built-in operators
 enum Type getTypeSignatureBinOp(enum Type firstType, enum Type secondType, enum BinOpEnum operator) {
@@ -521,6 +522,7 @@ node_st *TMAFfuncall(node_st *node)
         HTinsert(data->funcalls_id_paramIndex, FUNCALL_NAME(node), (void *) newArgumentIndexCounter);
                 printf("value of funcall count for in hash table: %d**********************************************\n", *newArgumentIndexCounter);
 
+        printf("1********************************************************************************************************************\n");
 
         // Update the last FunCall name before traversing the args to lookup the ste link in the hash table
         //lastFunCallName = FUNCALL_NAME(node);
@@ -545,7 +547,7 @@ node_st *TMAFfuncall(node_st *node)
 
         // After traversing the args, remove this entry from the hash table, to support another funcall
         HTremove(data->funcalls_id_paramIndex, FUNCALL_NAME(node));
-        // TODO: remove node from the other hash table as well???
+        HTremove(data->funcalls_funcallIndex_node, funcallCountHashTable);
         // Decrement the currentFunCallIndex after traversing args of a FunCall
         currentFunCallIndex--;
 
@@ -556,79 +558,7 @@ node_st *TMAFfuncall(node_st *node)
         tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
     }
 
-
-
-
-
-
-    // // Check if the link is correctly added in ContextAnalysis
-    // if (FUNCALL_STE_LINK(node) != NULL && FUNCALL_ARGS(node) != NULL) {
-    //     printf("in ste link and args part!********************\n");
-    //     // Get the hash table from the travdata of the TMAF traversal
-    //     struct data_tmaf *data = DATA_TMAF_GET();
-
-    //     // First save the new name and ste link in the hash table (for every funcall)
-    //     // Cast to void * because the parameter of the HTinsert is of type void *
-    //     HTinsert(data->funcalls_id_stelink, FUNCALL_NAME(node), (void *) FUNCALL_STE_LINK(node));
-
-    //     // Start the tempArgumentIndex at 0 before traversing the args
-    //     tempArgumentIndex = 0;
-    //     HTinsert(data->funcalls_id_paramIndex, FUNCALL_NAME(node), (void *) FUNCALL_STE_LINK(node));
-
-    //     // Update the last FunCall name before traversing the args to lookup the ste link in the hash table
-    //     lastFunCallName = FUNCALL_NAME(node);
-
-    //     // Then traverse the args
-    //     TRAVargs(node);
-
-    //     // After traversing the args, remove this entry from the hash table, to support another funcall
-    //     HTremove(data->funcalls_id_stelink, FUNCALL_NAME(node));
-
-    //     // Yield function return type after checking arguments
-    //     tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
-    // } else {
-    //     // If the FunCall node does not have args then just yield the return type of the FunDef
-    //     tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
-    // }
-
     return node;
-}
-
-// Helper function to check if an argument type is the same as the parameter type
-bool compareFunCallArgumentsTypes(enum Type argumentType, int paramIndex, node_st *steLink) {
-    printf("name of stelink fundef is: %s********************\n", STEFUN_NAME(steLink));
-    printf("**********************************************************************************************tempArgumentIndex: %d\n", paramIndex);
-
-    // Check if the link is not NULL
-    if (steLink != NULL) {
-        // Check if there are any params
-        if (STEFUN_PARAMS(steLink) != NULL) {
-            // Get the first param from the SteFun node
-            node_st *paramIterator = STEFUN_PARAMS(steLink);
-            int counter = 0;
-            // Go to the nTh argument using the linkedlist of the Params
-            do {
-                // Found parameter in SteFun link
-                if (counter == paramIndex) {
-                    printf("argumenttype is: %s, param type is: %s\n", getTypeForPrinting(argumentType), getTypeForPrinting(PARAM_TYPE(paramIterator)));
-                    if (argumentType == PARAM_TYPE(paramIterator)) {
-                        // Return true if the argument and the corresponding parameter type match
-                        return true;
-                    }
-                }
-
-                // Update parameter and counter
-                paramIterator = PARAM_NEXT(paramIterator);
-                counter++;
-            } while (paramIterator != NULL && counter <= paramIndex);
-        } else {
-            // No params in FunDef, so no types to check, return true
-            return true;
-        }
-    }
-    
-    // Not equal argument and parameter type
-    return false;
 }
 
 /**
@@ -638,8 +568,6 @@ bool compareFunCallArgumentsTypes(enum Type argumentType, int paramIndex, node_s
  */
 node_st *TMAFexprs(node_st *node)
 {
-        printf("exprs\n");
-
     // Get the hash table from the travdata of the TMAF traversal
     struct data_tmaf *data = DATA_TMAF_GET();
     // Get the current FunCall node to use for checking
@@ -647,12 +575,7 @@ node_st *TMAFexprs(node_st *node)
     // Get the param count from the hash table to check the corresponding param
     int *currentParamIndexFunCall = (int *) HTlookup(data->funcalls_id_paramIndex, FUNCALL_NAME(currentFunCallNode));
 
-    printf("param index funcall in exprs: %d*************\n", *currentParamIndexFunCall);
-
-        printf("param index funcall in exprs: %d*************\n", currentParamIndexFunCall);
-
-
-        // TODO: the param index is not going to well
+    // TODO: segmentation fault
 
 
 
@@ -678,129 +601,13 @@ node_st *TMAFexprs(node_st *node)
         CCNerrorPhase();
     }
 
-    // // Increment the argument index before the next to find the corresponding parameter in the FunDef node
-    // tempArgumentIndex++;
     // Reset global type helper variable before going to the next argument
     tempType = CT_NULL;
     // Then, do the same for the next argument (which can also be a new FunCall node)
     TRAVnext(node);
 
-
-
-
-
-
-    // // Get the hash table from the travdata of the TMAF traversal
-    // struct data_tmaf *data = DATA_TMAF_GET();
-    // // Get the current SteLink to use for checking
-    // node_st *currentSteLink = (node_st *) HTlookup(data->funcalls_id_stelink, lastFunCallName);
-    // printf("last funcall name: %s\n");
-    
-    // // Traverse the first expr
-    // TRAVexpr(node);
-    // // Save the tempType variable to save the stop expression type
-    // enum Type currentArgumentType = tempType;
-
-    // // Then check if the current argument type matches the corresponding parameter type
-    // if (currentSteLink != NULL && !compareFunCallArgumentsTypes(currentArgumentType, currentSteLink)) {
-    //     // Prints the error when it occurs, so in this line
-    //     CTI(CTI_ERROR, true, "type error in funcall '%s': argument number %d's type does not match corresponding parameter type",
-    //         lastFunCallName, (tempArgumentIndex+1));
-    //     // Create error action, will stop the current compilation at the end of this Phase
-    //     CCNerrorPhase();
-    // }
-
-    // // Increment the argument index before the next to find the corresponding parameter in the FunDef node
-    // tempArgumentIndex++;
-    // // Reset global type helper variable before going to the next argument
-    // tempType = CT_NULL;
-    // // Then, do the same for the next argument (which can also be a new FunCall node)
-    // TRAVnext(node);
-
-    // TODO: problem found, first it does something with the correct types, then it comes to the funcall before
-    // which is correct, but the param tempArgumentIndex does not work anymore
-
     return node;
 }
-
-// /**
-//  * @fn TMAFfuncall
-//  *
-//  * Case FunCall: Foreach argument expression: Infer argument type.
-//  * Compare with corresponding parameter type. Yield function return type.
-//  */
-// node_st *TMAFfuncall(node_st *node)
-// {
-//     printf("funcall\n");
-
-    // // Start the tempArgumentIndex at 0
-    // tempArgumentIndex = 0;
-//     // Save the FunCall link to use for checking the arguments
-//     tempSteFunCallLink = FUNCALL_STE_LINK(node);
-//     // Save the FunCall node itself for giving a specific type error
-//     tempSteFunCallNode = node;
-
-//     if (FUNCALL_ARGS(node) != NULL) {
-//         printf("Some args to check!\n");
-//         // Then, traverse to the arguments to infer the type of each argument using these variables
-//         TRAVargs(node);
-
-//         // TODO: nested funcalls with arguments do not work correctly now, fix it, it is with the arguments checking
-//         // Think about how to solve this issue and test it thorougly again! Maybe hash tables again?? or think of an 
-//         // easier solution! Draw it on paper to see exactly what needs to happen and what is currently happening in these
-//         // funcalls, etc!
-//         // Just start with rethinking the process maybe, make it as easy as possible, so that you can start with testing fast!
-//         // And then work on the summary of 'Programmeertalen!'
-
-//         // Reset global type helper variables after traversing arguments. 
-//         // This is done here for nested funcalls to avoid Segmentation fault!
-//         tempType = CT_NULL; // CT_NULL is the NULL type
-//         tempSteFunCallLink = NULL;
-//         tempSteFunCallNode = NULL;
-//         tempArgumentIndex = 0;
-//     } else {
-//         printf("No args to check!\n");
-//     }
-
-//     // Yield function return type after checking arguments
-//     tempType = STEFUN_TYPE(FUNCALL_STE_LINK(node));
-
-//     return node;
-// }
-
-// /**
-//  * @fn TMAFexprs
-//  *
-//  * With basic exprs is only used for FunCall arguments
-//  */
-// node_st *TMAFexprs(node_st *node)
-// {
-//         printf("exprs\n");
-
-
-//     // Traverse the first expr
-//     TRAVexpr(node);
-//     // Save the tempType variable to save the stop expression type
-//     enum Type currentArgumentType = tempType;
-
-//     // Then check if the current argument type matches the corresponding parameter type
-//     if (!compareFunCallArgumentsTypes(currentArgumentType)) {
-//         // Prints the error when it occurs, so in this line
-//         CTI(CTI_ERROR, true, "type error in funcall '%s': argument number %d's type does not match corresponding parameter type",
-//             FUNCALL_NAME(tempSteFunCallNode), (tempArgumentIndex+1));
-//         // Create error action, will stop the current compilation at the end of this Phase
-//         CCNerrorPhase();
-//     } 
-
-//     // Increment the argument index before the next to find the corresponding parameter in the FunDef node
-//     tempArgumentIndex++;
-//     // Reset global type helper variable before going to the next argument
-//     tempType = CT_NULL;
-//     // Then, do the same for the next argument
-//     TRAVnext(node);
-
-//     return node;
-// }
 
 /**
  * @fn TMAFbinop
@@ -810,8 +617,6 @@ node_st *TMAFexprs(node_st *node)
  */
 node_st *TMAFbinop(node_st *node)
 {
-        printf("binop\n");
-
     // Infer left operand type
     TRAVleft(node);
     // Save the tempType variable to save expression type
@@ -847,8 +652,6 @@ node_st *TMAFbinop(node_st *node)
  */
 node_st *TMAFmonop(node_st *node)
 {
-        printf("monop\n");
-
     // Infer operand type
     TRAVoperand(node);
     // Save the tempType variable to save expression type
@@ -878,8 +681,6 @@ node_st *TMAFmonop(node_st *node)
  */
 node_st *TMAFvar(node_st *node)
 {
-        printf("var\n");
-
     // Yield type from Ste link
     tempType = STEVAR_TYPE(VAR_STE_LINK(node));
 
@@ -893,8 +694,6 @@ node_st *TMAFvar(node_st *node)
  */
 node_st *TMAFnum(node_st *node)
 {    
-        printf("num\n");
-
     // Yield int
     tempType = CT_int;
 
@@ -908,8 +707,6 @@ node_st *TMAFnum(node_st *node)
  */
 node_st *TMAFfloat(node_st *node)
 {
-        printf("float\n");
-
     // Yield float
     tempType = CT_float;
 
@@ -923,8 +720,6 @@ node_st *TMAFfloat(node_st *node)
  */
 node_st *TMAFbool(node_st *node)
 {        
-        printf("bool\n");
-
     // Yield bool
     tempType = CT_bool;
 
