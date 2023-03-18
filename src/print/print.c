@@ -62,8 +62,8 @@ node_st *PRTprogram(node_st *node)
     This is left here with a purpose for teachers to if they would like to see the Ste's!
     */
     // Print the ste's for the global variables and global fundefs here on the top!
-    // printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
-    // printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
+    printSteVarChain(PROGRAM_FIRST_STE_VARIABLES(node));
+    printSteFunChain(PROGRAM_FIRST_STE_FUNCTIONS(node));
 
     // Go to child and print it
     TRAVdecls(node);
