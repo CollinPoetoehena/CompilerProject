@@ -5,7 +5,7 @@ start phase RootPhase {
         // Then perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
         // Then convert variable initializations into regular assignments, after ContextAnalysis
-        RegularAssignments;
+        //RegularAssignments;
         // Then perform TypeChecking
         // TypeChecking;
         // // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
@@ -52,6 +52,11 @@ PRO TIP (from experience :)):
 //for the exam and some less stress, etc :)!!!
 
 
+// TODO: typechecking, ask Simon:
+// the file contains this:     //fun() + bar();
+// but this should give an error right???
+// and the result 4 should be 5 right???
+
 
 // TODO: how to generate the file for assembly in the traversal, is there code about that somewhere???? Ask Simon
 
@@ -73,8 +78,9 @@ traversal Print {
 RegularAssignments traversal needs to be after ContextAnalysis.
 
 Then update the linking traversal in the ContextAnalysis phase:
-add a VarDecl node to the traversal and check if it is the same as the declaration for the Var node, if so
-it needs to be in the global scope if it works there!
+remove it and see if you can do the linking in the same traversal of the Var Ste's or the
+Fun Ste's, so Var and VarLet in SteVar and FunCall in SteFun creation traversals!
+Then test everything again!
 
 When making the VarLet and Var in RegularAssignments traversal, these need to be updated with the SteLink 
 of the already existing links, so use them and add them manually!
@@ -118,7 +124,10 @@ phase ContextAnalysis {
                 FunBody, 
                 // These nodes are used to create new Symbol Table entries
                 // For node has already been converted, so nothing that needs to be done here now!
-                GlobDecl, GlobDef, VarDecl, Param
+                GlobDecl, GlobDef, VarDecl, Param,
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet
+
             }
         };
         
@@ -131,24 +140,26 @@ phase ContextAnalysis {
                 // FunDef to use for creating a new SteFun 
                 FunDef,
                 // Param node (= LinkedList) to link the params of a FunDef
-                Param
+                Param,
+                // The FunCall node is used to update its link once it occurs in a program
+                FunCall
             }
         };
 
-        // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        traversal LinkSymbolTableEntries {
-            uid = LSTE,
-            nodes = { 
-                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-                Program,
-                // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-                FunDef,
-                // VarDecl is used to determine what scope to use for a variable with the same name as the VarDecl
-                VarDecl,
-                // These nodes are used to update their link once they occur in a program
-                Var, Varlet, FunCall
-            }
-        };
+        // // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
+        // traversal LinkSymbolTableEntries {
+        //     uid = LSTE,
+        //     nodes = { 
+        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+        //         Program,
+        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
+        //         FunDef,
+        //         // VarDecl is used to determine what scope to use for a variable with the same name as the VarDecl
+        //         VarDecl,
+                // // These nodes are used to update their link once they occur in a program
+                // Var, Varlet, FunCall
+        //     }
+        // };
 
         // /*
         // This traversal is used to fix the scoping of the RegularAssignment traversal for Assign 

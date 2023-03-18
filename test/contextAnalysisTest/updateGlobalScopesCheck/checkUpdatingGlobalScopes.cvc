@@ -3,6 +3,7 @@ extern void printNewlines(int num);
 
 int a = 1;
 int b = 10;
+int c = a;
 
 // void foo() {
 //     int a = 3;
@@ -12,10 +13,9 @@ int b = 10;
 // }
 
 void bar() {
-    // initializer uses global variable 'a'
-    int a = a + a + 1;
-    int b = b + b + intFun(b) + a; // 'a' here should refer to the local 'a'
-    int c = a; // references local 'a'
+    int a = a + a + b + 1; // 'a' and 'b' reference to global here
+    int b = b + b + intFun(b) + c + a; // 'a' here should refer to the local 'a' and 'c' to global
+    int c = a + b + intFun(c); // references local 'a' and 'b' and global 'c'
     // printInt(a);
     // printNewlines(1);
 }

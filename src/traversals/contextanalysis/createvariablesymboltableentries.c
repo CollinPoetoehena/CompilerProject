@@ -36,6 +36,9 @@ node_st *lastSteVarCurrent = NULL;
 // Helper variable to keep track of when to open a new chain
 bool newSteVarChain = false;
 
+// This helper VarDecl node is used for checking if a Var is the same as the declaration (then use global ste chain only)
+node_st *currentVarDeclNode = NULL;
+
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
     if (newSte != NULL) {
@@ -185,6 +188,9 @@ node_st *CVSglobdef(node_st *node)
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
 
+    // Traverse the init Expr to find potential links
+    TRAVinit(node);
+
     return node;
 }
 
@@ -271,10 +277,136 @@ node_st *CVSvardecl(node_st *node)
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
     createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
 
+    // Update the current vardecl node before going to the init expression
+    currentVarDeclNode = node;
+
+    // Traverse the init Expr to find potential links
+    TRAVinit(node);
+
     // To perfom the traversal functions of the children (next vardecls) use TRAVchildx(node)
     TRAVnext(node);
 
-    // No need to traverse the init Expr child because the initialization has no declarations for the Ste
+    // Reset the currentVarDeclNode to NULL at the end to not link it unnecessary later
+    currentVarDeclNode = NULL;
 
+    return node;
+}
+
+/*
+***********************************************************************************************************************************************
+                        This part is used to link the Var and/or VarLet nodes with their SteVar link 
+*/
+
+// Helper to avoid code duplication. Returns a found Ste node or NULL if no match is found
+node_st *findSteVarNodeInSteChain(node_st *firstChainSte, char *name) {
+    node_st *steIterator = firstChainSte;
+    do {
+        // Match found, return Ste node. Use string comparison 
+        // to check for equality, 0 means equal. == only checks if memory references are equal
+        char *tempSteName = STEVAR_NAME(steIterator);
+        // Add NULL check to avoid Segmentation fault
+        if (tempSteName != NULL && strcmp(tempSteName, name) == 0) {
+            // Return Ste found, automatically stops the execution of this function with the return
+            return steIterator;
+        }
+
+        // Update steIterator
+        steIterator = STEVAR_NEXT(steIterator);
+    } while (steIterator != NULL);
+
+    // No link found
+    return NULL;
+}
+
+// Find an Ste node that has the specified name
+node_st *findSteVarLink(char *name) {
+    /*
+    If the current VarDecl is not equal to NULL and the name of the VarDecl is equal
+    equal to 0 (means the name of the ste link and the VarDecl name are equal), 
+    then skip the current fundef chain and search in the global chain only!
+    If not:
+    First search in the fundef chain because you want the closest Ste to be linked.
+    If it is not in the current fundef chain, then search in the global chain.
+    If it is not in the global chain then give an error that there is no link found!
+    */
+    if (currentVarDeclNode != NULL && strcmp(VARDECL_NAME(currentVarDeclNode), name) == 0) {
+        printf("VarDecl, only global scope!************************\n");
+        // Search in the global chain only, skip searching in the current fundef chain
+        if (firstSymbolTableVar != NULL) {
+            node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSymbolTableVar, name);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
+    } else {
+        printf("NULL VarDecl, fundef and global scope!************************\n");
+
+        // First search in the current FunDef chain
+        if (firstSteVarCurrent != NULL) {
+            node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSteVarCurrent, name);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
+
+        // Search in the global chain if fundef chain is NULL or symbol not found there
+        // If the return statement of the previous search is not called it will get to this part
+        if (firstSymbolTableVar != NULL) {
+            node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSymbolTableVar, name);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
+    }
+    
+
+    // No existing symbol found, return NULL
+    return NULL;
+}
+
+/**
+ * @fn CVSvar
+ */
+node_st *CVSvar(node_st *node)
+{
+    // TODO
+
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteVarLink(VAR_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VAR_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s", VAR_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
+
+    return node;
+}
+
+/**
+ * @fn CVSvarlet
+ */
+node_st *CVSvarlet(node_st *node)
+{
+    // TODO
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteVarLink(VARLET_NAME(node));
+    
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VARLET_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
+    
     return node;
 }

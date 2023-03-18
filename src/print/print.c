@@ -830,7 +830,7 @@ node_st *PRTstevar(node_st *node)
 void printOneSteVar(node_st *steVarNode) {
   if (steVarNode != NULL) {
     // Open the new SteVar node
-    printf("\n****************************************************\n\tNew SteVar link:\n");
+    printf("\n\n****************************************************\n\tNew SteVar link:\n");
 
     // Get the type
     char *type = getPrintType(STEVAR_TYPE(steVarNode));
@@ -840,7 +840,7 @@ void printOneSteVar(node_st *steVarNode) {
         STEVAR_NAME(steVarNode), type, STEVAR_NESTING_LEVEL(steVarNode));
 
     // End the current SteVar chain
-    printf("\n\tEnd of SteVar link\n****************************************************\n");
+    printf("\n\tEnd of SteVar link\n****************************************************\n\n");
   }
 }
 
@@ -853,7 +853,7 @@ void printOneSteVar(node_st *steVarNode) {
 void printSteVarChain(node_st *steVarFirstNode) {
   if (steVarFirstNode != NULL) {
     // Open the new SteVar chain
-    printf("\n****************************************************\n\tNew SteVar chain:\n");
+    printf("\n\n****************************************************\n\tNew SteVar chain:\n");
 
     // Print the parent Ste node's name if it has a parent
     if (STEVAR_PARENT(steVarFirstNode) != NULL) {
@@ -911,7 +911,7 @@ char *getSteFunParamTypes(node_st *steFunNode) {
 void printOneSteFun(node_st *steFunNode) {
   if (steFunNode != NULL) {
     // Open the new SteVar node
-    printf("\n****************************************************\n\tOne SteFun:\n");
+    printf("\n\n****************************************************\n\tOne SteFun:\n");
 
     // Get the type
     char *type = getPrintType(STEFUN_TYPE(steFunNode));
@@ -922,7 +922,7 @@ void printOneSteFun(node_st *steFunNode) {
         STEFUN_NAME(steFunNode), type, paramsTypes, STEFUN_NESTING_LEVEL(steFunNode));
 
     // End the current SteVar chain
-    printf("\n\tEnd of one SteFun\n****************************************************\n");
+    printf("\n\tEnd of one SteFun\n****************************************************\n\n");
   }
 }
 
@@ -935,7 +935,7 @@ void printOneSteFun(node_st *steFunNode) {
 void printSteFunChain(node_st *steFunFirstNode) {
   if (steFunFirstNode != NULL) {
     // Open the new SteFun chain
-    printf("\n****************************************************\n\tNew SteFun chain:\n");
+    printf("\n\n****************************************************\n\tNew SteFun chain:\n");
 
     // Basic has no nested functions, so no need to print the parent because it is always NULL for now
 

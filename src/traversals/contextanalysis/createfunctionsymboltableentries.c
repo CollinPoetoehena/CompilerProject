@@ -107,6 +107,48 @@ node_st *CFSprogram(node_st *node)
     return node;
 }
 
+
+// TODO:
+// Check for argument numbers matching parameter numbers
+// bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
+//     // Get the parameter count
+//     int parameterCount = 0;
+//     // If the arguments are NULL, then the parameterCount should remain 0
+//     if (STEFUN_PARAMS(steLink) != NULL) {
+//         // Get the first param from the SteFun node
+//         node_st *paramIterator = STEFUN_PARAMS(steLink);
+//         do {
+//             // Increment parameter count
+//             parameterCount++;
+
+//             // Update parameter
+//             paramIterator = PARAM_NEXT(paramIterator);
+//         } while (paramIterator != NULL);
+//     }
+
+//     // Get the count of the arguments in the funcall node
+//     int argumentsCount = 0;
+//     if (FUNCALL_ARGS(funcallNode) != NULL) {
+//         // Get the first param from the Ste
+//         node_st *funcallArgsIterator = FUNCALL_ARGS(funcallNode);
+//         do {
+//             // Increment parameter count
+//             argumentsCount++;
+
+//             // Update parameter
+//             funcallArgsIterator = EXPRS_NEXT(funcallArgsIterator);
+//         } while (funcallArgsIterator != NULL);
+//     }
+
+//     if (parameterCount == argumentsCount) {
+//         // Equal arguments and parameter numbers
+//         return true;
+//     }
+    
+//     // Not equal arguments and parameter numbers
+//     return false;
+// }
+
 /**
  * @fn CFSfundef
  */
@@ -153,4 +195,14 @@ node_st *CFSparam(node_st *node)
     TRAVnext(node);
 
     return node;
+}
+
+/**
+ * @fn CFSfuncall
+ */
+node_st *CFSfuncall(node_st *node)
+{
+    // TODO: create link here
+    return node;
+    
 }
