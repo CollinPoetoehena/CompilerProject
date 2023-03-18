@@ -5,7 +5,7 @@ start phase RootPhase {
         // Then perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
         // Then convert variable initializations into regular assignments, after ContextAnalysis
-        //RegularAssignments;
+        RegularAssignments;
         // Then perform TypeChecking
         // TypeChecking;
         // // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
@@ -579,7 +579,9 @@ node GlobDef {
     attributes {
         Type type { constructor },
         string name { constructor },
-        bool export { constructor }
+        bool export { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 
@@ -606,7 +608,9 @@ node VarDecl {
 
     attributes {
         string name { constructor },
-        Type type { constructor }
+        Type type { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 

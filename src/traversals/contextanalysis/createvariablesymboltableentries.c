@@ -117,7 +117,7 @@ bool isSymbolUnique(char *name) {
 }
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
-bool createSymbolTableEntry(char *name, enum Type type) {
+node_st *createSymbolTableEntry(char *name, enum Type type) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         node_st *newSte = NULL;
@@ -133,8 +133,8 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        // Ste creation succeeded
-        return true;
+        // Ste creation succeeded, return newSte
+        return newSte;
     } else {
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the variable: %s", name);
@@ -142,8 +142,8 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         CCNerrorPhase();
     }
 
-    // Creation failed
-    return false;
+    // Creation failed, return NULL
+    return NULL;
 }
 
 /**
@@ -186,7 +186,12 @@ node_st *CVSglobdef(node_st *node)
     currentScopeVar = 0;
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
+    node_st *createdSteVarEntry = createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
+    // Save the created SteVar of itself in the node to use later if it was successfull
+    if (createdSteVarEntry != NULL) {
+        // SteVar of itself can be used in RegularAssignments traversal to save the link for example
+        GLOBDEF_SYMBOL_TABLE(node) = createdSteVarEntry;
+    }
 
     // Traverse the init Expr to find potential links
     TRAVinit(node);
@@ -275,7 +280,12 @@ node_st *CVSfunbody(node_st *node)
 node_st *CVSvardecl(node_st *node)
 {
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
+    node_st *createdSteVarEntry = createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
+    // Save the created SteVar of itself in the node to use later if it was successfull
+    if (createdSteVarEntry != NULL) {
+        // SteVar of itself can be used in RegularAssignments traversal to save the link for example
+        VARDECL_SYMBOL_TABLE(node) = createdSteVarEntry;
+    }
 
     // Update the current vardecl node before going to the init expression
     currentVarDeclNode = node;

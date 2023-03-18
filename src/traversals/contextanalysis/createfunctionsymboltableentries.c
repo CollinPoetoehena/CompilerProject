@@ -77,7 +77,7 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTablesSteFun(newSte);
 
-        // Ste creation succeeded
+        // Ste creation succeeded, return newSte
         return newSte;
     } else {
         // Prints the error when it occurs, so in this line
@@ -86,7 +86,7 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         CCNerrorPhase();
     }
 
-    // Creation failed
+    // Creation failed, return NULL
     return NULL;
 }
 

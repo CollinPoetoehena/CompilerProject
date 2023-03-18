@@ -134,7 +134,11 @@ node_st *RAglobdef(node_st *node)
         char *copiedGlobDefName = STRcpy(GLOBDEF_NAME(node));
 
         // Create new VarLet, Assign and Stmts node, use the current INIT Expr node
-        node_st *newStmtsNodeGlobDef = ASTstmts(ASTassign(ASTvarlet(copiedGlobDefName), GLOBDEF_INIT(node)), NULL);
+        node_st *newVarLetNode = ASTvarlet(copiedGlobDefName);
+        // Set the link of the new VarLet to the link of the GlobDef node itself
+        VARLET_STE_LINK(newVarLetNode) = GLOBDEF_SYMBOL_TABLE(node);
+        // The links of the Expr nodes in the GlobDef init Expr should already be correctly linked by the CA phase
+        node_st *newStmtsNodeGlobDef = ASTstmts(ASTassign(newVarLetNode, GLOBDEF_INIT(node)), NULL);
 
         // Add the new AssignNode to the global Stmts helper variable
         updateGlobDefStmts(newStmtsNodeGlobDef);
@@ -183,7 +187,11 @@ node_st *RAvardecl(node_st *node)
         char *copiedVarDeclName = STRcpy(VARDECL_NAME(node));
 
         // Create new VarLet, Assign and Stmts node, use the current INIT Expr node
-        node_st *newStmtsNodeVarDecl = ASTstmts(ASTassign(ASTvarlet(copiedVarDeclName), VARDECL_INIT(node)), NULL);
+        node_st *newVarLetNode = ASTvarlet(copiedVarDeclName);
+        // Set the link of the new VarLet to the link of the GlobDef node itself
+        VARLET_STE_LINK(newVarLetNode) = VARDECL_SYMBOL_TABLE(node);
+        // The links of the Expr nodes in the VarDecl init Expr should already be correctly linked by the CA phase
+        node_st *newStmtsNodeVarDecl = ASTstmts(ASTassign(newVarLetNode, VARDECL_INIT(node)), NULL);
 
         // Add the new AssignNode to the global Stmts helper variables
         updateVarDeclStmts(newStmtsNodeVarDecl);
