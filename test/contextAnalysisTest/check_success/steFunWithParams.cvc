@@ -19,7 +19,7 @@ int vardec_stat_ret(bool y, int z) {
 }
 
 int stat_ret(bool b) {
-    vardec();
+    vardec(5, 5.345, b);
     return 2;
 }
 

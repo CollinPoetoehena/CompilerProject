@@ -56,6 +56,7 @@ PRO TIP (from experience :)):
 // the file contains this:     //fun() + bar();
 // but this should give an error right???
 
+
 // TODO: when to check for integer or float out of range, etc???
 
 
@@ -67,32 +68,6 @@ PRO TIP (from experience :)):
 traversal Print {
     uid = PRT
 };
-
-
-// ******************************************************************************************************************************************
-
-// TODO: convert it to have the good scoping for:
-// ./civicc ../test/contextAnalysisTest/updateGlobalScopesCheck/checkUpdatingGlobalScopes.cvc 
-// ./civicc ../test/basic/functional/var_init.cvc 
-// This needs to be done by this:
-/*
-RegularAssignments traversal needs to be after ContextAnalysis.
-
-Then update the linking traversal in the ContextAnalysis phase:
-remove it and see if you can do the linking in the same traversal of the Var Ste's or the
-Fun Ste's, so Var and VarLet in SteVar and FunCall in SteFun creation traversals!
-Then test everything again!
-
-When making the VarLet and Var in RegularAssignments traversal, these need to be updated with the SteLink 
-of the already existing links, so use them and add them manually!
-
-Then if that works, remove the old solution of the extra traversal!
-
-Then uncomment the other actions in the start phase and test everything thorougly again!
-*/
-
-
-// ******************************************************************************************************************************************
 
 // The ContextAnalysis phase is mainly used to create Symbol tables
 phase ContextAnalysis {
@@ -161,46 +136,6 @@ phase ContextAnalysis {
                 FunCall
             }
         };
-
-        // // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        // traversal LinkSymbolTableEntries {
-        //     uid = LSTE,
-        //     nodes = { 
-        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-        //         Program,
-        //         // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-        //         FunDef,
-        //         // VarDecl is used to determine what scope to use for a variable with the same name as the VarDecl
-        //         VarDecl,
-                // // These nodes are used to update their link once they occur in a program
-                // Var, Varlet, FunCall
-        //     }
-        // };
-
-        // /*
-        // This traversal is used to fix the scoping of the RegularAssignment traversal for Assign 
-        // nodes. The scoping of Assign nodes is not correctly done in the above traversal because we
-        // chose to do the RegularAssignment traversal before ContextAnalysis, these benefits outweigh the
-        // drawbacks of having it after ContextAnalysis, however, to fix the scoping that is not 
-        // correctly done because of that this traversal is needed to fix that.
-        // */
-        // traversal UpdateGlobalVardeclScopes {
-        //     uid = UGVS,
-        //     nodes = { 
-        //         // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
-        //         Program,
-        //         // Assign node is used to update the scope to global of the Var in the Assign node
-        //         // if it needs to be updated
-        //         Assign,
-        //         // Var node is used to check and update the ste link if necssary
-        //         Var
-        //     },
-        //     travdata {
-        //         // A hash table is used to save the Var occurrences in to see if the scope of 
-        //         // the ste link has to be updated
-        //         user htable_ptr assign_var_occurred
-        //     }
-        // };
     }
 };
 

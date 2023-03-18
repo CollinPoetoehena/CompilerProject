@@ -4,9 +4,9 @@ void foo(int a, float b, bool c) {
     bool f = false;
 
     // Success
-    // foo(5, 5.45645, true);
-    // foo(a, b, c);
-    // foo(d, e, f);
+    foo(5, 5.45645, true);
+    foo(a, b, c);
+    foo(d, e, f);
     foo(d, e, (a() && b()));
 
     // Error

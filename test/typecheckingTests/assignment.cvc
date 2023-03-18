@@ -9,8 +9,8 @@ void foo() {
     a = b;
 
     // Failure
-    a = 5.643;
-    a = false;
-    a = c;
-    a = d;
+    // a = 5.643;
+    // a = false;
+    // a = c;
+    // a = d;
 }

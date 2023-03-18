@@ -10,9 +10,9 @@ void foo() {
     /*
     ************************ MonOps success ************************
     */ 
-    // a = -a;
-    // c = -c;
-    // g = !g;
+    a = -a;
+    c = -c;
+    g = !g;
     /*
     ************************ MonOps failures ************************
     */ 
@@ -28,41 +28,41 @@ void foo() {
     ************************ BinOps success ************************
     */ 
     // Arithmetic operators
-    // a = a + b;
-    // c = c + d;
-    // e = f + g;
+    a = a + b;
+    c = c + d;
+    e = f + g;
 
-    // a = a - b;
-    // c = c - d;
+    a = a - b;
+    c = c - d;
     
-    // a = a * b;
-    // c = c * d;
-    // e = f * g;
+    a = a * b;
+    c = c * d;
+    e = f * g;
 
-    // a = a / b;
-    // c = c / d;
+    a = a / b;
+    c = c / d;
 
-    // a = a % b;
+    a = a % b;
 
     // Relational operators
-    // g = a == c; // int with int
-    // g = a != c; // int with float
-    // g = a == b; // int with int
-    // g = e == a; // bool with int
-    // g = c != e; // float with bool
-    // g = e == f; // bool with bool
+    g = a == c; // int with int
+    g = a != c; // int with float
+    g = a == b; // int with int
+    g = e == a; // bool with int
+    g = c != e; // float with bool
+    g = e == f; // bool with bool
 
-    // g = a < b;
-    // g = c < d;
+    g = a < b;
+    g = c < d;
 
-    // g = a <= b;
-    // g = c <= d;
+    g = a <= b;
+    g = c <= d;
 
-    // g = a > b;
-    // g = c > d;
+    g = a > b;
+    g = c > d;
 
-    // g = a >= b;
-    // g = c >= d;
+    g = a >= b;
+    g = c >= d;
 
     // Logical operators
     e = f && g;
@@ -90,7 +90,7 @@ void foo() {
     // a = a % c; // float with int
     // a = c % d; // float with float on modulo
 
-    // Relational operators
+    // // Relational operators
     // g = a < c; // int with float
     // g = d < b; // float with int
 
@@ -103,11 +103,11 @@ void foo() {
     // g = a >= d;
     // g = c >= b;
 
-    // Logical operators
-    e = f && a; // bool and int
-    g = f || c; // bool and float
-    f = c && a; // float and int
-    g = b || d; // int and float
+    // // Logical operators
+    // e = f && a; // bool and int
+    // g = f || c; // bool and float
+    // f = c && a; // float and int
+    // g = b || d; // int and float
 
     /*
     ************************ BinOps return type failures ************************
@@ -129,7 +129,7 @@ void foo() {
 
     // e = a % b;
 
-    // Relational operators
+    // // Relational operators
     // a = a == c; // bool return type for int variable a
     // b = a != c;
 
@@ -145,7 +145,7 @@ void foo() {
     // d = a >= b;
     // b = c >= d;
 
-    // Logical operators
-    a = f && g; // bool return type for int variable a
-    c = f || e; // bool return type for float variable c
+    // // Logical operators
+    // a = f && g; // bool return type for int variable a
+    // c = f || e; // bool return type for float variable c
 }

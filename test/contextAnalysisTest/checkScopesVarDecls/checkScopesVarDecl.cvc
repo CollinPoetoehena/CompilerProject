@@ -5,29 +5,29 @@ int a = 1;
 int b = 10;
 int c = a;
 
-// void foo() {
-//     int a = 3;
-//     int c = a;  // references local 'a'
-//     printInt(a);
-//     printInt(b);
-// }
+void foo() {
+    int a = 3;
+    int c = a;  // references local 'a'
+    printInt(a);
+    printInt(b);
+}
 
 void bar() {
     int a = a + a + b + 1; // 'a' and 'b' reference to global here
     int b = b + b + intFun(b) + c + a; // 'a' here should refer to the local 'a' and 'c' to global
     int c = a + b + intFun(c); // references local 'a' and 'b' and global 'c'
-    // printInt(a);
-    // printNewlines(1);
+    printInt(a);
+    printNewlines(1);
 }
 
 int intFun(int a) {
     return a;
 }
 
-// void baz() {
-//     // initializer uses global variable 'b'
-//     int a = b;
-//     int b = 5;
-//     printInt(a);
-//     printNewlines(1);
-// }
+void baz() {
+    // initializer uses global variable 'b'
+    int a = b;
+    int b = 5;
+    printInt(a);
+    printNewlines(1);
+}

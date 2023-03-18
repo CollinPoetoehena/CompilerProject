@@ -1,14 +1,14 @@
-int a;
+float a;
 float b;
 float z;
 
 void foo(float a) {
-    int b;
-    int c = a + b;
-    foo(a);
-    b = 5;
+    float b;
+    float c = a + b;
+    foo(z);
+    b = 5.456;
 }
 
-void faa(float a) {
+void faa(float a, float b) {
     z = a + b;
 }

@@ -1,5 +1,5 @@
-// Global declaration
-int a;
+// Global declaration or definition
+int a = 4;
 int b;
 float z;
 

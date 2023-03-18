@@ -146,5 +146,4 @@ node_st *LFTSFfuncall(node_st *node)
     // Var and VarLet nodes should already be linked in the traversal for creating SteVar entries and linking them!
 
     return node;
-    
 }

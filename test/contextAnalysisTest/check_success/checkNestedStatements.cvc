@@ -5,9 +5,9 @@ bool z;
 void foo(bool a, bool b) {
     if (a) {
         if (b) {
-            return a;
+            a = true;
         }
-        return b;
+        b = false;
     }
 
     while (a) {
