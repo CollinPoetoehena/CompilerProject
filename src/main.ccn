@@ -126,7 +126,9 @@ phase ContextAnalysis {
                 // For node has already been converted, so nothing that needs to be done here now!
                 GlobDecl, GlobDef, VarDecl, Param,
                 // These nodes are used to update their link once they occur in a program
-                Var, Varlet
+                Var, Varlet,
+                // This node is just used to traverse the args child expression to find potential Var, VarLet links
+                FunCall
 
             }
         };
@@ -140,7 +142,20 @@ phase ContextAnalysis {
                 // FunDef to use for creating a new SteFun 
                 FunDef,
                 // Param node (= LinkedList) to link the params of a FunDef
-                Param,
+                Param
+            }
+        };
+
+        /*
+        This traversal function links FunCall nodes to their SteFun link.
+        This is separated because the order of function definitions does not matter in Civic
+        as explained in the CiviC manual on top of page 7.
+        */
+        traversal LinkFunCallsToSteFunNode {
+            uid = LFTSF,
+            nodes = {
+                // Program to link first symbol table entries of var and fun
+                Program,
                 // The FunCall node is used to update its link once it occurs in a program
                 FunCall
             }

@@ -107,9 +107,102 @@ node_st *CFSprogram(node_st *node)
     return node;
 }
 
+/**
+ * @fn CFSfundef
+ */
+node_st *CFSfundef(node_st *node)
+{
+    // Create a SteFun for this function definition
+    node_st *fundefSte = createSymbolTableEntrySteFun(FUNDEF_NAME(node), FUNDEF_TYPE(node));
 
-// TODO:
-// Check for argument numbers matching parameter numbers
+    // Link SteFun creation to this FunDef node if it was successfull
+    if (fundefSte != NULL) {
+        FUNDEF_SYMBOL_TABLE(node) = fundefSte;
+        // Create a new SteFun to use in the params traversal if it was successfull
+        tempFunDefNode = fundefSte;
+        // Open the new params to link only the first one
+        firstParam = true;
+    }
+
+    // Then traverse the params to add to this tempFunDefNode
+    TRAVparams(node);
+
+    // Then traverse the body to find potential links for FunCall nodes
+    TRAVbody(node);
+
+    // Reset the fundef for the next params
+    tempFunDefNode = NULL;
+    firstParam = false;
+
+    return node;
+}
+
+/**
+ * @fn CFSparam
+ */
+node_st *CFSparam(node_st *node)
+{
+    // If the temp FunDef node is not NULL link the params to it by using the previous FunDef
+    if (tempFunDefNode != NULL) {
+        if (firstParam) {
+            // Put the first param in the SteFun node
+            STEFUN_PARAMS(tempFunDefNode) = node;
+            // Reset the firstParam boolean to only add the first param
+            firstParam = false;
+        }
+    }
+
+    // If this param has a next, do the same for the next param in the function definition
+    TRAVnext(node);
+
+    return node;
+}
+
+/*
+***********************************************************************************************************************************************
+                        This part is used to link the FunCall nodes with their SteFun link 
+*/
+// // Helper to avoid code duplication. Returns a found Ste node or NULL if no match is found
+// node_st *findSteFunNodeInSteChain(node_st *firstChainSte, char *name) {
+//     node_st *steIterator = firstChainSte;
+//     do {
+//         // Match found, return Ste node. Use string comparison 
+//         // to check for equality, 0 means equal. == only checks if memory references are equal
+//         char *tempSteName = STEVAR_NAME(steIterator);
+//         // Add NULL check to avoid Segmentation fault
+//         if (tempSteName != NULL && strcmp(tempSteName, name) == 0) {
+//             // Return Ste found, automatically stops the execution of this function with the return
+//             return steIterator;
+//         }
+
+//         // Update steIterator
+//         steIterator = STEVAR_NEXT(steIterator);
+//     } while (steIterator != NULL);
+
+//     // No link found
+//     return NULL;
+// }
+
+// // Find an Ste node that has the specified name
+// node_st *findSteFunLink(char *name) {
+//     /*
+//     With basic, the SteFun chain only has one scope: global (level 0), so
+//     there is only one chain that should be searched to find a SteFun link.
+//     */
+//     // Search in the global chain to find the FunDef SteFun link
+//     if (firstSymbolTableFun != NULL) {
+//         node_st *foundSteNodeInChain = findSteFunNodeInSteChain(firstSymbolTableFun, name);
+//         if (foundSteNodeInChain != NULL) {
+//             // Return Ste found, automatically stops the execution of this function with the return
+//             return foundSteNodeInChain;
+//         }
+//     }
+
+//     // No existing symbol found, return NULL
+//     return NULL;
+// }
+
+// // Check for argument numbers matching parameter numbers
 // bool compareFunCallArgumentsLength(node_st *funcallNode, node_st *steLink) {
 //     // Get the parameter count
 //     int parameterCount = 0;
@@ -149,60 +242,36 @@ node_st *CFSprogram(node_st *node)
 //     return false;
 // }
 
-/**
- * @fn CFSfundef
- */
-node_st *CFSfundef(node_st *node)
-{
-    // Create a SteFun for this function definition
-    node_st *fundefSte = createSymbolTableEntrySteFun(FUNDEF_NAME(node), FUNDEF_TYPE(node));
+// /**
+//  * @fn CFSfuncall
+//  */
+// node_st *CFSfuncall(node_st *node)
+// {
+//     // Update this link from var to the Ste with the given name 
+//     node_st *steNode = findSteFunLink(FUNCALL_NAME(node));
 
-    // Link SteFun creation to this FunDef node if it was successfull
-    if (fundefSte != NULL) {
-        FUNDEF_SYMBOL_TABLE(node) = fundefSte;
-        // Create a new SteFun to use in the params traversal if it was successfull
-        tempFunDefNode = fundefSte;
-        // Open the new params to link only the first one
-        firstParam = true;
-    }
+//     if (steNode != NULL) {
+//         // If the arguments and parameter numbers are not equal, then error
+//         if (!compareFunCallArgumentsLength(node, steNode)) {
+//             // Prints the error when it occurs, so in this line
+//             CTI(CTI_ERROR, true, "argument numbers for function '%s' do not match parameter numbers", FUNCALL_NAME(node));
+//             // Create error action, will stop the current compilation after this Action (contextanalysis traversal)
+//             CCNerrorAction();
+//         } else {
+//             // Save Ste node in link attribute
+//             FUNCALL_STE_LINK(node) = steNode;
+//         }
+//     } else {
+//         // Prints the error when it occurs, so in this line
+//         CTI(CTI_ERROR, true, "no matching declaration/definition for funcall: %s", FUNCALL_NAME(node));
+//         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+//         CCNerrorPhase();
+//     }
 
-    // Then traverse the params to add to this tempFunDefNode
-    TRAVparams(node);
+//     // Go to the traversal functions of the args (Exprs node type) to traverse the parameters (such as potential FunCall nodes)
+//     TRAVargs(node);
+//     // Var and VarLet nodes should already be linked in the traversal for creating SteVar entries and linking them!
 
-    // Reset the fundef for the next params
-    tempFunDefNode = NULL;
-    firstParam = false;
-
-    return node;
-}
-
-/**
- * @fn CFSparam
- */
-node_st *CFSparam(node_st *node)
-{
-    // If the temp FunDef node is not NULL link the params to it by using the previous FunDef
-    if (tempFunDefNode != NULL) {
-        if (firstParam) {
-            // Put the first param in the SteFun node
-            STEFUN_PARAMS(tempFunDefNode) = node;
-            // Reset the firstParam boolean to only add the first param
-            firstParam = false;
-        }
-    }
-
-    // If this param has a next, do the same for the next param in the function definition
-    TRAVnext(node);
-
-    return node;
-}
-
-/**
- * @fn CFSfuncall
- */
-node_st *CFSfuncall(node_st *node)
-{
-    // TODO: create link here
-    return node;
+//     return node;
     
-}
+// }

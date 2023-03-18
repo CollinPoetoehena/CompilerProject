@@ -35,8 +35,10 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/traversals/contextanalysis/renameforidentifiers.c
     src/traversals/contextanalysis/createvariablesymboltableentries.c 
     src/traversals/contextanalysis/createfunctionsymboltableentries.c
-    src/traversals/contextanalysis/linksymboltableentries.c
-    src/traversals/contextanalysis/updateglobalvardeclscopes.c
+    src/traversals/contextanalysis/linkfuncallstostefunnode.c
+    
+    # src/traversals/contextanalysis/linksymboltableentries.c
+    # src/traversals/contextanalysis/updateglobalvardeclscopes.c
 
     # Convert variable initializations into regular assignments traversal
     src/traversals/regularassignments.c

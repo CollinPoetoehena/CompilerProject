@@ -296,7 +296,6 @@ node_st *CVSvardecl(node_st *node)
 ***********************************************************************************************************************************************
                         This part is used to link the Var and/or VarLet nodes with their SteVar link 
 */
-
 // Helper to avoid code duplication. Returns a found Ste node or NULL if no match is found
 node_st *findSteVarNodeInSteChain(node_st *firstChainSte, char *name) {
     node_st *steIterator = firstChainSte;
@@ -330,7 +329,6 @@ node_st *findSteVarLink(char *name) {
     If it is not in the global chain then give an error that there is no link found!
     */
     if (currentVarDeclNode != NULL && strcmp(VARDECL_NAME(currentVarDeclNode), name) == 0) {
-        printf("VarDecl, only global scope!************************\n");
         // Search in the global chain only, skip searching in the current fundef chain
         if (firstSymbolTableVar != NULL) {
             node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSymbolTableVar, name);
@@ -340,8 +338,6 @@ node_st *findSteVarLink(char *name) {
             }
         }
     } else {
-        printf("NULL VarDecl, fundef and global scope!************************\n");
-
         // First search in the current FunDef chain
         if (firstSteVarCurrent != NULL) {
             node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSteVarCurrent, name);
@@ -368,12 +364,21 @@ node_st *findSteVarLink(char *name) {
 }
 
 /**
+ * @fn CVSfuncall
+ */
+node_st *CVSfuncall(node_st *node)
+{
+    // Traverse the args Expr child to find potential links for a SteVar node
+    TRAVargs(node);
+    
+    return node;
+}
+
+/**
  * @fn CVSvar
  */
 node_st *CVSvar(node_st *node)
 {
-    // TODO
-
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteVarLink(VAR_NAME(node));
     if (steNode != NULL) {
@@ -394,7 +399,6 @@ node_st *CVSvar(node_st *node)
  */
 node_st *CVSvarlet(node_st *node)
 {
-    // TODO
     // Update this link from var to the Ste with the given name 
     node_st *steNode = findSteVarLink(VARLET_NAME(node));
     
