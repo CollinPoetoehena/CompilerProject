@@ -45,10 +45,8 @@ void updateGlobSymbolTablesSteFun(node_st *newSte) {
     }
 }
 
-// Check if a symbol is unique
+// Check if the name is not already present in the symbol table entries (use linear search)
 bool isSymbolUniqueSteFun(char *name) {
-    // Check if the name is not already present in the symbol table entries (use linear search)
-
     // Only one scope for basic for fundefs: global (0)
     node_st *symtbolTableChainFun = firstSymbolTableFun;
     // Go through the current chain to check if it contains the symbol already
@@ -79,7 +77,7 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTablesSteFun(newSte);
 
-        // Ste creation succeeded
+        // Ste creation succeeded, return newSte
         return newSte;
     } else {
         // Prints the error when it occurs, so in this line
@@ -88,7 +86,7 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         CCNerrorPhase();
     }
 
-    // Creation failed
+    // Creation failed, return NULL
     return NULL;
 }
 
@@ -128,6 +126,9 @@ node_st *CFSfundef(node_st *node)
 
     // Then traverse the params to add to this tempFunDefNode
     TRAVparams(node);
+
+    // Then traverse the body
+    TRAVbody(node);
 
     // Reset the fundef for the next params
     tempFunDefNode = NULL;

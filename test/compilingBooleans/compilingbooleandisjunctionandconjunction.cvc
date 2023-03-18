@@ -1,0 +1,10 @@
+bool foo() {
+    bool a;
+    bool b;
+
+    a = foo() || b;
+    a = foo() && b;
+    b = foo() && foo();
+    a = foo() && (foo() && foo());
+    b = a || (b || a);
+}

@@ -36,6 +36,9 @@ node_st *lastSteVarCurrent = NULL;
 // Helper variable to keep track of when to open a new chain
 bool newSteVarChain = false;
 
+// This helper VarDecl node is used for checking if a Var is the same as the declaration (then use global ste chain only)
+node_st *currentVarDeclNode = NULL;
+
 // Update the global symbol tables used for iterating over the Ste's
 void updateGlobSymbolTables(node_st *newSte) {
     if (newSte != NULL) {
@@ -100,8 +103,6 @@ bool isSymbolUnique(char *name) {
                 // Symbol already present, return not unique/false. Use string comparison 
                 // to check for equality, 0 means equal. == only checks if memory references are equal
                 if (strcmp(STEVAR_NAME(symtbolTableChain), name) == 0) {
-                    printf("**********************Link found for %s\n", name);
-                    printf("First stevar that occured is: %s\n", STEVAR_NAME(symtbolTableChain));
                     return false;
                 }
 
@@ -116,7 +117,7 @@ bool isSymbolUnique(char *name) {
 }
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
-bool createSymbolTableEntry(char *name, enum Type type) {
+node_st *createSymbolTableEntry(char *name, enum Type type) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         node_st *newSte = NULL;
@@ -132,8 +133,8 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         // Update global symbol tables in this traversal
         updateGlobSymbolTables(newSte);
 
-        // Ste creation succeeded
-        return true;
+        // Ste creation succeeded, return newSte
+        return newSte;
     } else {
         // Prints the error when it occurs, so in this line
         CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the variable: %s", name);
@@ -141,8 +142,8 @@ bool createSymbolTableEntry(char *name, enum Type type) {
         CCNerrorPhase();
     }
 
-    // Creation failed
-    return false;
+    // Creation failed, return NULL
+    return NULL;
 }
 
 /**
@@ -185,7 +186,15 @@ node_st *CVSglobdef(node_st *node)
     currentScopeVar = 0;
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
+    node_st *createdSteVarEntry = createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
+    // Save the created SteVar of itself in the node to use later if it was successfull
+    if (createdSteVarEntry != NULL) {
+        // SteVar of itself can be used in RegularAssignments traversal to save the link for example
+        GLOBDEF_SYMBOL_TABLE(node) = createdSteVarEntry;
+    }
+
+    // Traverse the init Expr to find potential links
+    TRAVinit(node);
 
     return node;
 }
@@ -271,76 +280,147 @@ node_st *CVSfunbody(node_st *node)
 node_st *CVSvardecl(node_st *node)
 {
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
+    node_st *createdSteVarEntry = createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
+    // Save the created SteVar of itself in the node to use later if it was successfull
+    if (createdSteVarEntry != NULL) {
+        // SteVar of itself can be used in RegularAssignments traversal to save the link for example
+        VARDECL_SYMBOL_TABLE(node) = createdSteVarEntry;
+    }
+
+    // Update the current vardecl node before going to the init expression
+    currentVarDeclNode = node;
+
+    // Traverse the init Expr to find potential links
+    TRAVinit(node);
 
     // To perfom the traversal functions of the children (next vardecls) use TRAVchildx(node)
     TRAVnext(node);
 
-    // No need to traverse the init Expr child because the initialization has no declarations for the Ste
+    // Reset the currentVarDeclNode to NULL at the end to not link it unnecessary later
+    currentVarDeclNode = NULL;
+
+    return node;
+}
+
+/*
+***********************************************************************************************************************************************
+                        This part is used to link the Var and/or VarLet nodes with their SteVar link 
+*/
+// Helper to avoid code duplication. Returns a found Ste node or NULL if no match is found
+node_st *findSteVarNodeInSteChain(node_st *firstChainSte, char *name) {
+    node_st *steIterator = firstChainSte;
+    do {
+        // Match found, return Ste node. Use string comparison 
+        // to check for equality, 0 means equal. == only checks if memory references are equal
+        char *tempSteName = STEVAR_NAME(steIterator);
+        // Add NULL check to avoid Segmentation fault
+        if (tempSteName != NULL && strcmp(tempSteName, name) == 0) {
+            // Return Ste found, automatically stops the execution of this function with the return
+            return steIterator;
+        }
+
+        // Update steIterator
+        steIterator = STEVAR_NEXT(steIterator);
+    } while (steIterator != NULL);
+
+    // No link found
+    return NULL;
+}
+
+// Find an Ste node that has the specified name
+node_st *findSteVarLink(char *name) {
+    /*
+    If the current VarDecl is not equal to NULL and the name of the VarDecl is equal
+    equal to 0 (means the name of the ste link and the VarDecl name are equal), 
+    then skip the current fundef chain and search in the global chain only!
+    If not:
+    First search in the fundef chain because you want the closest Ste to be linked.
+    If it is not in the current fundef chain, then search in the global chain.
+    If it is not in the global chain then give an error that there is no link found!
+    */
+    if (currentVarDeclNode != NULL && strcmp(VARDECL_NAME(currentVarDeclNode), name) == 0) {
+        // Search in the global chain only, skip searching in the current fundef chain
+        if (firstSymbolTableVar != NULL) {
+            node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSymbolTableVar, name);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
+    } else {
+        // First search in the current FunDef chain
+        if (firstSteVarCurrent != NULL) {
+            node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSteVarCurrent, name);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
+
+        // Search in the global chain if fundef chain is NULL or symbol not found there
+        // If the return statement of the previous search is not called it will get to this part
+        if (firstSymbolTableVar != NULL) {
+            node_st *foundSteNodeInChain = findSteVarNodeInSteChain(firstSymbolTableVar, name);
+            if (foundSteNodeInChain != NULL) {
+                // Return Ste found, automatically stops the execution of this function with the return
+                return foundSteNodeInChain;
+            }
+        }
+    }
+    
+
+    // No existing symbol found, return NULL
+    return NULL;
+}
+
+/**
+ * @fn CVSfuncall
+ */
+node_st *CVSfuncall(node_st *node)
+{
+    // Traverse the args Expr child to find potential links for a SteVar node
+    TRAVargs(node);
+    
+    return node;
+}
+
+/**
+ * @fn CVSvar
+ */
+node_st *CVSvar(node_st *node)
+{
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteVarLink(VAR_NAME(node));
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VAR_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s", VAR_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
 
     return node;
 }
 
 /**
- * @fn CVSfor
- *
- * Updating scope not necessary, no VarDecls or FunDefs in Stmts (see language)!
-   Renaming of for loop identifiers has been done in a separate traversal
+ * @fn CVSvarlet
  */
-node_st *CVSfor(node_st *node)
+node_st *CVSvarlet(node_st *node)
 {
-    /*
-    remove the declaration part from for-loop induction variables and create corresponding 
-    local variable declarations on the level of the (innermost) function definition
-    For var declaration always has type int and name is saved in For node
-    */
-    createSymbolTableEntry(FOR_VAR(node), CT_int);
-
-    // Go to stmts traversal functions
-    TRAVblock(node);
-
+    // Update this link from var to the Ste with the given name 
+    node_st *steNode = findSteVarLink(VARLET_NAME(node));
+    
+    if (steNode != NULL) {
+        // Save Ste node in link attribute
+        VARLET_STE_LINK(node) = steNode;
+    } else {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
+        // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
+        CCNerrorPhase();
+    }
+    
     return node;
-}
-
-// Prints a chain of SteVar's using the LinkedList structure
-// TODO: remove at the end of the compiler project, this is handy to print a chain of Ste's for debugging!
-void printSteVar(node_st *steParentNode) {
-  if (steParentNode != NULL) {
-    // Open the new SteVar chain
-    printf("\n**************************\n\tNew SteVar chain:\n");
-
-    // Get the first param from the Ste
-    node_st *steIterator = steParentNode;
-    do {
-        // Get the type
-        char *type = NULL;
-
-        switch (STEVAR_TYPE(steParentNode)) {
-          case CT_int:
-          type = "int";
-          break;
-          case CT_float:
-          type = "float";
-          break;
-          case CT_bool:
-          type = "bool";
-          break;
-          case CT_void:
-          type = "void";
-          break;
-          case CT_NULL:
-          DBUG_ASSERT(false, "unknown type detected!");
-        }
-
-        // Print var Ste: "name, type"
-        printf("SteVar:\n %s : %s\nnesting level: %d\n", 
-            STEVAR_NAME(steIterator), type, STEVAR_NESTING_LEVEL(steIterator));
-
-        // Update iterator
-        steIterator = STEVAR_NEXT(steIterator);
-    } while (steIterator != NULL);
-
-    // End the current SteVar chain
-    printf("\n\tEnd of SteVar chain\n**************************\n\n");
-  }
 }

@@ -1,0 +1,151 @@
+void foo() {
+    int a = 5;
+    int b = 8;
+    float c = 5.346;    
+    float d = 34.43643;
+    bool e = true;
+    bool f = false;
+    bool g = true;
+
+    /*
+    ************************ MonOps success ************************
+    */ 
+    a = -a;
+    c = -c;
+    g = !g;
+    /*
+    ************************ MonOps failures ************************
+    */ 
+    // g = -a;
+    // g = -c;
+    // a = !g;
+
+    /*
+    ************************ MonOps return type failures ************************
+    */ 
+
+    /*
+    ************************ BinOps success ************************
+    */ 
+    // Arithmetic operators
+    a = a + b;
+    c = c + d;
+    e = f + g;
+
+    a = a - b;
+    c = c - d;
+    
+    a = a * b;
+    c = c * d;
+    e = f * g;
+
+    a = a / b;
+    c = c / d;
+
+    a = a % b;
+
+    // Relational operators
+    g = a == c; // int with int
+    g = a != c; // int with float
+    g = a == b; // int with int
+    g = e == a; // bool with int
+    g = c != e; // float with bool
+    g = e == f; // bool with bool
+
+    g = a < b;
+    g = c < d;
+
+    g = a <= b;
+    g = c <= d;
+
+    g = a > b;
+    g = c > d;
+
+    g = a >= b;
+    g = c >= d;
+
+    // Logical operators
+    e = f && g;
+    g = f || e;
+
+    /*
+    ************************ BinOps operator failures ************************
+    */ 
+    // Arithmetic operators
+    // a = a + c; // int with float
+    // c = c + a; // float with int
+    // e = f + a; // bool with int
+
+    // a = a - c;
+    // c = c - a;
+    // c = f - e; // bool with bool on Binop sub
+    
+    // a = a * c;
+    // c = c * a;
+    // e = f * a;
+
+    // a = a / c;
+    // c = c / a;
+
+    // a = a % c; // float with int
+    // a = c % d; // float with float on modulo
+
+    // // Relational operators
+    // g = a < c; // int with float
+    // g = d < b; // float with int
+
+    // g = a <= c; 
+    // g = d <= b;
+
+    // f = b > c;
+    // f = a > d;
+
+    // g = a >= d;
+    // g = c >= b;
+
+    // // Logical operators
+    // e = f && a; // bool and int
+    // g = f || c; // bool and float
+    // f = c && a; // float and int
+    // g = b || d; // int and float
+
+    /*
+    ************************ BinOps return type failures ************************
+    */ 
+    // Arithmetic operators
+    // c = a + b; // int return type for float variable
+    // a = c + d; // float return type for int variable
+    // a = f + g; // bool return type for int variable
+
+    // c = a - b;
+    // a = c - d;
+    
+    // c = a * b;
+    // b = c * d;
+    // d = f * g;
+
+    // e = a / b;
+    // e = c / d;
+
+    // e = a % b;
+
+    // // Relational operators
+    // a = a == c; // bool return type for int variable a
+    // b = a != c;
+
+    // c = a < b; // bool return type for float variable c
+    // d = c < d;
+
+    // a = a <= b;
+    // c = c <= d;
+
+    // d = a > b;
+    // c = c > d;
+
+    // d = a >= b;
+    // b = c >= d;
+
+    // // Logical operators
+    // a = f && g; // bool return type for int variable a
+    // c = f || e; // bool return type for float variable c
+}

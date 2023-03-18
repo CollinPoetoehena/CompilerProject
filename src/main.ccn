@@ -1,52 +1,69 @@
 start phase RootPhase {
-    // Comment unfinished actions because they might cause an error!
+    // TODO: Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
-        // TODO: uncomment when that is done, otherwise it might cause an error!
+        // Then perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
-        //RegularAssignments;
+        // Then convert variable initializations into regular assignments, after ContextAnalysis
+        RegularAssignments;
+        // Then perform TypeChecking
+        TypeChecking;
+        // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
+        CompilingBooleanDisjunctionAndConjunction;
+        // then compile boolean cast (type and result type) expressions with the TernaryOp node
+        CompilingBooleanCastExpressions;
+        // Then print the output of the compiler
         print;
     }
-}; 
+};
+
+/*
+SHORT MEMORY TUTORIAL IN COCONUT AND C:
+
+Use CCNcopy when you update something in the AST that you are not returning, otherwise it is lost 
+or can cause a double free error because a global variable in a traversal.c file will be freed by CoCoNut
+after that traversal, and then anything can still point to this already freed global variable and cause an error.
+In short:
+    - changes to the node of a traversal function of that node are saved because this 
+        node is returned at the end, so no CCNcopy required.
+    - changes to the AST outside this node, such as the VarDecl nodes changed in renameforidentifiers.c traversal
+        require a CCNcopy because otherwise the result is lost and can cause a memory leak or a double free, etcetera!
+    - one thing to keep in mind is that you still need to copy some things, such as STRcopy for setting the
+        FOR_START_EXRP(node) = ASTvar(FOR_VAR(node));
+        because otherwise you would still have a memory issue because now FOR_START_EXRP(node) and
+        FOR_VAR(node) point to the same char * in memory! So, it should look like this ASTvar(STRcpy(FOR_VAR(node)))
+
+PRO TIP (from experience :)):
+    Try to make changes to the AST in the traversal functions of that node, try to avoid changing a node outside of 
+    its traversal function as much as possible because it can lead to unpredictable behaviour otherwise! Unless
+    it is absolutely unavoidable you can try doing it, but be careful and test everything thorougly again then!
+*/
 
 //TODO: remove when done, these are common commands:
 // make
 // ./civicc ../test/basic/check_success/binops.cvc
 // yacc -Wcounterexamples parser.y
-
-// ************************************************************************************************************************************
-// TODO:
-// milestone 6 is only first part , other parts are for extensions, so not necessary
-// For loop i's can have the same id at the start, but rename them in a previous traversal
-// milestones 8 and 11 are only for extensions!
-
-// TODO: for type checking see slides Semantic analysis for implementation hint on type checking!
-// Explanation on type checking: 
-
-// milestone 9:
-// || wordt lazy geevalueerd
-// voor bool operators een apart iets, dus || &&. Maak daar een ternary node voor
-// Dus eig die dingen omvormen in ternary statements
-// Example:
-// funcCallA() || funcallb()
-// Als funCallA() true returned dan zou funcallb() niet uitgevoerd hoeven worden (als die side effects heeft is dat slecht)
-// Traversal hoeft dan alleen over de binops te gaan en dan de logicoperators van Binop
-
-// milestone 10:
-// in assembly worden booleans anders afgehandeld
-// Er zijn geen assembly instructions om van en naar booleans te casten
-// Dit moet je dus zelf gaan doen met de cijfers
-// cast van int naar bool moet dan bijv een > 0 vergelijking, etc en andersom
-// traversal gaat over de Cast nodes
+// This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
 
 //**********************************************************************************************************************************************
-// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
-// TODO: see renameforidentifiers, renaming of variable in nested for loop does not go well, ask in the lesson to a good TA or Simon!
-// it is with this file: ./civicc ../test/basic/functional/for_to_while.cvc 
+// TODO: implement the last milestones :) -> milestone 12 and 13 and test them very thorougly 
+//and make them perfect! I have untill the end of the period because milestone 14 and 15 can be skipped,
+// so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
+//for the exam and some less stress, etc :)!!!
 
-// TODO: check with a TA if milestone 6 is working correctly: regular assignments traversal
-// TODO: also ask when this traversal should be performed, before ContextAnalysis or after, etcetera
 
+// TODO: typechecking, ask Simon:
+// the file contains this:     //fun() + bar();
+// but this should give an error right???
+
+
+// TODO: when to check for integer or float out of range, etc???
+
+
+// TODO: how to generate the file for assembly in the traversal, is there code about that somewhere???? Ask Simon
+
+
+// ************************************************************************************************************************************
 
 traversal Print {
     uid = PRT
@@ -63,7 +80,12 @@ phase ContextAnalysis {
         traversal RenameForIdentifiers {
             uid = RFI,
             // Also rename all the occurrences of the for variable
-            nodes = { For, FunCall, Assign, Var, VarLet }
+            nodes = { FunBody, VarDecl, Stmts, For, FunCall, Assign, Var, VarLet },
+            travdata {
+                // Hash tables are used to handle converting nested for loops
+                user htable_ptr for_identifiers_table,
+                user htable_ptr for_assignNodes_table
+            }
         };
 
         // Create Variable Symboltables, linking will be done in a separate traversal
@@ -77,7 +99,13 @@ phase ContextAnalysis {
                 // FunBody to traverse the VarDecls and Stmts
                 FunBody, 
                 // These nodes are used to create new Symbol Table entries
-                GlobDecl, GlobDef, VarDecl, Param, For
+                // For node has already been converted, so nothing that needs to be done here now!
+                GlobDecl, GlobDef, VarDecl, Param,
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet,
+                // This node is just used to traverse the args child expression to find potential Var, VarLet links
+                FunCall
+
             }
         };
         
@@ -94,30 +122,185 @@ phase ContextAnalysis {
             }
         };
 
-        // This traversal links all the Var, VarLet and FunCall occurrences to the correct Ste
-        traversal LinkSymbolTableEntries {
-            uid = LSTE,
-            nodes = { 
-                // Program to save the global chain of SteVar and SteFun and going to the right traversal functions
+        /*
+        This traversal function links FunCall nodes to their SteFun link.
+        This is separated because the order of function definitions does not matter in Civic
+        as explained in the CiviC manual on top of page 7.
+        */
+        traversal LinkFunCallsToSteFunNode {
+            uid = LFTSF,
+            nodes = {
+                // Program to link first symbol table entries of var and fun
                 Program,
-                // FunDef and FunBody to use for saving the current chain and going to the right traversal functions
-                FunDef, 
-                // These nodes are used to update their link once they occur in a program
-                Var, Varlet, FunCall
+                // The FunCall node is used to update its link once it occurs in a program
+                FunCall
             }
         };
     }
 };
 
+// This traversal should transform Variable Initialisations into Regular Assignments. Should be 
+// performed before the ContextAnalysis because that phase can create Ste's for the transformed code
 traversal RegularAssignments {
-    // This traversal should transform Variable Initialisations into Regular Assignments
     uid = RA,
-    // TODO: what is milestone 6, only first 2 paragraphs right, the rest is for arrays???? Ask Simon!
-    nodes = {FunBody, VarDecl, GlobDef, For}
-    // FunBody is used to first traverse the VarDecls and then the Stmts and append the 
-    // saved initializations to the stmts, these are filled after TRAVdecls(node) of FunBody
-    // For loop has something special to it, the above nodes are the correct nodes
+    nodes = { Program, Decls, GlobDef, FunBody, VarDecl}
 };
+
+// The TypeChecking phase is used to check all the types
+phase TypeChecking {
+    actions {
+        // This traversal is used for type checking, such as matching assignments and funcall types
+        traversal TypeMatchingAssignmentsFunCalls {
+            uid = TMAF,
+            nodes = {
+                /*
+                        These nodes are used for checking the types
+                */
+                // Foreach function definition
+                FunDef,
+                // Traverse into the function body
+                FunBody,
+                // Case assignment: Infer expression type. Compare with variable type
+                Assign,
+                // Case if-then-else: Infer type of predicate expression: Boolean? 
+                // Traverse into then-branch. Traverse into else-branch
+                IfElse,
+                // Case while-/do-loop: Infer type of predicate expression: Boolean? Traverse into loop body
+                While, DoWhile,
+                // Case for-loop: Infer types of bound/step expressions: Integer? Traverse into loop body
+                For,
+                // Case return: check with fundef return type
+                Return,
+                // Then continue with next statement...
+                /*
+                        These nodes are used to infer the types of the Expression
+                */
+                // Case FunCall: Foreach argument expression: Infer argument type
+                // Compare with corresponding parameter type. Yield function return type
+                FunCall, Exprs,
+                Cast,
+                // Case BinOp: Infer left operand type. Infer right operand type. Yield operator result type
+                BinOp,
+                // Case MonOp: Infer operand type. Yield operator result type
+                Monop,
+                Var,
+                // Case IntConstant: Yield int
+                Num,
+                // Case FloatConstant: Yield float
+                Float,
+                // Case BoolConstant: Yield bool
+                Bool
+            },
+            travdata {
+                // Hash tables are used to handle type checking nested funcalls
+                // This hash table is used to save the funcall index to get the last funcall node
+                user htable_ptr funcalls_funcallIndex_node,
+                // This hash table is used to save the funcall index to get the last parmam index of that funcall
+                user htable_ptr funcalls_funcallIndex_paramIndex
+            }
+        };
+    }
+};
+
+/*
+This traversal extends the intermediate representation of the compiler by conditional
+expressions as exemplified by the C ternary operator pred ?then :else and to systematically
+transform all Boolean operations in question into semantically equivalent conditional expressions.
+*/
+traversal CompilingBooleanDisjunctionAndConjunction {
+    uid = CBDC,
+    nodes = { BinOp }
+};
+
+/*
+This traversal should transform cast expressions with Boolean argument or result value
+into semantically equivalent non-cast expressions (milestone 10).
+This is done after the CBDC traversal because the binops need to be traversed already for this
+traversal because a Cast can have a BinOp Expr child as well.
+*/
+traversal CompilingBooleanCastExpressions {
+    uid = CBCE,
+    // It traverses all Cast expressions that have a boolean result or bool cast type
+    nodes = { Cast, BinOp, FunCall, Bool }
+};
+
+// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
+// this is done before code generation because it has no for loops in the VM for example, like this:
+// int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
+// (step expr from for loop)
+// maakt niet uit waar, zolang het voor de assembly genereren is, gaat alleen over for naar while omzetten de rest kan hetzelfde
+//TODO: create
+//     // This traversal converts For nodes to While nodes
+//     traversal ConvertForToWhile {
+//         uid = CFTW,
+//         nodes = { For }
+//     };
+
+/*
+TODO: 
+    milestone 15 is helemaal optioneel en om de bonus punten te krijgen moet je heel veel optimalisatie
+    doen om een beetje punten te krijgen, dus die niet doen!
+    milestone 14 is een beetje optioneel, probeer die alleen te doen als je nog veel tijd over hebt
+    na milestones 12 en 13, 12 en 13 moet je echt sowieso goed krijgen!
+    
+    ***************************************************************************************************************************
+    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
+    DUS HET PLAN NU: 
+    MILESTONE 12 EN 13 MAKEN EN ZORG DAT DIE HELEMAAL GOED ZIJN EN PERFECT MET ALLE TESTS, SCHRIJF HIER OOK EXTRA TESTS VOOR ZELF!
+    FOCUS GEWOON DAAROP NU EN MILESTONE 14 EN 15 MOET JE GEWOON OVERSLAAN, DIE ZIJN TOCH OPTIONEEL EIGENLIJK!
+    DUS:
+    MILESTONE 12 EN 13 MAKEN TOT HET EIND
+    MILESTONE 14 EN 15 OVERSLAAN EN NIET DOEN WANT DAT IS DE TIJD NIET WAARD, ZORG DAT MILESTONE 12 EN 13 GEWOON PERFECT STAAN EN HEEL
+    GOED GETEST ZIJN! 14 EN 15 KRIJG JE AMPER TOT GEEN PUNTEN VOOR EN JE MOET ER HEEL VEEL VOOR DOEN, DUS SLA DIE NU OVER!
+    DUS MIILESTONE 12 EN 13 MAKEN EN DAN ALLES HEEEEEEL GOED TESTEN DE KOMENDE 2 WEKEN EN DAN VOOR DE REST FOCUSSEN OP PROGRAMMEERTALEN
+    LEREN VOOR HET TENTAMEN! DAN KOMT HET HELEMAAL GOED EN HEBBEN WE GEWOON ROND DE 7 VOOR HET COMPILER PROJECT EN DAT IS AL HEEL 
+    GOED, MET EEN VOLDOENDE IS HET AL HEEL GOED, KOMT GOED, DUS NU MILESTONE 12 EN 13 AFMAKEN :)!
+    ***************************************************************************************************************************
+
+    milestone 12 en 13 zijn super belangrijk, die moeten heel goed staan, test alles goed met de test suite
+    EN je eigen test files of die kloppen, test dit heel goed en grondig, dit moet goed zijn!
+
+    Uitleg milestones 12 en 13 voor assembly genereren:
+    assembly uitprinten, ipv code printen ga je assembly code printen naar de output file die meegegeven is
+    main.c: regel 66:
+            global.output_file = optarg;
+    Standaard C om de file aan te maken, maak de file aan, de assembly code is een tekst bestand dat je gaat aanmaken
+    milestone 12 en 13 zijn in 1 traversal die je uitbreidt op 1 file die je aanmaakt
+    gebruik de reference compiler om een voorbeeld te zien van assembly dat gegenereert wordt:
+    Zo kan je de reference compiler gebruiken: 
+    chmod +x ./civcc -> geeft permission voor alles
+    gebruik uit de /bin folder de reference compiler: civcc
+    run die compiler dan vervolgens op een .cvc file
+    hoeft niet 1 op 1 overeen te komen met jou compiler, zolang de output maar gelijk is.
+
+    Algemene tips:
+    functies zijn voornamelijk moeilijk, ruimte op de stack maken voor variabele
+    begin met de statements, dat is goed te doen, ga gewoon de milestones af.
+    Het is in principe minder tijd rovend dan de symbol tables, dat was het meeste tijd
+    Je kan een klein beetje kijken naar de print.c, sommige dingen zijn redelijk straight forward
+    zoals een BinOp is bijvoorbeeld in principe 2 dingen traversen en dan addition doen.
+*/
+// This traversal is used for assembly code generation
+// traversal AssemblyCodeGeneration {
+//     uid = ACG,
+
+// };
+
+/*
+TODO: this is done during CodeGeneration, but when and how, etc???
+    Explanation about Strict logic disjunction and conjunction:
+        Strict logic disjunction and conjunction are logical operations that implement the logical OR 
+        and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
+        conjunction, the operators are defined as arithmetic operators for addition and multiplication, respectively, 
+        and not as logical operators. This means that they operate on Boolean values as if they were integers, 
+        with the value true being treated as 1 and the value false being treated as 0.
+
+        In strict logic disjunction, the result is true if either or both operands are true, and false otherwise. 
+        It is implemented by the addition operator (+).
+
+        In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
+        It is implemented by the multiplication operator (*).
+*/
 
 enum Type {
     // T_ collides with bison/flex generated stuff.
@@ -130,6 +313,8 @@ enum Type {
 enum MonOpEnum {
     prefix = MO,
     values {
+        // logical negation (!, MO_not), used for boolean values (true, false)
+        // unary minus (-, MO_neg), arithmetic negation, used for arithmetic values (=numbers, etc)
         not, neg
     }
 };
@@ -144,7 +329,7 @@ enum BinOpEnum {
 
 nodeset Constants = {Float, Bool, Num};
 
-nodeset Operations = {Binop, Monop};
+nodeset Operations = {Binop, Monop, TernaryOp};
 
 nodeset Decl = {GlobDef, GlobDecl, FunDef};
 
@@ -154,9 +339,8 @@ nodeset Expr = {Cast, FunCall, Var, ArrExpr} | (Constants | Operations);
 
 nodeset Stmt = {Assign, ExprStmt, IfElse, While, DoWhile, For, Return};
 
-// Link is used for the Symbol table to link a node to the symbol table
+// Link is used for the Symbol table to link a node (Var, VarLet or FunCall) to the symbol table
 nodeset Link = {SteVar, SteFun};
-// Link is voor na de symbol table om de symbol table entry te linken met de node (Var, Varlet, Funcall)
 
 root node Program {
     children {
@@ -173,7 +357,7 @@ root node Program {
 
 node Decls {
     children {
-        Decl decl { constructor, mandatory },
+        Decl decl { constructor },
         Decls next { constructor }
     }
 };
@@ -242,9 +426,11 @@ node FunDefs {
     }
 };
 
-// This ast uses the FunDef node for both the function definition and the function declaration. 
-// A function declaration is simply represented as a FunDef node without a FunBody.
-// FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
+/*
+This ast uses the FunDef node for both the function definition and the function declaration.
+A function declaration is simply represented as a FunDef node without a FunBody.
+FunHeader not necessary because it has no added value for the ast, first param could be FunHeader.
+*/
 node FunDef {
     children {
         FunBody body { constructor },
@@ -329,7 +515,9 @@ node GlobDef {
     attributes {
         Type type { constructor },
         string name { constructor },
-        bool export { constructor }
+        bool export { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 
@@ -356,7 +544,9 @@ node VarDecl {
 
     attributes {
         string name { constructor },
-        Type type { constructor }
+        Type type { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 
@@ -381,7 +571,9 @@ node Binop {
     }, 
 
     attributes {
-        BinOpEnum op { constructor }
+        BinOpEnum op { constructor },
+        // Save the infered operator type in typechecking in the node to use in code generation later
+        Type operator_type_signature
     }
 };
 
@@ -391,7 +583,23 @@ node Monop {
     },
 
     attributes {
-        MonOpEnum op { constructor }
+        MonOpEnum op { constructor },
+        // Save the infered operator type in typechecking in the node to use in code generation later
+        Type operator_type_signature
+    }
+};
+
+// This node is used for the format: pred?then:else
+node TernaryOp {
+    children {
+        Expr predicate { constructor, mandatory },
+        Expr then_expr { constructor, mandatory },
+        Expr else_expr { constructor, mandatory }
+    },
+    attributes {
+        // Save the inferred type of the ternary operator expression to use in code generation later
+        // Can be copied from the BinOp turned into TernaryOp
+        Type type_signature { constructor }
     }
 };
 
@@ -411,6 +619,7 @@ node VarLet {
 // Variable in an expression (= later on, such as int d = a * 5, a is the Var).
 node Var {
     children {
+        // NOT used currently, indices is for the array extensions
         Exprs indices
     }, 
 
@@ -459,7 +668,6 @@ node SteVar {
 node SteFun {
     children {
         // Parent wijst naar hogere nesting level
-        // TODO: with basic it can just be NULL always in creation, so set to null in traversal function!
         SteFun parent { constructor },
         // LinkedList data structure for next symbol table
         SteFun next { constructor }
@@ -474,48 +682,3 @@ node SteFun {
         Param params { constructor }
     }
 };
-
-// Symbol table entry
-// node Ste {
-//     // variablen en functies
-//     children {
-//         // LinkedList data structure for next symbol table
-//         Ste next { constructor },
-//         // TODO: een lijst per functie en 1 global
-//         // Parent wijst naar hogere nesting level
-//         Ste parent
-
-//         // FunDef
-//         // Traverse funbody
-//         // travdata can be used for Ste
-
-//         // Start with Ste's for the variables only
-//         // Separate traversal for fundefs
-//         // 2 losse tables, 1 voor vars, 1 voor functinos, allebei linkedlist
-//         // 2 nodes, SteVar, SteFun
-//     }, 
-
-//     attributes {
-//         string name { constructor },
-//         Type type { constructor },
-//         int nesting_level { constructor },
-//         SymbolTableType symbol_type { constructor },
-//         // Params is the LinkedList from the FunDef, should contain the first value of 
-//         // the FunDef params. From the first value the LinkedList chain can be followed.
-//         Param params { constructor }
-//     }
-// };
-// Milestone 5 symbol table
-// Each symbol table entry would feature the name of the variable as a character string, 
-// its type as well as its nesting level (starting with zero for the global context)
-
-// basic heeft 2 scopes, global en in een funcall
-// LinkedList is dan het handigst, alle functies hebben zijn eigen symbol table
-// Alles die de AST ombouwt is een traversal
-// Dus Context analysis (Symbol table bouwen) en TypeChecking zijn traversals
-
-// TODO: milestone 6
-// This needs to be a separate traversal as well
-// int a = expr;
-// milestone 6 is loskoppelen van die expr van een VarDecl, je knipt hem dus van de boom after
-// en weer aan de boom, dit is handig uiteindelijk voor code generation

@@ -374,6 +374,11 @@ block: CURLYBRACE_L stmts CURLYBRACE_R
       {
         $$ = $2;
       }
+    | CURLYBRACE_L CURLYBRACE_R
+      {
+        // Empty block, return NULL
+        $$ = NULL;
+      }
     | stmt
       {
         $$ = ASTstmts($1, NULL);
@@ -464,7 +469,7 @@ expr: BRACKET_L expr BRACKET_R
     | MINUS expr %prec MONOP_MINUS
       {
         // This MINUS uses the MONOP_MINUS precedence rule
-        // arithmetic negation, used for arithmetic values (=numbers, etc)
+        // unary minus, arithmetic negation, used for arithmetic values (=numbers, etc)
         $$ = ASTmonop($2, MO_neg);
         // AddLocToNode($$, &@2);
       }

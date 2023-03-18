@@ -1,0 +1,24 @@
+void foo(int a, float b, bool c) {
+    // Vardecls
+    int d = 5;
+    int e = 8;
+    float f = 56.34534;
+
+    // Statements
+    a = 5;
+    b = 5.46;
+    c = true;
+}
+
+void faa() {
+    // Vardecls
+    int d = 5;
+    float e = 8.574;
+    bool c = false;
+
+    // Statements
+    d = 5;
+    e = 5.46;
+    c = true;
+    
+}

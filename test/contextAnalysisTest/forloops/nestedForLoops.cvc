@@ -1,0 +1,74 @@
+extern void printInt(int val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+export int main() {
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int i;
+    int j;
+    int k;
+
+    for(int i=10, 0,-1) {
+        printInt(i);
+        printSpaces(1);
+    }
+
+    for(int i=0, 10, 2) {
+        printInt(i);
+    }
+    
+    // Double nested for loop
+    for(int i=2, 5) {
+        for(int j=0, 4) {
+            printInt(i);
+            printInt(j);
+        }
+    }
+
+    // Triple nested for loop
+    for(int i=4, 10) {
+        printInt(i);
+        for(int j=0, 4) {
+            printInt(i);
+            printInt(j);
+            for(int k=0, 4) {
+                printInt(i);
+                printInt(j);
+                printInt(k);
+            }
+        }
+    }
+
+    // Very deeply nested for loop
+    for(int a=1, 10) {
+        printInt(a);
+        for(int b=4, 4) {
+            printInt(a);
+            printInt(b);
+            for(int c=3, 4) {
+                printInt(a);
+                printInt(b);
+                printInt(c);
+                for(int d=0, 4) {
+                    printInt(a);
+                    printInt(b);
+                    printInt(c);
+                    printInt(d);
+                    for(int e=0, 4) {
+                        printInt(a);
+                        printInt(b);
+                        printInt(c);
+                        printInt(d);
+                        printInt(e);
+                    }
+                }
+            }
+        }
+    }
+
+    return 0;
+}

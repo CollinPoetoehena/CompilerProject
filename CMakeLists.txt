@@ -35,10 +35,19 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     src/traversals/contextanalysis/renameforidentifiers.c
     src/traversals/contextanalysis/createvariablesymboltableentries.c 
     src/traversals/contextanalysis/createfunctionsymboltableentries.c
-    src/traversals/contextanalysis/linksymboltableentries.c
+    src/traversals/contextanalysis/linkfuncallstostefunnode.c
 
     # Convert variable initializations into regular assignments traversal
     src/traversals/regularassignments.c
+
+    # TypeChecking traversals
+    src/traversals/typechecking/typematchingassignmentsfuncalls.c
+
+    # Compiling boolean disjunction and conjunction
+    src/traversals/compilingbooleandisjunctionandconjunction.c
+    
+    # Convert boolean arguments/results cast expressions into non-cast expressions
+    src/traversals/compilingbooleancastexpressions.c
 )
 
 target_compile_options(civicc PRIVATE

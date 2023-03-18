@@ -1,0 +1,24 @@
+void foo() {
+    bool a = true;
+    int b = 5;
+
+    // Success
+    while (a) {
+        a = false;
+    }
+    while (false) {
+        while (a) {
+            b = 6;
+        }
+    }
+
+    // Failure
+    while (b) {
+        a = false;
+    }
+    while (a) {
+        while (b) {
+            b = 7;
+        }
+    }
+}

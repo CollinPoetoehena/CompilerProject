@@ -1,0 +1,13 @@
+void foo() {
+    int d=4;
+
+    d = (int) ((bool) ((int) ((int)((bool) (((int) (bool) 1))))));
+}
+
+bool boolFun() {
+    return true;
+}
+
+int intFun() {
+    return 5;
+}

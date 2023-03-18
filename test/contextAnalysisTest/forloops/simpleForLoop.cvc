@@ -1,0 +1,34 @@
+void foo() {
+    // TODO: also test without VarDecls if it still works!
+    // int a;
+    // int i;
+    int j;
+    int a;
+
+    // for (int i = 0, 10) {
+    //     for (int j = 1, 10) {
+    //         a = 5;
+    //     }
+    // }
+
+    // for (int a = 0, 10) {
+    //     for (int b = 1, 10) {
+    //         z = 5;
+    //     }
+    // }
+
+    for (int i = 0, 10) {
+        if (i == 5) {
+            for (int j = 5, 10) {
+            }
+        }
+    }
+
+    if (true) {
+
+    }
+
+    for (int i = 5, 10) {
+        j = 4;
+    }
+}
