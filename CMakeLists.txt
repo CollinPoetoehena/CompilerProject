@@ -48,6 +48,9 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     
     # Convert boolean arguments/results cast expressions into non-cast expressions
     src/traversals/compilingbooleancastexpressions.c
+
+    # Convert For nodes to While nodes with exactly the same semantics
+    src/traversals/convertfortowhile.c
 )
 
 target_compile_options(civicc PRIVATE
