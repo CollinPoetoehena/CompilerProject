@@ -205,13 +205,14 @@ enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
 }
 
 // Helper function to check for condition type of statements
-bool checkConditionExpression(enum Type conditionType, char *statementType) {
+bool checkConditionExpression(enum Type conditionType, char *statementType, node_st *nodeForErrorLoc) {
     if (conditionType == CT_bool) {
         // Return true if the condition expression is of type Boolean
         return true;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in %s: condition is not a bool expression", statementType);
+        CTI(CTI_ERROR, true, "type error in %s: condition is not a bool expression, at line %d, column %d",
+            statementType, NODE_BLINE(nodeForErrorLoc), NODE_BCOL(nodeForErrorLoc));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
@@ -288,7 +289,7 @@ node_st *TMAFifelse(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into then and else block
-    if (checkConditionExpression(tempType, "if-statement")) {
+    if (checkConditionExpression(tempType, "if-statement", node)) {
         TRAVthen(node);
         TRAVelse_block(node);
     }
@@ -312,7 +313,7 @@ node_st *TMAFwhile(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into the loop body
-    if (checkConditionExpression(tempType, "while-loop")) {
+    if (checkConditionExpression(tempType, "while-loop", node)) {
         TRAVblock(node);
     }
 
@@ -335,7 +336,7 @@ node_st *TMAFdowhile(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into the loop body
-    if (checkConditionExpression(tempType, "dowhile-loop")) {
+    if (checkConditionExpression(tempType, "dowhile-loop", node)) {
         TRAVblock(node);
     }
 
