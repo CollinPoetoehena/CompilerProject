@@ -11,6 +11,9 @@
 #include "ccngen/ast.h"
 // Palm library for easy working with strings
 #include "palm/str.h"
+// Include enums and types, for the Type
+#include "ccngen/enum.h"
+#include "ccn/ccn_types.h"
 
 node_st *appendStmtsNodeToTail(node_st *firstSmtsNode, node_st *newStmtsNode) {
     node_st *stmtsIterator = firstSmtsNode;
@@ -42,9 +45,29 @@ node_st *CFTWfor(node_st *node)
     // Then after that, convert this node to a While node
 
     // Create the condition Expr for the new While node, copy Var node from start_expr (used multiple times)
-    // no copy necessary for stop expression, because it is only used once, here. Use < operator.
+    // no copy necessary for stop expression, because it is only used once, here.
     node_st *newWhileCondition = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
+    
+     //TODO: remove this because it should always be BO_add right??? because - -3 is + 3 in math!
+    // TODO: if it can be used update it in the if statement and use it for the binop later, if not used, remove!
+    //enum Type stmtsAssignBinOpType = BO_add; // Standard is BO_add
+
+        // TODO: this does not go very well, the negative numbers do not always go to > operator in the binop!
+        // TODO: this is probably because it is a memory address or something and is only negative sometimes, see print!
+        if (FOR_STEP(node) != NULL) {
+            printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
+        }
+        // TODO: so why is a positive value a value and a negative value some sort of memory address???
+
+    // Check if the Num node is smaller than 0, if so use > operator, otherwise use < operator for positive numbers
+    // TODO: the above print prints a weird value for negative numbers, why and how is that???
+    if (FOR_STEP(node) != NULL && NUM_VAL(FOR_STEP(node)) < 0) {
+        // Use greater than operator: >
+        BINOP_OP(newWhileCondition) = BO_gt;
+    }
     // TODO: is stop expression from for loop: "i < FOR_STOP(node)"??? So, the < operator???
+
+    // Create the new While node
     node_st *newWhileNode = ASTwhile(newWhileCondition, FOR_BLOCK(node));
     
     // Then append the step expression of the For node to the end of the While block
@@ -58,8 +81,6 @@ node_st *CFTWfor(node_st *node)
     // Then set the link of that VarLet node (links should be correct because the renaming
     // of for identifiers happened before linking of Ste's in the CA phase)
     VARLET_STE_LINK(newVarLetNode) = VAR_STE_LINK(FOR_START_EXPR(node));
-
-    printf("new step Assign node newVarLetNode name is: %s\n", VARLET_NAME(newVarLetNode));
 
     if (FOR_STEP(node) != NULL) {
         /*
