@@ -249,17 +249,7 @@ traversal CompilingBooleanCastExpressions {
     nodes = { Cast, BinOp, FunCall, Bool }
 };
 
-// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
-// this is done before code generation because it has no for loops in the VM for example, like this:
-// int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
-// (step expr from for loop)
-// maakt niet uit waar, zolang het voor de assembly genereren is, gaat alleen over for naar while omzetten de rest kan hetzelfde
-// ********************************************************************************************************************************************
-//TODO: create. Then test thorougly with a lot of files with a For node! No need to test the other things because
-// that has been tested very good and thorougly already! So, just do this traversal now!!
 // This traversal converts For nodes to While nodes with exactly the same semantics.
-// Test the links by printing them as well once to see if they are moved correctly!
-// So, first see the output without Ste links, then test the same file WITH Ste links!
 traversal ConvertForToWhile {
     uid = CFTW,
     nodes = { For }
@@ -310,10 +300,9 @@ TODO:
     zoals een BinOp is bijvoorbeeld in principe 2 dingen traversen en dan addition doen.
 */
 // This traversal is used for assembly code generation
-// traversal AssemblyCodeGeneration {
-//     uid = ACG,
-
-// };
+traversal AssemblyCodeGeneration {
+    uid = ACG
+};
 
 /*
 TODO: this is done during CodeGeneration, but when and how, etc???

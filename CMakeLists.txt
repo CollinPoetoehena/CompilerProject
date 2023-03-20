@@ -51,6 +51,9 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
 
     # Convert For nodes to While nodes with exactly the same semantics
     src/traversals/convertfortowhile.c
+
+    # Assembly Code Generation
+    src/traversals/assemblycodegeneration.c
 )
 
 target_compile_options(civicc PRIVATE
