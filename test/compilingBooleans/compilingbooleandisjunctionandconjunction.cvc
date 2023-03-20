@@ -7,4 +7,5 @@ bool foo() {
     b = foo() && foo();
     a = foo() && (foo() && foo());
     b = a || (b || a);
+    b = a || (b && a);
 }

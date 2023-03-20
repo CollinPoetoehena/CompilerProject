@@ -58,7 +58,7 @@ export int main() {
                     printInt(b);
                     printInt(c);
                     printInt(d);
-                    for(int e=0, 4) {
+                    for(int e=10, 2, -3) {
                         printInt(a);
                         printInt(b);
                         printInt(c);

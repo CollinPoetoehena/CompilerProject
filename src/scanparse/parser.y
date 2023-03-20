@@ -156,63 +156,75 @@ decl: fundef
 fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           $$ = ASTfundef($8, $5, $2, $3, true);
+          AddLocToNode($$, &@1, &@9);
         }
       | EXPORT type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           // Empty param
           $$ = ASTfundef($7, NULL, $2, $3, true);
+          AddLocToNode($$, &@1, &@8);
         }
       | type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           $$ = ASTfundef($7, $4, $1, $2, false);
+          AddLocToNode($$, &@1, &@8);
         }
       | type ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           // Empty param
           $$ = ASTfundef($6, NULL, $1, $2, false);
+          AddLocToNode($$, &@1, &@7);
         }
       | EXTERN type ID BRACKET_L param BRACKET_R SEMICOLON
         {
           // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, $5, $2, $3, true);
+          AddLocToNode($$, &@1, &@7);
         }
       | EXTERN type ID BRACKET_L BRACKET_R SEMICOLON
         {
           // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, NULL, $2, $3, true);
+          AddLocToNode($$, &@1, &@6);
         }
       // Rules with void type
       | EXPORT VOIDTYPE ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           $$ = ASTfundef($8, $5, CT_void, $3, true);
+          AddLocToNode($$, &@1, &@9);
         }
       | EXPORT VOIDTYPE ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           // Empty param
           $$ = ASTfundef($7, NULL, CT_void, $3, true);
+          AddLocToNode($$, &@1, &@8);
         }
       | VOIDTYPE ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           $$ = ASTfundef($7, $4, CT_void, $2, false);
+          AddLocToNode($$, &@1, &@8);
         }
       | VOIDTYPE ID BRACKET_L BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           // Empty param
           $$ = ASTfundef($6, NULL, CT_void, $2, false);
+          AddLocToNode($$, &@1, &@7);
         }
       | EXTERN VOIDTYPE ID BRACKET_L param BRACKET_R SEMICOLON
         {
           // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, $5, CT_void, $3, true);
+          AddLocToNode($$, &@1, &@7);
         }
       | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R SEMICOLON
         {
           // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
           $$ = ASTfundef(NULL, NULL, CT_void, $3, true);
+          AddLocToNode($$, &@1, &@6);
         }
       ;
 
@@ -220,34 +232,41 @@ globdecl: EXTERN type ID SEMICOLON
          {
           // ID has the value that the lexer put into it with STRCopy(yytext)
            $$ = ASTglobdecl($2, $3);
+           AddLocToNode($$, &@1, &@4);
          }
         ;
 
 globdef: EXPORT type ID LET expr SEMICOLON
         {
           $$ = ASTglobdef(NULL, $5, $2, $3, true);
+          AddLocToNode($$, &@1, &@6);
         }
       | type ID LET expr SEMICOLON
         {
           $$ = ASTglobdef(NULL, $4, $1, $2, false);
+          AddLocToNode($$, &@1, &@5);
         }
       | EXPORT type ID SEMICOLON 
         {
           $$ = ASTglobdef(NULL, NULL, $2, $3, true);
+          AddLocToNode($$, &@1, &@4);
         }
       | type ID SEMICOLON 
         {
           $$ = ASTglobdef(NULL, NULL, $1, $2, false);
+          AddLocToNode($$, &@1, &@3);
         }
       ;
 
 param: type ID COMMA param
       {
         $$ = ASTparam(NULL, $4, $2, $1);
+        AddLocToNode($$, &@1, &@4);
       }
      | type ID
       {
         $$ = ASTparam(NULL, NULL, $2, $1);
+        AddLocToNode($$, &@1, &@2);
       }
     ;
 
@@ -273,18 +292,22 @@ vardecl: type ID SEMICOLON
         {
           // dims expr is NULL, initial expr is NULL, next is NULL, name is ID, type is type
           $$ = ASTvardecl(NULL, NULL, NULL, $2, $1);
+          AddLocToNode($$, &@1, &@3);
         }
       | type ID LET expr SEMICOLON
         {
           $$ = ASTvardecl(NULL, $4, NULL, $2, $1);
+          AddLocToNode($$, &@1, &@5);
         }
       | type ID SEMICOLON vardecl
         {
           $$ = ASTvardecl(NULL, NULL, $4, $2, $1);
+          AddLocToNode($$, &@1, &@4);
         }
       | type ID LET expr SEMICOLON vardecl
         {
           $$ = ASTvardecl(NULL, $4, $6, $2, $1);
+          AddLocToNode($$, &@1, &@6);
         }
       ;
 
@@ -333,39 +356,47 @@ stmt: assign
 ifelse: IF BRACKET_L expr BRACKET_R block %prec THEN
         {
           $$ = ASTifelse($3, $5, NULL);
+          AddLocToNode($$, &@1, &@5);
         }
       | IF BRACKET_L expr BRACKET_R block ELSE block 
         {
           $$ = ASTifelse($3, $5, $7);
+          AddLocToNode($$, &@1, &@7);
         }
       ;
 while: WHILE BRACKET_L expr BRACKET_R block
        {
         $$ = ASTwhile($3, $5);
+        AddLocToNode($$, &@1, &@5);
        }
       ;
 dowhile: DO block WHILE BRACKET_L expr BRACKET_R SEMICOLON
           {
            $$ = ASTdowhile($5, $2);
+           AddLocToNode($$, &@1, &@7);
           }
         ;
 for: FOR BRACKET_L INTTYPE ID LET expr COMMA expr COMMA expr BRACKET_R block
      {
       $$ = ASTfor($6, $8, $10, $12, $4);
+      AddLocToNode($$, &@1, &@12);
      }
     | FOR BRACKET_L INTTYPE ID LET expr COMMA expr BRACKET_R block
      {
       // No step means NULL, which will be used as + 1, this is coded somewhere else
       $$ = ASTfor($6, $8, NULL, $10, $4);
+      AddLocToNode($$, &@1, &@10);
      }
     ;
 return: RETURN SEMICOLON
         {
           $$ = ASTreturn(NULL);
+          AddLocToNode($$, &@1, &@2);
         }
       | RETURN expr SEMICOLON
         {
           $$ = ASTreturn($2);
+          AddLocToNode($$, &@1, &@3);
         }
       ;
 
@@ -389,10 +420,12 @@ funcall: ID BRACKET_L BRACKET_R
         {
           // No arguments
           $$ = ASTfuncall(NULL, $1);
+          AddLocToNode($$, &@1, &@3);
         }
       | ID BRACKET_L exprs BRACKET_R 
         {
           $$ = ASTfuncall($3, $1);
+          AddLocToNode($$, &@1, &@4);
         }
       ;
 
@@ -400,6 +433,7 @@ funcall: ID BRACKET_L BRACKET_R
 expr: BRACKET_L expr BRACKET_R
       {
         $$ = $2;
+        AddLocToNode($$, &@1, &@3);
       }
     | expr[left] PLUS expr[right]
       {
@@ -471,18 +505,19 @@ expr: BRACKET_L expr BRACKET_R
         // This MINUS uses the MONOP_MINUS precedence rule
         // unary minus, arithmetic negation, used for arithmetic values (=numbers, etc)
         $$ = ASTmonop($2, MO_neg);
-        // AddLocToNode($$, &@2);
+        AddLocToNode($$, &@1, &@2);
       }
     | EXCLAMATION expr
       {
         // logical negation, used for boolean values (true, false)
         $$ = ASTmonop($2, MO_not);
-        // AddLocToNode($$, &@2);
+        AddLocToNode($$, &@1, &@2);
       }
     | BRACKET_L type BRACKET_R expr %prec TYPECAST
       {
         // Type cast (can be int, float and bool)
         $$ = ASTcast($4, $2);
+        AddLocToNode($$, &@1, &@4);
       }
     | funcall %prec FUNCTIONCALL
       {
@@ -503,17 +538,20 @@ expr: BRACKET_L expr BRACKET_R
 exprs: expr
       {
         $$ = ASTexprs($1, NULL);
+        AddLocToNode($$, &@1, &@1);
       }
      | expr COMMA exprs
       {
         // First expr then exprs to avoid reversing the order of exprs!
         $$ = ASTexprs($1, $3);
+        AddLocToNode($$, &@1, &@3);
       }
      ;
 
 assign: varlet LET expr SEMICOLON
         {
           $$ = ASTassign($1, $3);
+          AddLocToNode($$, &@1, &@4);
         }
       ;
 
@@ -559,27 +597,37 @@ constant: floatval
 floatval: FLOAT
            {
              $$ = ASTfloat($1);
+             AddLocToNode($$, &@1, &@1);
            }
          ;
 
 intval: NUM
         {
           $$ = ASTnum($1);
+          AddLocToNode($$, &@1, &@1);
         }
       ;
 
 boolval: TRUEVAL
          {
            $$ = ASTbool(true);
+           AddLocToNode($$, &@1, &@1);
          }
        | FALSEVAL
          {
            $$ = ASTbool(false);
+           AddLocToNode($$, &@1, &@1);
          }
        ;
 %%
 
-/* Add location tracking information to a node in the parse tree */
+/* 
+Add location tracking information to a node in the parse tree.
+Cannot easily cause an error in the code because it just changes the standard
+locations of the node. When a node is created it gets the standard locations 0.
+So, by adding a location to the error message, almost nothing can go wrong for adding
+that to the compiler because if something is not correctly added the location will be 0.
+*/
 void AddLocToNode(node_st *node, void *begin_loc, void *end_loc)
 {
     // Needed because YYLTYPE unpacks later than top-level decl.

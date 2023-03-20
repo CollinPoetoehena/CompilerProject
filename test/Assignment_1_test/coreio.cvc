@@ -3,7 +3,7 @@
 extern void printInt( int val);
 extern void printSpaces( int num);
 
-// TODO: remove when milestone 14 is supported, multiple modules
+// Milestone 14 is not supported (multiple modules), so use the function here to test this file!
 export int fib(int n) {
     if (n <= 1) return n;
     return fib(n - 1) + fib(n - 2);
@@ -19,27 +19,28 @@ export void fibs(int n) {
     }
 }
 
-// This is not supported without extensions, so no need to test that, maybe the content without the nested fun!
-// export void primes(int n) {
-//     int count = 0;
-//     int i = 0;
+// No nested functions in basic, so no need to test that, the below is the content without that, so still test it,
+// can be helpful for testing the compiler!
+bool isprime(int n) {
+    if (n <= 1) return false;
+
+    for (int i = 2, n) {
+        if (n % i == 0) return false;
+    }
     
-//     bool isprime(int n) {
-//         if (n <= 1) return false;
+    return true;
+}
 
-//         for (int i = 2, n) {
-//             if (n % i == 0) return false;
-//         }
-        
-//         return true;
-//     }
+export void primes(int n) {
+    int count = 0;
+    int i = 0;
 
-//     while (n != count) {
-//         if (isprime(i)) {
-//             count = count + 1;
-//             printInt(i);
-//             printSpaces(1);
-//         } 
-//         i = i + 1;
-//     }
-// }
+    while (n != count) {
+        if (isprime(i)) {
+            count = count + 1;
+            printInt(i);
+            printSpaces(1);
+        } 
+        i = i + 1;
+    }
+}

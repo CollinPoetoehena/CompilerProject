@@ -205,13 +205,14 @@ enum Type getTypeSignatureMonOp(enum Type firstType, enum MonOpEnum operator) {
 }
 
 // Helper function to check for condition type of statements
-bool checkConditionExpression(enum Type conditionType, char *statementType) {
+bool checkConditionExpression(enum Type conditionType, char *statementType, node_st *nodeForErrorLoc) {
     if (conditionType == CT_bool) {
         // Return true if the condition expression is of type Boolean
         return true;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in %s: condition is not a bool expression", statementType);
+        CTI(CTI_ERROR, true, "type error in %s: condition is not a bool expression, at line %d, column %d",
+            statementType, NODE_BLINE(nodeForErrorLoc), NODE_BCOL(nodeForErrorLoc));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
@@ -265,7 +266,8 @@ node_st *TMAFassign(node_st *node)
     // Get the varlet type from the Ste's link and compar it with the expr type
     if (tempType != STEVAR_TYPE(VARLET_STE_LINK(ASSIGN_LET(node)))) {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in assignment: %s", VARLET_NAME(ASSIGN_LET(node)));
+        CTI(CTI_ERROR, true, "type error in assignment: %s, at line %d, column %d",
+            VARLET_NAME(ASSIGN_LET(node)), NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
@@ -288,7 +290,7 @@ node_st *TMAFifelse(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into then and else block
-    if (checkConditionExpression(tempType, "if-statement")) {
+    if (checkConditionExpression(tempType, "if-statement", node)) {
         TRAVthen(node);
         TRAVelse_block(node);
     }
@@ -312,7 +314,7 @@ node_st *TMAFwhile(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into the loop body
-    if (checkConditionExpression(tempType, "while-loop")) {
+    if (checkConditionExpression(tempType, "while-loop", node)) {
         TRAVblock(node);
     }
 
@@ -335,7 +337,7 @@ node_st *TMAFdowhile(node_st *node)
     TRAVcond(node);
 
     // Check if the condition expr is a Boolean, if so, traverse into the loop body
-    if (checkConditionExpression(tempType, "dowhile-loop")) {
+    if (checkConditionExpression(tempType, "dowhile-loop", node)) {
         TRAVblock(node);
     }
 
@@ -377,7 +379,8 @@ node_st *TMAFfor(node_st *node)
             TRAVblock(node);
         } else {
             // Prints the error when it occurs, so in this line
-            CTI(CTI_ERROR, true, "type error in for-loop: stop and/or step expression is not an int expression");
+            CTI(CTI_ERROR, true, "type error in for-loop: stop and/or step expression is not an int expression, at line %d, column %d",
+                NODE_BLINE(node), NODE_BCOL(node));
             // Create error action, will stop the current compilation at the end of this Phase
             CCNerrorPhase();
         }
@@ -388,7 +391,8 @@ node_st *TMAFfor(node_st *node)
             TRAVblock(node);
         } else {
             // Prints the error when it occurs, so in this line
-            CTI(CTI_ERROR, true, "type error in for-loop: stop expression is not an int expression");
+            CTI(CTI_ERROR, true, "type error in for-loop: stop expression is not an int expression, at line %d, column %d",
+                NODE_BLINE(node), NODE_BCOL(node));
             // Create error action, will stop the current compilation at the end of this Phase
             CCNerrorPhase();
         }
@@ -421,12 +425,15 @@ node_st *TMAFreturn(node_st *node)
         if (STEFUN_TYPE(tempFundefSteLink) == CT_void && 
             (tempType == CT_bool || tempType == CT_int || tempType == CT_float)) {
             // Prints the error when it occurs, so in this line
-            CTI(CTI_ERROR, true, "type error in return statement for function '%s'", STEFUN_NAME(tempFundefSteLink));
+            CTI(CTI_ERROR, true, "type error in return statement for function '%s', at line %d, column %d",
+                STEFUN_NAME(tempFundefSteLink), NODE_BLINE(node), NODE_BCOL(node));
+            
             // Create error action, will stop the current compilation at the end of this Phase
             CCNerrorPhase();
         } else if (tempType != STEFUN_TYPE(tempFundefSteLink) && STEFUN_TYPE(tempFundefSteLink) != CT_void) {
             // Prints the error when it occurs, so in this line
-            CTI(CTI_ERROR, true, "type error in return statement for function '%s'", STEFUN_NAME(tempFundefSteLink));
+            CTI(CTI_ERROR, true, "type error in return statement for function '%s', at line %d, column %d",
+                STEFUN_NAME(tempFundefSteLink), NODE_BLINE(node), NODE_BCOL(node));
             // Create error action, will stop the current compilation at the end of this Phase
             CCNerrorPhase();
         }
@@ -539,8 +546,8 @@ node_st *TMAFexprs(node_st *node)
     // Then check if the current argument type matches the corresponding parameter type
     if (currentFunCallNode != NULL && !typeCheckResult) {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error in funcall '%s': argument number %d's type does not match corresponding parameter type",
-            FUNCALL_NAME(currentFunCallNode), (*currentParamIndexFunCall));
+        CTI(CTI_ERROR, true, "type error in funcall '%s': argument number %d's type does not match corresponding parameter type, at line %d, column %d",
+            FUNCALL_NAME(currentFunCallNode), (*currentParamIndexFunCall), NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
@@ -581,7 +588,8 @@ node_st *TMAFbinop(node_st *node)
     } else {
         // If the function returned CT_NULL than it could not infer a type, so error!
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error: could not infer type of binary operator!");
+        CTI(CTI_ERROR, true, "type error: could not infer type of binary operator with the operand types, at line %d, column %d",
+            NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }
@@ -611,7 +619,8 @@ node_st *TMAFmonop(node_st *node)
     } else {
         // If the function returned CT_NULL than it could not infer a type, so error!
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "type error: could not infer type of monary operator!");
+        CTI(CTI_ERROR, true, "type error: could not infer type of monary operator with the operand type, at line %d, column %d",
+            NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase
         CCNerrorPhase();
     }

@@ -10,8 +10,10 @@ start phase RootPhase {
         TypeChecking;
         // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
         CompilingBooleanDisjunctionAndConjunction;
-        // then compile boolean cast (type and result type) expressions with the TernaryOp node
+        // Then compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
+        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
+        ConvertForToWhile;
         // Then print the output of the compiler
         print;
     }
@@ -55,6 +57,29 @@ PRO TIP (from experience :)):
 // TODO: typechecking, ask Simon:
 // the file contains this:     //fun() + bar();
 // but this should give an error right???
+
+
+// TODO: converting For to While nodes:
+// what if the step expression is a negative number (-)
+        // then do BO_sub instead of BO_add???
+        // probably can do BO_add right because "i + -1 == -1" right in math???
+// and the step expression needs to go at the end of the While block right???
+
+// TODO: what to do with:
+/*
+for(int i=10, 0,-1) {
+        printInt(i);
+        printSpaces(1);
+    }
+*/
+// because now my while loop has the condition x < y, but here it needs to be 
+// x > y
+// so why and how???
+// Looks like it should be "<" when the number is positive and ">" when the number is negative
+// But you do not know the value of the number right, how do you do that?????
+// So, how to do this and determine when it is > or < because it can also be an Expr node that is not
+// a num value right?? So, NUM_VALUE(node) cannot work!
+
 
 
 // TODO: when to check for integer or float out of range, etc???
@@ -229,12 +254,16 @@ traversal CompilingBooleanCastExpressions {
 // int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
 // (step expr from for loop)
 // maakt niet uit waar, zolang het voor de assembly genereren is, gaat alleen over for naar while omzetten de rest kan hetzelfde
-//TODO: create
-//     // This traversal converts For nodes to While nodes
-//     traversal ConvertForToWhile {
-//         uid = CFTW,
-//         nodes = { For }
-//     };
+// ********************************************************************************************************************************************
+//TODO: create. Then test thorougly with a lot of files with a For node! No need to test the other things because
+// that has been tested very good and thorougly already! So, just do this traversal now!!
+// This traversal converts For nodes to While nodes with exactly the same semantics.
+// Test the links by printing them as well once to see if they are moved correctly!
+// So, first see the output without Ste links, then test the same file WITH Ste links!
+traversal ConvertForToWhile {
+    uid = CFTW,
+    nodes = { For }
+};
 
 /*
 TODO: 

@@ -68,7 +68,7 @@ bool isSymbolUniqueSteFun(char *name) {
 }
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error in C!
-node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
+node_st *createSymbolTableEntrySteFun(char *name, enum Type type, node_st *nodeForErrorLoc) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUniqueSteFun(name)) {
         // Parent of fundefs is in basic always NULL, next is set later, so for now NULL
@@ -81,7 +81,8 @@ node_st *createSymbolTableEntrySteFun(char *name, enum Type type) {
         return newSte;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the function: %s", name);
+        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the function: %s, at line %d, column %d",
+            name, NODE_BLINE(nodeForErrorLoc), NODE_BCOL(nodeForErrorLoc));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }
@@ -113,7 +114,7 @@ node_st *CFSprogram(node_st *node)
 node_st *CFSfundef(node_st *node)
 {
     // Create a SteFun for this function definition
-    node_st *fundefSte = createSymbolTableEntrySteFun(FUNDEF_NAME(node), FUNDEF_TYPE(node));
+    node_st *fundefSte = createSymbolTableEntrySteFun(FUNDEF_NAME(node), FUNDEF_TYPE(node), node);
 
     // Link SteFun creation to this FunDef node if it was successfull
     if (fundefSte != NULL) {
