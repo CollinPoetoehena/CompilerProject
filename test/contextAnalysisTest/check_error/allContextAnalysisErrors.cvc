@@ -1,7 +1,18 @@
 int a;
 int b;
 
+// Duplicate globdef
+float a;
+bool b;
+
 void foo(bool b) {
+    int a;
+
+    // Duplicate vardecl
+    float a;
+    // Duplicate vardecl (now from param)
+    int b;
+
     // No matching declaration for varlets
     x = 5;
     z = 5.67;

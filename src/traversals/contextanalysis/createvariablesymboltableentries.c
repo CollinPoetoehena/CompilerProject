@@ -117,7 +117,7 @@ bool isSymbolUnique(char *name) {
 }
 
 // Create a symbol table entry node, declared after helper functions, because otherwise it gives an error!
-node_st *createSymbolTableEntry(char *name, enum Type type) {
+node_st *createSymbolTableEntry(char *name, enum Type type, node_st *nodeForErrorLoc) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUnique(name)) {
         node_st *newSte = NULL;
@@ -137,7 +137,8 @@ node_st *createSymbolTableEntry(char *name, enum Type type) {
         return newSte;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the variable: %s", name);
+        CTI(CTI_ERROR, true, "multiple matching declarations/definitions found for the variable: %s, at line %d, column %d",
+            name, NODE_BLINE(nodeForErrorLoc), NODE_BCOL(nodeForErrorLoc));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }
@@ -172,7 +173,7 @@ node_st *CVSglobdecl(node_st *node)
     currentScopeVar = 0;
 
     // Create a symbol table entry
-    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node));
+    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node), node);
 
     return node;
 }
@@ -186,7 +187,7 @@ node_st *CVSglobdef(node_st *node)
     currentScopeVar = 0;
 
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    node_st *createdSteVarEntry = createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node));
+    node_st *createdSteVarEntry = createSymbolTableEntry(GLOBDEF_NAME(node), GLOBDEF_TYPE(node), node);
     // Save the created SteVar of itself in the node to use later if it was successfull
     if (createdSteVarEntry != NULL) {
         // SteVar of itself can be used in RegularAssignments traversal to save the link for example
@@ -251,7 +252,7 @@ node_st *CVSfundef(node_st *node)
 node_st *CVSparam(node_st *node)
 {
     // Create a SteVar for the param
-    createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node));
+    createSymbolTableEntry(PARAM_NAME(node), PARAM_TYPE(node), node);
 
     // If this param has a next, do the same for the next param in the function definition
     TRAVnext(node);
@@ -280,7 +281,7 @@ node_st *CVSfunbody(node_st *node)
 node_st *CVSvardecl(node_st *node)
 {
     // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
-    node_st *createdSteVarEntry = createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node));
+    node_st *createdSteVarEntry = createSymbolTableEntry(VARDECL_NAME(node), VARDECL_TYPE(node), node);
     // Save the created SteVar of itself in the node to use later if it was successfull
     if (createdSteVarEntry != NULL) {
         // SteVar of itself can be used in RegularAssignments traversal to save the link for example
@@ -396,7 +397,8 @@ node_st *CVSvar(node_st *node)
         VAR_STE_LINK(node) = steNode;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s", VAR_NAME(node));
+        CTI(CTI_ERROR, true, "no matching declaration/definition for var: %s, at line %d, column %d",
+            VAR_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }
@@ -417,7 +419,8 @@ node_st *CVSvarlet(node_st *node)
         VARLET_STE_LINK(node) = steNode;
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s", VARLET_NAME(node));
+        CTI(CTI_ERROR, true, "no matching declaration/definition for varlet: %s, at line %d, column %d",
+            VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }

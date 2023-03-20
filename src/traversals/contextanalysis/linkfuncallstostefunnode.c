@@ -127,7 +127,8 @@ node_st *LFTSFfuncall(node_st *node)
         // If the arguments and parameter numbers are not equal, then error
         if (!compareFunCallArgumentsLength(node, steNode)) {
             // Prints the error when it occurs, so in this line
-            CTI(CTI_ERROR, true, "argument numbers for function '%s' do not match parameter numbers", FUNCALL_NAME(node));
+            CTI(CTI_ERROR, true, "argument numbers for function '%s' do not match parameter numbers, at line %d, column %d",
+                FUNCALL_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
             // Create error action, will stop the current compilation after this Action (contextanalysis traversal)
             CCNerrorAction();
         } else {
@@ -136,7 +137,8 @@ node_st *LFTSFfuncall(node_st *node)
         }
     } else {
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "no matching declaration/definition for funcall: %s", FUNCALL_NAME(node));
+        CTI(CTI_ERROR, true, "no matching declaration/definition for funcall: %s, at line %d, column %d",
+            FUNCALL_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
         // Create error action, will stop the current compilation at the end of this Phase (contextanalysis phase)
         CCNerrorPhase();
     }

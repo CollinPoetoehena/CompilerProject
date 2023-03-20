@@ -538,11 +538,13 @@ expr: BRACKET_L expr BRACKET_R
 exprs: expr
       {
         $$ = ASTexprs($1, NULL);
+        AddLocToNode($$, &@1, &@1);
       }
      | expr COMMA exprs
       {
         // First expr then exprs to avoid reversing the order of exprs!
         $$ = ASTexprs($1, $3);
+        AddLocToNode($$, &@1, &@3);
       }
      ;
 
@@ -619,7 +621,13 @@ boolval: TRUEVAL
        ;
 %%
 
-/* Add location tracking information to a node in the parse tree */
+/* 
+Add location tracking information to a node in the parse tree.
+Cannot easily cause an error in the code because it just changes the standard
+locations of the node. When a node is created it gets the standard locations 0.
+So, by adding a location to the error message, almost nothing can go wrong for adding
+that to the compiler because if something is not correctly added the location will be 0.
+*/
 void AddLocToNode(node_st *node, void *begin_loc, void *end_loc)
 {
     // Needed because YYLTYPE unpacks later than top-level decl.
