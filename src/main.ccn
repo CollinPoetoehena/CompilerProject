@@ -58,6 +58,7 @@ PRO TIP (from experience :)):
 // the file contains this:     //fun() + bar();
 // but this should give an error right???
 
+
 // TODO: converting For to While nodes:
 // what if the step expression is a negative number (-)
         // then do BO_sub instead of BO_add???
@@ -76,6 +77,10 @@ for(int i=10, 0,-1) {
 // so why and how???
 // Looks like it should be "<" when the number is positive and ">" when the number is negative
 // But you do not know the value of the number right, how do you do that?????
+// So, how to do this and determine when it is > or < because it can also be an Expr node that is not
+// a num value right?? So, NUM_VALUE(node) cannot work!
+
+
 
 // TODO: when to check for integer or float out of range, etc???
 

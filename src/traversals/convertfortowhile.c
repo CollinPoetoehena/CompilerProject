@@ -47,10 +47,6 @@ node_st *CFTWfor(node_st *node)
     // Create the condition Expr for the new While node, copy Var node from start_expr (used multiple times)
     // no copy necessary for stop expression, because it is only used once, here.
     node_st *newWhileCondition = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
-    
-     //TODO: remove this because it should always be BO_add right??? because - -3 is + 3 in math!
-    // TODO: if it can be used update it in the if statement and use it for the binop later, if not used, remove!
-    //enum Type stmtsAssignBinOpType = BO_add; // Standard is BO_add
 
         // TODO: this does not go very well, the negative numbers do not always go to > operator in the binop!
         // TODO: this is probably because it is a memory address or something and is only negative sometimes, see print!
@@ -58,6 +54,11 @@ node_st *CFTWfor(node_st *node)
             printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
         }
         // TODO: so why is a positive value a value and a negative value some sort of memory address???
+
+
+        // So, how to do this and determine when it is > or < because it can also be an Expr node that is not
+// a num value right?? So, NUM_VALUE(node) cannot work!
+
 
     // Check if the Num node is smaller than 0, if so use > operator, otherwise use < operator for positive numbers
     // TODO: the above print prints a weird value for negative numbers, why and how is that???
