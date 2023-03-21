@@ -60,31 +60,47 @@ node_st *CFTWfor(node_st *node)
         // So, how to do this and determine when it is > or < because it can also be an Expr node that is not
 // a num value right?? So, NUM_VALUE(node) cannot work!
 
-    // TODO: remove the above if this works
-    // Create a TernaryOp node for the while expression
-    node_st *ternaryOpWhileCondition;
-    if (FOR_STEP(node) != NULL) {
-        ternaryOpWhileCondition = ASTternaryop();
-            printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
-    } else {
-        // If the step is NULL, then it is the standard: +1, so < operator
-    }
-
-
-    // Check if the Num node is smaller than 0, if so use > operator, otherwise use < operator for positive numbers
-    // TODO: the above print prints a weird value for negative numbers, why and how is that???
-    if (FOR_STEP(node) != NULL && NUM_VAL(FOR_STEP(node)) < 0) {
-        // Use greater than operator: >
-        BINOP_OP(newWhileCondition) = BO_gt;
-    }
-    // TODO: is stop expression from for loop: "i < FOR_STOP(node)"??? So, the < operator???
+// // Check if the Num node is smaller than 0, if so use > operator, otherwise use < operator for positive numbers
+//     // TODO: the above print prints a weird value for negative numbers, why and how is that???
+//     if (FOR_STEP(node) != NULL && NUM_VAL(FOR_STEP(node)) < 0) {
+//         // Use greater than operator: >
+//         BINOP_OP(newWhileCondition) = BO_gt;
+//     }
+//     // TODO: is stop expression from for loop: "i < FOR_STOP(node)"??? So, the < operator???
 
     
     // TODO: Implement in the report the for loop syntax and how and when to use the < and > operator, etc!
 
 
-    // Create the new While node
-    node_st *newWhileNode = ASTwhile(newWhileCondition, FOR_BLOCK(node));
+    // TODO: remove the above if this works
+    // Create a TernaryOp node for the while expression
+    node_st *whileConditionExprNode;
+    if (FOR_STEP(node) != NULL) {        
+        /*
+        TernaryOp node:
+        predicate Expr is (step > 0)
+        then_expr Expr is for example: _i < stop
+        else_expr Expr is for example: _i > stop
+
+        The format is step > 0 ? _i < stop : _i > stop
+        This selects the correct operator for the While condition.
+        Type signature is bool.
+        Copy Var node from start_expr (used multiple times).
+        */
+        whileConditionExprNode = ASTternaryop(
+            ASTbinop(FOR_STEP(node), ASTnum(0), BO_gt),
+            ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt),
+            ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_gt),
+            CT_bool
+        );
+        // TODO: type signature correct as bool???
+    } else {
+        // If the step is NULL, then it is the standard: +1, so < operator
+        whileConditionExprNode = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
+    }
+
+    // Create the new While node, use CCNcopy for the new Expr condition node
+    node_st *newWhileNode = ASTwhile(CCNcopy(whileConditionExprNode), FOR_BLOCK(node));
     
     // Then append the step expression of the For node to the end of the While block
     node_st *forStepAssignNode = NULL;
@@ -104,13 +120,13 @@ node_st *CFTWfor(node_st *node)
         The start_expr should contain a Var node with the correct linking already
         from the renaming of for loops in the CA phase.
         Create a copy of the Var node in the start_expression because it is used multiple times.
+
+        No need to introduce a BO_sub operator, because negative step values are correctly executed:
+        _i = _i + -3;
+        is correctly executed to "_i = _i -3;" because in math +- will be -
         */
         forStepAssignNode = ASTassign(newVarLetNode,
             ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STEP(node), BO_add));
-        
-        // TODO: what if the step expression is a negative number (-)
-        // then do BO_sub instead of BO_add???
-        // probably can do BO_add right because "i + -1 == -1" right in math???
     } else {
         // Create the Assign node with + 1 (the standard step expression) BinOP node
         forStepAssignNode = ASTassign(newVarLetNode,

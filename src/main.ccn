@@ -15,7 +15,7 @@ start phase RootPhase {
         // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
         ConvertForToWhile;
         // Then generate the assembly code generation with the AST from the previous traversals
-        AssemblyCodeGeneration;
+        //AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
@@ -62,19 +62,10 @@ PRO TIP (from experience :)):
 
 
 // TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?
-// makkelijker om het allebei apart te doen in assembly, het is een klein beetje anders, bij do- while
-// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen
-
-
-
-// TODO: converting For to While nodes:
-// what if the step expression is a negative number (-)
-        // then do BO_sub instead of BO_add???
-        // probably can do BO_add right because "i + -1 == -1" right in math???
-// and the step expression needs to go at the end of the While block right???
-// i = i + 1;
-// i = i + -1;
-// This is correct
+// Answer: makkelijker om het allebei apart te doen in assembly, het is een klein beetje anders, bij do- while
+// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen.
+// Het kan dus allebei maar in assembly een do-while loop assembly genereren is goed te doen, net als while,
+// het enige verschil is dat bij do-while, eerst de executie van de body gedaan wordt en dan de conditie.
 
 
 
