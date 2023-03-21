@@ -59,6 +59,7 @@ PRO TIP (from experience :)):
 // TODO: typechecking, ask Simon:
 // the file contains this:     //fun() + bar();
 // but this should give an error right???
+// Answer: this should indeed give an error
 
 
 // TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?

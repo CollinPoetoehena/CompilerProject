@@ -27,6 +27,10 @@ void ACGinit() {
 
         // Write to a file with 'fprintf'.
         fprintf(data->assembly_output_file, "Hello World\n");
+
+        // TODO: veel dingen kan je al direct schrijven, verzin een logica dat de juiste assembly ouput
+        // tabs hoeven niet in de file, zolang de assembly maar de goede instructions heeft, maar
+        // het is goed om te debuggen misschien
     } else {
         // File is NULL, so failed
         // TODO: produce something from an error here or something???

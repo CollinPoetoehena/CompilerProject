@@ -47,32 +47,7 @@ node_st *CFTWfor(node_st *node)
 
     // Create the condition Expr for the new While node, copy Var node from start_expr (used multiple times)
     // no copy necessary for stop expression, because it is only used once, here.
-    // node_st *newWhileCondition = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
-
-    //     // TODO: this does not go very well, the negative numbers do not always go to > operator in the binop!
-    //     // TODO: this is probably because it is a memory address or something and is only negative sometimes, see print!
-    //     if (FOR_STEP(node) != NULL) {
-    //         printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
-    //     }
-        // TODO: so why is a positive value a value and a negative value some sort of memory address???
-
-
-        // So, how to do this and determine when it is > or < because it can also be an Expr node that is not
-// a num value right?? So, NUM_VALUE(node) cannot work!
-
-// // Check if the Num node is smaller than 0, if so use > operator, otherwise use < operator for positive numbers
-//     // TODO: the above print prints a weird value for negative numbers, why and how is that???
-//     if (FOR_STEP(node) != NULL && NUM_VAL(FOR_STEP(node)) < 0) {
-//         // Use greater than operator: >
-//         BINOP_OP(newWhileCondition) = BO_gt;
-//     }
-//     // TODO: is stop expression from for loop: "i < FOR_STOP(node)"??? So, the < operator???
-
     
-    // TODO: Implement in the report the for loop syntax and how and when to use the < and > operator, etc!
-
-
-    // TODO: remove the above if this works
     // Create a TernaryOp node for the while expression
     node_st *whileConditionExprNode;
     if (FOR_STEP(node) != NULL) {        
@@ -85,12 +60,12 @@ node_st *CFTWfor(node_st *node)
         The format is step > 0 ? _i < stop : _i > stop
         This selects the correct operator for the While condition.
         Type signature is bool.
-        Copy Var node from start_expr (used multiple times).
+        Copy some nodes because they are used multiple times
         */
         whileConditionExprNode = ASTternaryop(
-            ASTbinop(FOR_STEP(node), ASTnum(0), BO_gt),
+            ASTbinop(CCNcopy(FOR_STEP(node)), ASTnum(0), BO_gt),
             ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt),
-            ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_gt),
+            ASTbinop(CCNcopy(FOR_START_EXPR(node)), CCNcopy(FOR_STOP(node)), BO_gt),
             CT_bool
         );
         // TODO: type signature correct as bool???
@@ -100,7 +75,7 @@ node_st *CFTWfor(node_st *node)
     }
 
     // Create the new While node, use CCNcopy for the new Expr condition node
-    node_st *newWhileNode = ASTwhile(CCNcopy(whileConditionExprNode), FOR_BLOCK(node));
+    node_st *newWhileNode = ASTwhile(whileConditionExprNode, FOR_BLOCK(node));
     
     // Then append the step expression of the For node to the end of the While block
     node_st *forStepAssignNode = NULL;
