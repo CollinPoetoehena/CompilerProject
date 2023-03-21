@@ -44,11 +44,7 @@ node_st *CFTWfor(node_st *node)
     TRAVblock(node);
 
     // Then after that, convert this node to a While node
-
-    // Create the condition Expr for the new While node, copy Var node from start_expr (used multiple times)
-    // no copy necessary for stop expression, because it is only used once, here.
-    
-    // Create a TernaryOp node for the while expression
+    // First, create a TernaryOp or BinOp node for the while expression
     node_st *whileConditionExprNode;
     if (FOR_STEP(node) != NULL) {        
         /*
@@ -68,13 +64,12 @@ node_st *CFTWfor(node_st *node)
             ASTbinop(CCNcopy(FOR_START_EXPR(node)), CCNcopy(FOR_STOP(node)), BO_gt),
             CT_bool
         );
-        // TODO: type signature correct as bool???
     } else {
-        // If the step is NULL, then it is the standard: +1, so < operator
+        // If the step is NULL, then it is the standard: +1, so < operator with a BinOp node
         whileConditionExprNode = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
     }
 
-    // Create the new While node, use CCNcopy for the new Expr condition node
+    // Create the new While node, no copy necessary, nodes are already copied in the creation
     node_st *newWhileNode = ASTwhile(whileConditionExprNode, FOR_BLOCK(node));
     
     // Then append the step expression of the For node to the end of the While block

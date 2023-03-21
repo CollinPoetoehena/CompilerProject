@@ -14,34 +14,14 @@ start phase RootPhase {
         CompilingBooleanCastExpressions;
         // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
         ConvertForToWhile;
-        // Then generate the assembly code generation with the AST from the previous traversals
-        //AssemblyCodeGeneration;
+        // Then generate the assembly code with the AST from the previous traversals
+        AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
 };
 
-/*
-SHORT MEMORY TUTORIAL IN COCONUT AND C:
-
-Use CCNcopy when you update something in the AST that you are not returning, otherwise it is lost 
-or can cause a double free error because a global variable in a traversal.c file will be freed by CoCoNut
-after that traversal, and then anything can still point to this already freed global variable and cause an error.
-In short:
-    - changes to the node of a traversal function of that node are saved because this 
-        node is returned at the end, so no CCNcopy required.
-    - changes to the AST outside this node, such as the VarDecl nodes changed in renameforidentifiers.c traversal
-        require a CCNcopy because otherwise the result is lost and can cause a memory leak or a double free, etcetera!
-    - one thing to keep in mind is that you still need to copy some things, such as STRcopy for setting the
-        FOR_START_EXRP(node) = ASTvar(FOR_VAR(node));
-        because otherwise you would still have a memory issue because now FOR_START_EXRP(node) and
-        FOR_VAR(node) point to the same char * in memory! So, it should look like this ASTvar(STRcpy(FOR_VAR(node)))
-
-PRO TIP (from experience :)):
-    Try to make changes to the AST in the traversal functions of that node, try to avoid changing a node outside of 
-    its traversal function as much as possible because it can lead to unpredictable behaviour otherwise! Unless
-    it is absolutely unavoidable you can try doing it, but be careful and test everything thorougly again then!
-*/
+// TODO:
 
 //TODO: remove when done, these are common commands:
 // make
@@ -55,11 +35,13 @@ PRO TIP (from experience :)):
 // so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
 //for the exam and some less stress, etc :)!!!
 
+// TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
-// TODO: typechecking, ask Simon:
-// the file contains this:     //fun() + bar();
-// but this should give an error right???
-// Answer: this should indeed give an error
+
+// TODO: when to check for integer and float out of range, etc???
+// at the end, but when, ask Simon, probably in the Num and Float node for Assembly generation right?
+
+
 
 
 // TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?
@@ -67,35 +49,6 @@ PRO TIP (from experience :)):
 // begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen.
 // Het kan dus allebei maar in assembly een do-while loop assembly genereren is goed te doen, net als while,
 // het enige verschil is dat bij do-while, eerst de executie van de body gedaan wordt en dan de conditie.
-
-
-
-// TODO: what to do with:
-/*
-for(int i=10, 0,-1) {
-        printInt(i);
-        printSpaces(1);
-    }
-*/
-// because now my while loop has the condition x < y, but here it needs to be 
-// x > y
-// so why and how???
-// Looks like it should be "<" when the number is positive and ">" when the number is negative
-// But you do not know the value of the number right, how do you do that?????
-// So, how to do this and determine when it is > or < because it can also be an Expr node that is not
-// a num value right?? So, NUM_VALUE(node) cannot work!
-// Answer: Lange expressie opbouwen
-// while(TernaryOp)
-// s is step and L is stop expr
-// 
-
-
-
-// TODO: when to check for integer and float out of range, etc???
-
-
-// TODO: how to generate the file for assembly in the traversal, is there code about that somewhere???? Ask Simon
-// globale variabele vanuit CoCoNut. Zit in
 
 
 // ************************************************************************************************************************************
