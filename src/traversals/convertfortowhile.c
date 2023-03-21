@@ -15,6 +15,7 @@
 #include "ccngen/enum.h"
 #include "ccn/ccn_types.h"
 
+// Helper function to append a new Stmts node to the end of an Stmts node's chain
 node_st *appendStmtsNodeToTail(node_st *firstSmtsNode, node_st *newStmtsNode) {
     node_st *stmtsIterator = firstSmtsNode;
     do {        
@@ -46,18 +47,28 @@ node_st *CFTWfor(node_st *node)
 
     // Create the condition Expr for the new While node, copy Var node from start_expr (used multiple times)
     // no copy necessary for stop expression, because it is only used once, here.
-    node_st *newWhileCondition = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
+    // node_st *newWhileCondition = ASTbinop(CCNcopy(FOR_START_EXPR(node)), FOR_STOP(node), BO_lt);
 
-        // TODO: this does not go very well, the negative numbers do not always go to > operator in the binop!
-        // TODO: this is probably because it is a memory address or something and is only negative sometimes, see print!
-        if (FOR_STEP(node) != NULL) {
-            printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
-        }
+    //     // TODO: this does not go very well, the negative numbers do not always go to > operator in the binop!
+    //     // TODO: this is probably because it is a memory address or something and is only negative sometimes, see print!
+    //     if (FOR_STEP(node) != NULL) {
+    //         printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
+    //     }
         // TODO: so why is a positive value a value and a negative value some sort of memory address???
 
 
         // So, how to do this and determine when it is > or < because it can also be an Expr node that is not
 // a num value right?? So, NUM_VALUE(node) cannot work!
+
+    // TODO: remove the above if this works
+    // Create a TernaryOp node for the while expression
+    node_st *ternaryOpWhileCondition;
+    if (FOR_STEP(node) != NULL) {
+        ternaryOpWhileCondition = ASTternaryop();
+            printf("num value of For node step expr: %d\n", NUM_VAL(FOR_STEP(node)));
+    } else {
+        // If the step is NULL, then it is the standard: +1, so < operator
+    }
 
 
     // Check if the Num node is smaller than 0, if so use > operator, otherwise use < operator for positive numbers
@@ -67,6 +78,10 @@ node_st *CFTWfor(node_st *node)
         BINOP_OP(newWhileCondition) = BO_gt;
     }
     // TODO: is stop expression from for loop: "i < FOR_STOP(node)"??? So, the < operator???
+
+    
+    // TODO: Implement in the report the for loop syntax and how and when to use the < and > operator, etc!
+
 
     // Create the new While node
     node_st *newWhileNode = ASTwhile(newWhileCondition, FOR_BLOCK(node));

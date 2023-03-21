@@ -9,6 +9,53 @@
 
 #include "ccn/ccn.h"
 #include "ccngen/ast.h"
+// Include the globals.h for the global output file
+#include "global/globals.h"
+// Include FILE * from stdio.h in C to work with files
+#include <stdio.h>
+
+// Get the output file in the init fuction
+void ACGinit() {
+    // Initialize file pointer, ensures there is a file.
+    // Use the global.output_file from globals in CoCoNut to write the assembly to
+    FILE *file = fopen(global.output_file, "w");
+
+    if (file != NULL) {
+        // Get the file pointer from the travdata of the ACG traversal and update it
+        struct data_acg *data = DATA_ACG_GET();
+        data->assembly_output_file = file;
+
+        // Write to a file with 'fprintf'.
+        fprintf(data->assembly_output_file, "Hello World\n");
+    } else {
+        // File is NULL, so failed
+        // TODO: produce something from an error here or something???
+    }
+    
+    return;
+}
+
+void ACGfini() {
+    // TODO: close the file here
+
+    // Get the file pointer from the travdata of the ACG traversal and update it
+    struct data_acg *data = DATA_ACG_GET();
+
+    // Close the file at the end of the traversal
+    fclose(data->assembly_output_file);
+
+    return;
+}
+
+/*
+TODO: this is how you generate a file:
+./civicc ../test/basic/functional/for_to_while.cvc -o <fileName>
+The file will be made in the current directory, so you run this in the build-debug,
+so the file can then be found in that directory!
+
+You can run this command in the build-debug to see more information about civicc
+./civicc
+*/
 
 /**
  * @fn ACGprogram
