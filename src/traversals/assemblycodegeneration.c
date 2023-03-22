@@ -561,7 +561,8 @@ node_st *ACGvarlet(node_st *node)
     // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
     int varletIndex = STEVAR_ASSEMBLY_INDEX(VARLET_STE_LINK(node));
     // Save the VarLet into the assembly
-    // type store 
+    // instruction: <type>store <index>
+    //fprintf(data->assembly_output_file, "iloadc %d\n", constandIndex);
 
     return node;
 }
