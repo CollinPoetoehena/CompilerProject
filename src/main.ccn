@@ -360,67 +360,31 @@ node Decls {
     }
 };
 
-node Exprs {
+node GlobDecl {
     children {
-        Expr expr { constructor, mandatory },
-        Exprs next { constructor }
-    }
-};
-
-// This is for the array expression, which is extension 2 and 3
-node ArrExpr {
-    children {
-        Exprs exprs { constructor, mandatory }
-    }
-};
-
-// Ids are only used for array extensions (= arr[m,n] m and n are Ids), so not yet used
-node Ids {
-    children {
-        Ids next   
+        // Dimensions for array extension 3, leave for now
+        Ids dims
     },
+
     attributes {
-        string name
+        Type type { constructor },
+        string name { constructor }
     }
 };
 
-node ExprStmt {
+node GlobDef {
     children {
-        Expr expr { constructor, mandatory }
-    }
-};
-
-node Return {
-    children {
-        Expr expr { constructor }
-    }
-};
-
-// (= later on, same as Var and VarLet, such as void foo(){}; return foo();, foo in return is the FunCall)
-node FunCall {
-    children {
-        Exprs args { constructor }
+        // Dimensions for array extension 3, leave for now
+        Exprs dims { constructor },
+        Expr init { constructor }
     },
+
     attributes {
+        Type type { constructor },
         string name { constructor },
-        Link ste_link
-    }
-};
-
-node Cast {
-    children {
-        Expr expr {constructor, mandatory }
-    }, 
-    attributes {
-        Type type {constructor }
-    }
-};
-
-// Used for first extension: nested functions
-node FunDefs {
-    children {
-        FunDef fundef { constructor, mandatory },
-        FunDefs next
+        bool export { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 
@@ -446,6 +410,19 @@ node FunDef {
     }
 };
 
+node Param {
+    children {
+        // Dimensions for array extension 3, leave for now
+        Ids dims { constructor },
+        Param next { constructor }
+    },
+
+    attributes {
+        string name { constructor, mandatory },
+        Type type { constructor }
+    }
+};
+
 // local_fundefs is used for nested function definitions
 node FunBody {
     children {
@@ -453,6 +430,42 @@ node FunBody {
         // local_fundefs is for the first extension, ignore for now
         FunDefs local_fundefs,
         Stmts stmts { constructor }
+    }
+};
+
+node VarDecl {
+    children {
+        // Dimensions for array extension 3, leave for now
+        Exprs dims { constructor },
+        Expr init { constructor },
+        VarDecl next { constructor }
+    },
+
+    attributes {
+        string name { constructor },
+        Type type { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
+    }
+};
+
+node Stmts {
+    children {
+        Stmt stmt { constructor, mandatory },
+        Stmts next { constructor }
+    }
+};
+
+node Assign {
+    children {
+        VarLet let { constructor },
+        Expr expr { constructor, mandatory }
+    }
+};
+
+node ExprStmt {
+    children {
+        Expr expr { constructor, mandatory }
     }
 };
 
@@ -491,74 +504,9 @@ node For {
     }
 };
 
-node GlobDecl {
+node Return {
     children {
-        // Dimensions for array extension 3, leave for now
-        Ids dims
-    },
-
-    attributes {
-        Type type { constructor },
-        string name { constructor }
-    }
-};
-
-node GlobDef {
-    children {
-        // Dimensions for array extension 3, leave for now
-        Exprs dims { constructor },
-        Expr init { constructor }
-    },
-
-    attributes {
-        Type type { constructor },
-        string name { constructor },
-        bool export { constructor },
-        // Link to its own symbol table, can be used in RegularAssignments traversal for example
-        SteVar symbol_table
-    }
-};
-
-node Param {
-    children {
-        // Dimensions for array extension 3, leave for now
-        Ids dims { constructor },
-        Param next { constructor }
-    },
-
-    attributes {
-        string name { constructor, mandatory },
-        Type type { constructor }
-    }
-};
-
-node VarDecl {
-    children {
-        // Dimensions for array extension 3, leave for now
-        Exprs dims { constructor },
-        Expr init { constructor },
-        VarDecl next { constructor }
-    },
-
-    attributes {
-        string name { constructor },
-        Type type { constructor },
-        // Link to its own symbol table, can be used in RegularAssignments traversal for example
-        SteVar symbol_table
-    }
-};
-
-node Stmts {
-    children {
-        Stmt stmt { constructor, mandatory },
-        Stmts next { constructor }
-    }
-};
-
-node Assign {
-    children {
-        VarLet let { constructor },
-        Expr expr { constructor, mandatory }
+        Expr expr { constructor }
     }
 };
 
@@ -614,6 +562,33 @@ node VarLet {
     }
 };
 
+node Cast {
+    children {
+        Expr expr {constructor, mandatory }
+    }, 
+    attributes {
+        Type type {constructor }
+    }
+};
+
+// (= later on, same as Var and VarLet, such as void foo(){}; return foo();, foo in return is the FunCall)
+node FunCall {
+    children {
+        Exprs args { constructor }
+    },
+    attributes {
+        string name { constructor },
+        Link ste_link
+    }
+};
+
+node Exprs {
+    children {
+        Expr expr { constructor, mandatory },
+        Exprs next { constructor }
+    }
+};
+
 // Variable in an expression (= later on, such as int d = a * 5, a is the Var).
 node Var {
     children {
@@ -644,7 +619,6 @@ node Bool {
         bool val { constructor }
     }
 };
-
 
 // This is the node for a Symbol table chain for variables
 node SteVar {
@@ -678,5 +652,32 @@ node SteFun {
         // Params is the LinkedList from the FunDef, should contain the first value of 
         // the FunDef params. From the first value the LinkedList chain can be followed.
         Param params { constructor }
+    }
+};
+
+
+
+// Used for first extension: nested functions
+node FunDefs {
+    children {
+        FunDef fundef { constructor, mandatory },
+        FunDefs next
+    }
+};
+
+// This is for the array expression, which is extension 2 and 3
+node ArrExpr {
+    children {
+        Exprs exprs { constructor, mandatory }
+    }
+};
+
+// Ids are only used for array extensions (= arr[m,n] m and n are Ids), so not yet used
+node Ids {
+    children {
+        Ids next   
+    },
+    attributes {
+        string name
     }
 };
