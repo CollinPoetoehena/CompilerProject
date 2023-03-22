@@ -14,32 +14,14 @@ start phase RootPhase {
         CompilingBooleanCastExpressions;
         // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
         ConvertForToWhile;
+        // Then generate the assembly code with the AST from the previous traversals
+        AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
 };
 
-/*
-SHORT MEMORY TUTORIAL IN COCONUT AND C:
-
-Use CCNcopy when you update something in the AST that you are not returning, otherwise it is lost 
-or can cause a double free error because a global variable in a traversal.c file will be freed by CoCoNut
-after that traversal, and then anything can still point to this already freed global variable and cause an error.
-In short:
-    - changes to the node of a traversal function of that node are saved because this 
-        node is returned at the end, so no CCNcopy required.
-    - changes to the AST outside this node, such as the VarDecl nodes changed in renameforidentifiers.c traversal
-        require a CCNcopy because otherwise the result is lost and can cause a memory leak or a double free, etcetera!
-    - one thing to keep in mind is that you still need to copy some things, such as STRcopy for setting the
-        FOR_START_EXRP(node) = ASTvar(FOR_VAR(node));
-        because otherwise you would still have a memory issue because now FOR_START_EXRP(node) and
-        FOR_VAR(node) point to the same char * in memory! So, it should look like this ASTvar(STRcpy(FOR_VAR(node)))
-
-PRO TIP (from experience :)):
-    Try to make changes to the AST in the traversal functions of that node, try to avoid changing a node outside of 
-    its traversal function as much as possible because it can lead to unpredictable behaviour otherwise! Unless
-    it is absolutely unavoidable you can try doing it, but be careful and test everything thorougly again then!
-*/
+// TODO:
 
 //TODO: remove when done, these are common commands:
 // make
@@ -54,38 +36,32 @@ PRO TIP (from experience :)):
 //for the exam and some less stress, etc :)!!!
 
 
-// TODO: typechecking, ask Simon:
-// the file contains this:     //fun() + bar();
-// but this should give an error right???
+
+// TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
 
-// TODO: converting For to While nodes:
-// what if the step expression is a negative number (-)
-        // then do BO_sub instead of BO_add???
-        // probably can do BO_add right because "i + -1 == -1" right in math???
-// and the step expression needs to go at the end of the While block right???
+//TODO: what to do with the output file, need to do something else with it or where do you need to 
+// save the output file, etc????
 
-// TODO: what to do with:
-/*
-for(int i=10, 0,-1) {
-        printInt(i);
-        printSpaces(1);
-    }
-*/
-// because now my while loop has the condition x < y, but here it needs to be 
-// x > y
-// so why and how???
-// Looks like it should be "<" when the number is positive and ">" when the number is negative
-// But you do not know the value of the number right, how do you do that?????
-// So, how to do this and determine when it is > or < because it can also be an Expr node that is not
-// a num value right?? So, NUM_VALUE(node) cannot work!
+// How do you test your compiler in output, like the performed functions????
+
+
+// TODO: now when I run my compiler without the flag "-o <fileName>"
+// it gives an error for output file not found, is that correct or????
+
+
+// TODO: when to check for integer and float out of range, etc???
+// at the end, but when, ask Simon, probably in the Num and Float node for Assembly generation right?
 
 
 
-// TODO: when to check for integer or float out of range, etc???
 
 
-// TODO: how to generate the file for assembly in the traversal, is there code about that somewhere???? Ask Simon
+// TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?
+// Answer: makkelijker om het allebei apart te doen in assembly, het is een klein beetje anders, bij do- while
+// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen in assembly kan makkelijk.
+// Het kan dus allebei maar in assembly een do-while loop assembly genereren is goed te doen, net als while,
+// het enige verschil is dat bij do-while, eerst de executie van de body gedaan wordt en dan de conditie.
 
 
 // ************************************************************************************************************************************
@@ -249,17 +225,7 @@ traversal CompilingBooleanCastExpressions {
     nodes = { Cast, BinOp, FunCall, Bool }
 };
 
-// TODO later: Create separate traversal to convert for loop to while loop, easier after ContextAnalysis, but when to do it????
-// this is done before code generation because it has no for loops in the VM for example, like this:
-// int declaration eruit, dan de for omzetten naar een while loop en de body extenden met de increment aan het eind 
-// (step expr from for loop)
-// maakt niet uit waar, zolang het voor de assembly genereren is, gaat alleen over for naar while omzetten de rest kan hetzelfde
-// ********************************************************************************************************************************************
-//TODO: create. Then test thorougly with a lot of files with a For node! No need to test the other things because
-// that has been tested very good and thorougly already! So, just do this traversal now!!
 // This traversal converts For nodes to While nodes with exactly the same semantics.
-// Test the links by printing them as well once to see if they are moved correctly!
-// So, first see the output without Ste links, then test the same file WITH Ste links!
 traversal ConvertForToWhile {
     uid = CFTW,
     nodes = { For }
@@ -310,10 +276,13 @@ TODO:
     zoals een BinOp is bijvoorbeeld in principe 2 dingen traversen en dan addition doen.
 */
 // This traversal is used for assembly code generation
-// traversal AssemblyCodeGeneration {
-//     uid = ACG,
-
-// };
+traversal AssemblyCodeGeneration {
+    uid = ACG,
+    travdata {
+        // This is the global output file used to write the generated assembly to
+        user file_ptr assembly_output_file
+    }
+};
 
 /*
 TODO: this is done during CodeGeneration, but when and how, etc???
