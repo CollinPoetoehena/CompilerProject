@@ -25,8 +25,13 @@
 #include "palm/memory.h"
 #include "palm/dbug.h"
 
-// TODO: is this correct with the constants index??
+// Save the index of the constant in a global variable to use for creation assembly
 int constandIndex = 0;
+// Save the index of the VarDecls in a global variable to use for creation assembly
+int vardeclsIndex = 0;
+
+// Save the current fundef first SteVar to use
+//node_st *firstSteVarCurrentFunDefACG = NULL;
 
 // This function is performed at the start of the traversal
 void ACGinit() {
@@ -95,7 +100,7 @@ char *getOperandTypeAssembly(enum Type type) {
     // Get the type
     char *assemblyType = NULL;
 
-    // Get the type (void excluded)
+    // Get the type
     switch (type) {
         case CT_int:
             assemblyType = "i";
@@ -106,12 +111,20 @@ char *getOperandTypeAssembly(enum Type type) {
         case CT_bool:
             assemblyType = "b";
             break;
+        case CT_void:
+            // void is empty, such as 'return' for a void return
+            assemblyType = "";
+            break;
         case CT_NULL:
             DBUG_ASSERT(false, "unknown type detected!");
     }
 
     return assemblyType;
 }
+
+// int getIndexFromSteVarChain(node_st *firstSteVarEntry) {
+
+// }
 
 /**
  * @fn ACGprogram
@@ -171,6 +184,45 @@ node_st *ACGglobdef(node_st *node)
  */
 node_st *ACGfundef(node_st *node)
 {
+    /*
+    TODO: this is how you handle external functions that are build in:
+        - check if the fundef is exported and if the funbody is NULL, then it is a FunDec
+        - No need to check for a name of the built in functions, extern functions are always this way, so just follow this:
+        - Then create the assembly instruction for the external built in function:
+            .importfun "funName" <retType> <args>
+        - Then update this fundef ste link node with its index in the assembly instructions (global variable)
+            STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node));
+            = globalVariable
+        - Then when you get the funcall node of this fundef (can be found with the stefun link)
+            get the index, check if STEFUN_ASSEMBLY_INDEX(FUNCALL)_STE_LINK(node)) != NULL, then:
+            then you add the following assembly instruction:
+            jsre <indexFromSteLink>
+            This is: jump to external subroutine (which is the external function that is done for you already!)
+        - OR: what you can also do is create a hash table in the travdata with the funName and the index, but the above is easier
+
+    */
+    // isr 
+    // start a new subroutine, eigenlijk wanneer je een functie called, voorbereiden op uitvoer functie
+    // sub routine is eigenlijk een functie in assembly
+
+    // onder isr alle argumenten loaden met 'load'
+    //
+
+    // label is een unieke naam die je in de assembly neerzet, gebruik het overal waar je moet jumpen
+    // dit gebruik je eigenlijk als de offset, dat gebruik je in de 'jsr'
+    // alle labels moeten uniek zijn, dat moet je bijhouden, bijv. met een counter voor labels
+
+    // je kan ook jumpen naar een subroutine als iets true is, zoals met
+    // branch_t O
+    // Dit jumpt alleen als iets true is, met offset O
+    // Maar bekijk de CiviC VM manual gewoon en lees alles dan zie je wat alles doet en hoe het werkt, etc!
+    // werk weer in kleine stapjes!
+
+
+    // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
+    // TODO: is it correct that only the vardeclsIndex needs to be reset
+    vardeclsIndex = 0;
+    
     // Traverse the children
     TRAVbody(node);
     TRAVparams(node);
@@ -218,6 +270,11 @@ These nodes are children of the FunBody node
  */
 node_st *ACGvardecl(node_st *node)
 {
+    // Get the SteVar of this VarDecl and update it with the assembly index to use later
+    STEVAR_ASSEMBLY_INDEX(VARDECL_SYMBOL_TABLE(node)) = vardeclsIndex;
+    // Increment the vardecls index for the next VarDecl
+    vardeclsIndex++;
+
     // Traverse into the children
     TRAVinit(node);
     TRAVnext(node);
@@ -230,17 +287,14 @@ node_st *ACGvardecl(node_st *node)
  */
 node_st *ACGstmts(node_st *node)
 {
-    // TODO: correct to first to the next every time and then traverse the stmt of the last one
-    // this way you can find the last statement as described in the slides
-    // or is it not what was meant by the slides and was it meant the last Expr???
-
-    // TODO: probably traverse down to last statement because the Stack is LIFO, so do the last statement first
-
-    // Traverse the next Stmts
-    TRAVnext(node);
+    // In the slides it said traverse down to the last statement, but it meant the last statement in the line, so
+    // basically the last expression
 
     // Traverse the Stmt
     TRAVstmt(node);
+
+    // Traverse the next Stmts
+    TRAVnext(node);
 
     return node;
 }
@@ -254,9 +308,7 @@ These are the statement nodes (Stmt)
  * @fn ACGassign
  */
 node_st *ACGassign(node_st *node)
-{
-    // TODO: generate assembly
-    
+{    
     // First traverse the left hand side variable
     TRAVlet(node);
 
@@ -346,6 +398,11 @@ node_st *ACGreturn(node_st *node)
 {
     // Traverse the return Expr
     TRAVexpr(node);
+
+    // // Allocate memory for a string of up to 99 characters
+    // char *monopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
+    // // Initialize with empty string to avoid weird memory address value being used at the start
+    // strcpy(monopInstructionSymbol, "");
 
     return node;
 }
@@ -451,27 +508,27 @@ node_st *ACGbinop(node_st *node)
 node_st *ACGmonop(node_st *node)
 {
     // Allocate memory for a string of up to 99 characters
-    char *binopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
+    char *monopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
     // Initialize with empty string to avoid weird memory address value being used at the start
-    strcpy(binopInstructionSymbol, "");
+    strcpy(monopInstructionSymbol, "");
 
     if (BINOP_OPERATOR_TYPE_SIGNATURE(node) != CT_NULL) {
         char *assemblyTypeString = getOperandTypeAssembly(BINOP_OPERATOR_TYPE_SIGNATURE(node));
         if (assemblyTypeString != NULL) {
             // Add the type in front of the string, such as i, then at the end it will be iadd
-            binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
+            monopInstructionSymbol = STRcat(monopInstructionSymbol, assemblyTypeString);
         }
 
         // Type of the operator
         switch (MONOP_OP(node)) {
             case MO_not:
-            tmp = "!";
-            break;
+                monopInstructionSymbol = STRcat(monopInstructionSymbol, "not");
+                break;
             case MO_neg:
-            tmp = "-";
-            break;
+                monopInstructionSymbol = STRcat(monopInstructionSymbol, "neg");
+                break;
             case MO_NULL:
-            DBUG_ASSERT(false, "unknown monop detected!");
+                DBUG_ASSERT(false, "unknown monop detected!");
         }
     }
 
@@ -501,6 +558,11 @@ These are the nodes that have an Ste link, Var, VarLet and FunCall (has Exprs no
  */
 node_st *ACGvarlet(node_st *node)
 {
+    // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
+    int varletIndex = STEVAR_ASSEMBLY_INDEX(VARLET_STE_LINK(node));
+    // Save the VarLet into the assembly
+    // type store 
+
     return node;
 }
 
@@ -535,6 +597,7 @@ node_st *ACGexprs(node_st *node)
  */
 node_st *ACGvar(node_st *node)
 {
+
     return node;
 }
 

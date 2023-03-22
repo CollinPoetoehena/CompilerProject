@@ -43,12 +43,11 @@ start phase RootPhase {
 //TODO: what to do with the output file, need to do something else with it or where do you need to 
 // save the output file, etc????
 
-// TODO: how to add tests to the MakeFile to run your own tests?
-
-// TODO: How do you test your compiler in output, like the performed functions????
-
 
 // TODO: in the slides it said traverse down to the last statement, but why not do the stmt and then the next Stmts???
+
+
+
 
 
 // TODO: now when I run my compiler without the flag "-o <fileName>"
@@ -631,7 +630,9 @@ node SteVar {
         // Parent points to a higher nesting level
         SteVar parent { constructor },
         // LinkedList data structure for next symbol table
-        SteVar next { constructor }
+        SteVar next { constructor },
+        // This is used for creating assembly instructions with the correct index
+        int assembly_index_vardecl
     }, 
 
     attributes {
@@ -656,7 +657,9 @@ node SteFun {
         int nesting_level { constructor },
         // Params is the LinkedList from the FunDef, should contain the first value of 
         // the FunDef params. From the first value the LinkedList chain can be followed.
-        Param params { constructor }
+        Param params { constructor },
+        // This is used for creating assembly instructions with the correct index
+        int assembly_index_fundef
     }
 };
 
