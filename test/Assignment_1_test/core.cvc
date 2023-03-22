@@ -1,3 +1,7 @@
+extern void printInt(int val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
 export int gcd(int a, int b) {
     for(int i = a, 0, -1) {
         if(a % i == 0 && b % i == 0) return i;
@@ -24,4 +28,33 @@ export bool isprime(int n) {
     }
     
     return true;
+}
+
+export int main() {
+    // core.cvc tests
+    int gcdTest =  gcd(100, 20);
+    int facTest = fac(5);
+    int fibTest = fib(10);
+    bool isprimeTest = isprime(97);
+
+    // print test results of core.cvc
+    printInt(gcdTest);
+    printNewlines(1);
+
+    printInt(facTest);
+    printNewlines(1);
+
+    printInt(fibTest);
+    printNewlines(1);
+
+    if (isprimeTest == true) {
+        // is prime number
+        printInt(1);
+    } else {
+        // is not a prime number
+        printInt(0);
+    }
+    printNewlines(3);
+
+    return 0;
 }

@@ -35,7 +35,19 @@ start phase RootPhase {
 // so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
 //for the exam and some less stress, etc :)!!!
 
+
+
 // TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
+
+
+//TODO: what to do with the output file, need to do something else with it or where do you need to 
+// save the output file, etc????
+
+// How do you test your compiler in output, like the performed functions????
+
+
+// TODO: now when I run my compiler without the flag "-o <fileName>"
+// it gives an error for output file not found, is that correct or????
 
 
 // TODO: when to check for integer and float out of range, etc???
@@ -44,9 +56,10 @@ start phase RootPhase {
 
 
 
+
 // TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?
 // Answer: makkelijker om het allebei apart te doen in assembly, het is een klein beetje anders, bij do- while
-// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen.
+// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen in assembly kan makkelijk.
 // Het kan dus allebei maar in assembly een do-while loop assembly genereren is goed te doen, net als while,
 // het enige verschil is dat bij do-while, eerst de executie van de body gedaan wordt en dan de conditie.
 

@@ -73,6 +73,9 @@ You can run this command in the build-debug to see more information about civicc
  */
 node_st *ACGprogram(node_st *node)
 {
+    // Traverse to the children
+    TRAVdecls(node);
+
     return node;
 }
 
@@ -81,6 +84,10 @@ node_st *ACGprogram(node_st *node)
  */
 node_st *ACGdecls(node_st *node)
 {
+    // Traverse to the children
+    TRAVdecl(node);
+    TRAVnext(node);
+
     return node;
 }
 
@@ -94,6 +101,10 @@ These nodes are Decl nodes
  */
 node_st *ACGglobdecl(node_st *node)
 {
+    // No children for basic here, so perform assembly generation
+
+    // TODO
+
     return node;
 }
 
@@ -102,6 +113,11 @@ node_st *ACGglobdecl(node_st *node)
  */
 node_st *ACGglobdef(node_st *node)
 {
+    // Traverse to the init Expr
+    TRAVinit(node);
+
+    // TODO: perform assembly generation
+    
     return node;
 }
 

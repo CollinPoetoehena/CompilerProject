@@ -1,7 +1,6 @@
-// #include "civic.h"
-// #include "core.h"
-extern void printInt( int val);
-extern void printSpaces( int num);
+extern void printInt(int val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
 
 // Milestone 14 is not supported (multiple modules), so use the function here to test this file!
 export int fib(int n) {
@@ -43,4 +42,15 @@ export void primes(int n) {
         } 
         i = i + 1;
     }
+}
+
+export int main() {
+    // coreio.cvc tests
+    fibs(5);
+    printNewlines(1);
+
+    primes(6);
+    printNewlines(3);
+
+    return 0;
 }
