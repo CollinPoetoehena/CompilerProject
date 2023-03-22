@@ -23,6 +23,10 @@
 #include "ccn/ccn_types.h"
 // Include memory from Palm to work with memory
 #include "palm/memory.h"
+#include "palm/dbug.h"
+
+// TODO: is this correct with the constants index??
+int constandIndex = 0;
 
 // This function is performed at the start of the traversal
 void ACGinit() {
@@ -74,6 +78,15 @@ so the file can then be found in that directory!
 
 You can run this command in the build-debug to see more information about civicc
 ./civicc
+
+This is how you can then perform the output for a file using civas and civvm
+(You need to have the civas and civvm in your bin folder for this to work):
+    1. First go to the build-debug directory, then do:
+    2. ./civicc ../test/<testFilePath> -o <fileName>
+        This creates the assembly instructions for the test file provided
+    3. ../bin/civas <fileName> -o <fileName2>.as
+        This creates the output file with the CiviC assembler
+    4. ../bin/civvm <fileName2>.as
 */
 
 // Helper function to get the string type of the enum Type
@@ -85,13 +98,13 @@ char *getOperandTypeAssembly(enum Type type) {
     // Get the type (void excluded)
     switch (type) {
         case CT_int:
-            printType = "i";
+            assemblyType = "i";
             break;
         case CT_float:
-            printType = "f";
+            assemblyType = "f";
             break;
         case CT_bool:
-            printType = "b";
+            assemblyType = "b";
             break;
         case CT_NULL:
             DBUG_ASSERT(false, "unknown type detected!");
@@ -354,7 +367,7 @@ node_st *ACGbinop(node_st *node)
     // Allocate memory for a string of up to 99 characters
     char *binopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
     // Initialize with empty string to avoid weird memory address value being used at the start
-    STRcpy(binopInstructionSymbol, "");
+    strcpy(binopInstructionSymbol, "");
 
     // Get the type signature and push the correct instruction symbol
     // Add the correct type in front of the build up string
@@ -362,44 +375,48 @@ node_st *ACGbinop(node_st *node)
         char *assemblyTypeString = getOperandTypeAssembly(BINOP_OPERATOR_TYPE_SIGNATURE(node));
         if (assemblyTypeString != NULL) {
             // Add the type in front of the string, such as i, then at the end it will be iadd
-            STRcat(assemblyTypeString, binopInstructionSymbol);
+            binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
         }
+
+        // TODO: also, what to use, STRcat or strcat???
+        // Strings are difficult in C, so I do not know when to use what because it does not work.
+        // strcat works, but STRcat does not append anything
 
         // Then append the type of the operator assembly instruction
         // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
         switch (BINOP_OP(node)) {
             case BO_add:
-                STRcat(binopInstructionSymbol, "add");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "add");
                 break;
             case BO_sub:
-                STRcat(binopInstructionSymbol, "sub");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "sub");
                 break;
             case BO_mul:
-                STRcat(binopInstructionSymbol, "mul");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "mul");
                 break;
             case BO_div:
-                STRcat(binopInstructionSymbol, "div");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "div");
                 break;
             case BO_mod:
-                STRcat(binopInstructionSymbol, "rem");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "rem");
                 break;
             case BO_lt:
-                STRcat(binopInstructionSymbol, "lt");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "lt");
                 break;
             case BO_le:
-                STRcat(binopInstructionSymbol, "le");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "le");
                 break;
             case BO_gt:
-                STRcat(binopInstructionSymbol, "gt");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "gt");
                 break;
             case BO_ge:
-                STRcat(binopInstructionSymbol, "ge");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "ge");
                 break;
             case BO_eq:
-                STRcat(binopInstructionSymbol, "eq");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "eq");
                 break;
             case BO_ne:
-                STRcat(binopInstructionSymbol, "ne");
+                binopInstructionSymbol = STRcat(binopInstructionSymbol, "ne");
                 break;
             case BO_NULL:
                 DBUG_ASSERT(false, "unknown binop detected!");
@@ -407,11 +424,20 @@ node_st *ACGbinop(node_st *node)
 
         // Push the instruction symbol at the end
         struct data_acg *data = DATA_ACG_GET();
+        // Append a new line at the end of the binop instruction symbol string
+        binopInstructionSymbol = STRcat(binopInstructionSymbol, "\n");
         fprintf(data->assembly_output_file, binopInstructionSymbol);
+
+        printf("printed binop instruction: %s\n", binopInstructionSymbol);
     }
 
     // Then traverse into the right operand
     TRAVright(node);
+
+    // Then traverse into the left operand
+    TRAVleft(node);
+
+    // TODO: how to store it on the stack and how to do the sequence???
 
     return node;
 }
@@ -424,17 +450,29 @@ node_st *ACGbinop(node_st *node)
  */
 node_st *ACGmonop(node_st *node)
 {
+    // Allocate memory for a string of up to 99 characters
+    char *binopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
+    // Initialize with empty string to avoid weird memory address value being used at the start
+    strcpy(binopInstructionSymbol, "");
 
-    // Type of the operator
-    switch (MONOP_OP(node)) {
-    case MO_not:
-      tmp = "!";
-      break;
-    case MO_neg:
-      tmp = "-";
-      break;
-    case MO_NULL:
-      DBUG_ASSERT(false, "unknown monop detected!");
+    if (BINOP_OPERATOR_TYPE_SIGNATURE(node) != CT_NULL) {
+        char *assemblyTypeString = getOperandTypeAssembly(BINOP_OPERATOR_TYPE_SIGNATURE(node));
+        if (assemblyTypeString != NULL) {
+            // Add the type in front of the string, such as i, then at the end it will be iadd
+            binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
+        }
+
+        // Type of the operator
+        switch (MONOP_OP(node)) {
+            case MO_not:
+            tmp = "!";
+            break;
+            case MO_neg:
+            tmp = "-";
+            break;
+            case MO_NULL:
+            DBUG_ASSERT(false, "unknown monop detected!");
+        }
     }
 
     return node;
@@ -512,6 +550,14 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
+    // TODO: how to do the indexing of the constants, because you do not have Ste's for that
+
+
+    struct data_acg *data = DATA_ACG_GET();
+    fprintf(data->assembly_output_file, "iloadc %d\n", constandIndex);
+
+    constandIndex++;
+
     return node;
 }
 

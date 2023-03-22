@@ -43,7 +43,10 @@ start phase RootPhase {
 //TODO: what to do with the output file, need to do something else with it or where do you need to 
 // save the output file, etc????
 
+// TODO: how to add tests to the MakeFile to run your own tests?
+
 // TODO: How do you test your compiler in output, like the performed functions????
+
 
 // TODO: in the slides it said traverse down to the last statement, but why not do the stmt and then the next Stmts???
 
