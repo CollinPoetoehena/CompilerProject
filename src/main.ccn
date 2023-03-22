@@ -43,7 +43,9 @@ start phase RootPhase {
 //TODO: what to do with the output file, need to do something else with it or where do you need to 
 // save the output file, etc????
 
-// How do you test your compiler in output, like the performed functions????
+// TODO: How do you test your compiler in output, like the performed functions????
+
+// TODO: in the slides it said traverse down to the last statement, but why not do the stmt and then the next Stmts???
 
 
 // TODO: now when I run my compiler without the flag "-o <fileName>"
@@ -410,6 +412,16 @@ node FunDef {
     }
 };
 
+// local_fundefs is used for nested function definitions
+node FunBody {
+    children {
+        VarDecl decls { constructor },
+        // local_fundefs is for the first extension, ignore for now
+        FunDefs local_fundefs,
+        Stmts stmts { constructor }
+    }
+};
+
 node Param {
     children {
         // Dimensions for array extension 3, leave for now
@@ -420,16 +432,6 @@ node Param {
     attributes {
         string name { constructor, mandatory },
         Type type { constructor }
-    }
-};
-
-// local_fundefs is used for nested function definitions
-node FunBody {
-    children {
-        VarDecl decls { constructor },
-        // local_fundefs is for the first extension, ignore for now
-        FunDefs local_fundefs,
-        Stmts stmts { constructor }
     }
 };
 

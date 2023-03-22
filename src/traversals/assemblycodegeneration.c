@@ -13,8 +13,16 @@
 #include "global/globals.h"
 // Include FILE * from stdio.h in C to work with files
 #include <stdio.h>
+// Palm library for easy working with strings
+#include "palm/str.h"
+#include  <string.h>
 // Include error functionality
 #include "palm/ctinfo.h"
+// Include enums, for the Type 
+#include "ccngen/enum.h"
+#include "ccn/ccn_types.h"
+// Include memory from Palm to work with memory
+#include "palm/memory.h"
 
 // This function is performed at the start of the traversal
 void ACGinit() {
@@ -29,7 +37,7 @@ void ACGinit() {
         data->assembly_output_file = file;
 
         // Write to a file with 'fprintf'.
-        fprintf(data->assembly_output_file, "Hello World 2\n");
+        //fprintf(data->assembly_output_file, "Hello World 2\n");
 
         // TODO: veel dingen kan je al direct schrijven, verzin een logica dat de juiste assembly ouput
         // tabs hoeven niet in de file, zolang de assembly maar de goede instructions heeft, maar
@@ -67,6 +75,30 @@ so the file can then be found in that directory!
 You can run this command in the build-debug to see more information about civicc
 ./civicc
 */
+
+// Helper function to get the string type of the enum Type
+// Define at the top to avoid C return type error
+char *getOperandTypeAssembly(enum Type type) {
+    // Get the type
+    char *assemblyType = NULL;
+
+    // Get the type (void excluded)
+    switch (type) {
+        case CT_int:
+            printType = "i";
+            break;
+        case CT_float:
+            printType = "f";
+            break;
+        case CT_bool:
+            printType = "b";
+            break;
+        case CT_NULL:
+            DBUG_ASSERT(false, "unknown type detected!");
+    }
+
+    return assemblyType;
+}
 
 /**
  * @fn ACGprogram
@@ -126,6 +158,10 @@ node_st *ACGglobdef(node_st *node)
  */
 node_st *ACGfundef(node_st *node)
 {
+    // Traverse the children
+    TRAVbody(node);
+    TRAVparams(node);
+
     return node;
 }
 
@@ -135,18 +171,27 @@ These nodes are children of the FunDef node
 */
 
 /**
- * @fn ACGparam
- */
-node_st *ACGparam(node_st *node)
-{
-    return node;
-}
-
-/**
  * @fn ACGfunbody
  */
 node_st *ACGfunbody(node_st *node)
 {
+    // Traverse into the children
+    TRAVdecls(node);
+    TRAVstmts(node);
+
+    return node;
+}
+
+/**
+ * @fn ACGparam
+ */
+node_st *ACGparam(node_st *node)
+{
+    // TODO
+
+    // Traverse the next param
+    TRAVnext(node);
+
     return node;
 }
 
@@ -160,6 +205,10 @@ These nodes are children of the FunBody node
  */
 node_st *ACGvardecl(node_st *node)
 {
+    // Traverse into the children
+    TRAVinit(node);
+    TRAVnext(node);
+
     return node;
 }
 
@@ -168,6 +217,18 @@ node_st *ACGvardecl(node_st *node)
  */
 node_st *ACGstmts(node_st *node)
 {
+    // TODO: correct to first to the next every time and then traverse the stmt of the last one
+    // this way you can find the last statement as described in the slides
+    // or is it not what was meant by the slides and was it meant the last Expr???
+
+    // TODO: probably traverse down to last statement because the Stack is LIFO, so do the last statement first
+
+    // Traverse the next Stmts
+    TRAVnext(node);
+
+    // Traverse the Stmt
+    TRAVstmt(node);
+
     return node;
 }
 
@@ -181,6 +242,14 @@ These are the statement nodes (Stmt)
  */
 node_st *ACGassign(node_st *node)
 {
+    // TODO: generate assembly
+    
+    // First traverse the left hand side variable
+    TRAVlet(node);
+
+    // Then traverse the Expr
+    TRAVexpr(node);
+
     return node;
 }
 
@@ -189,6 +258,9 @@ node_st *ACGassign(node_st *node)
  */
 node_st *ACGexprstmt(node_st *node)
 {
+    // Traverse the Expr
+    TRAVexpr(node);
+
     return node;
 }
 
@@ -197,6 +269,16 @@ node_st *ACGexprstmt(node_st *node)
  */
 node_st *ACGifelse(node_st *node)
 {
+    // Traverse the condition Expr
+    TRAVcond(node);
+
+    // Traverse the then Stmts
+    TRAVthen(node);
+
+    // TODO: if the condition is true, what to do with the else block???
+
+    // Traverse the else_block
+    TRAVelse_block(node);
     return node;
 }
 
@@ -205,6 +287,12 @@ node_st *ACGifelse(node_st *node)
  */
 node_st *ACGwhile(node_st *node)
 {
+    // Traverse the condition Expr
+    TRAVcond(node);
+
+    // Traverse the block Stmts
+    TRAVblock(node);
+
     return node;
 }
 
@@ -213,6 +301,14 @@ node_st *ACGwhile(node_st *node)
  */
 node_st *ACGdowhile(node_st *node)
 {
+    // Traverse the condition Expr
+    TRAVcond(node);
+
+    // Traverse the block Stmts
+    TRAVblock(node);
+
+    // TODO: with do-while, the block is done first, then the condition evaluation, think of how to do that!
+
     return node;
 }
 
@@ -221,6 +317,12 @@ node_st *ACGdowhile(node_st *node)
  */
 node_st *ACGfor(node_st *node)
 {
+    // For loops have been converted to While nodes, so nothing needs to be done here
+    // because there are no For nodes left when this traversal is performed
+
+    // TODO: remove after testing and creation, this prints if there is a For node!
+    printf("For node found in ACG, this is not what you want!!!!\n");
+
     return node;
 }
 
@@ -229,6 +331,9 @@ node_st *ACGfor(node_st *node)
  */
 node_st *ACGreturn(node_st *node)
 {
+    // Traverse the return Expr
+    TRAVexpr(node);
+
     return node;
 }
 
@@ -239,17 +344,99 @@ These are the operator nodes (also part of Expr, Operations)
 
 /**
  * @fn ACGbinop
+ *
+ * Push instruction symbol
+ * Traverse into right operand
+ * Traverse into left operand
  */
 node_st *ACGbinop(node_st *node)
 {
+    // Allocate memory for a string of up to 99 characters
+    char *binopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
+    // Initialize with empty string to avoid weird memory address value being used at the start
+    STRcpy(binopInstructionSymbol, "");
+
+    // Get the type signature and push the correct instruction symbol
+    // Add the correct type in front of the build up string
+    if (BINOP_OPERATOR_TYPE_SIGNATURE(node) != CT_NULL) {
+        char *assemblyTypeString = getOperandTypeAssembly(BINOP_OPERATOR_TYPE_SIGNATURE(node));
+        if (assemblyTypeString != NULL) {
+            // Add the type in front of the string, such as i, then at the end it will be iadd
+            STRcat(assemblyTypeString, binopInstructionSymbol);
+        }
+
+        // Then append the type of the operator assembly instruction
+        // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
+        switch (BINOP_OP(node)) {
+            case BO_add:
+                STRcat(binopInstructionSymbol, "add");
+                break;
+            case BO_sub:
+                STRcat(binopInstructionSymbol, "sub");
+                break;
+            case BO_mul:
+                STRcat(binopInstructionSymbol, "mul");
+                break;
+            case BO_div:
+                STRcat(binopInstructionSymbol, "div");
+                break;
+            case BO_mod:
+                STRcat(binopInstructionSymbol, "rem");
+                break;
+            case BO_lt:
+                STRcat(binopInstructionSymbol, "lt");
+                break;
+            case BO_le:
+                STRcat(binopInstructionSymbol, "le");
+                break;
+            case BO_gt:
+                STRcat(binopInstructionSymbol, "gt");
+                break;
+            case BO_ge:
+                STRcat(binopInstructionSymbol, "ge");
+                break;
+            case BO_eq:
+                STRcat(binopInstructionSymbol, "eq");
+                break;
+            case BO_ne:
+                STRcat(binopInstructionSymbol, "ne");
+                break;
+            case BO_NULL:
+                DBUG_ASSERT(false, "unknown binop detected!");
+        }
+
+        // Push the instruction symbol at the end
+        struct data_acg *data = DATA_ACG_GET();
+        fprintf(data->assembly_output_file, binopInstructionSymbol);
+    }
+
+    // Then traverse into the right operand
+    TRAVright(node);
+
     return node;
 }
 
 /**
  * @fn ACGmonop
+ *
+ * Push instruction symbol
+ * Traverse into operand
  */
 node_st *ACGmonop(node_st *node)
 {
+
+    // Type of the operator
+    switch (MONOP_OP(node)) {
+    case MO_not:
+      tmp = "!";
+      break;
+    case MO_neg:
+      tmp = "-";
+      break;
+    case MO_NULL:
+      DBUG_ASSERT(false, "unknown monop detected!");
+    }
+
     return node;
 }
 
@@ -258,6 +445,10 @@ node_st *ACGmonop(node_st *node)
  */
 node_st *ACGternaryop(node_st *node)
 {
+    // The AND (&&) and OR (||) operators are handled here 
+
+    //TODO
+
     return node;
 }
 
@@ -301,6 +492,8 @@ node_st *ACGexprs(node_st *node)
 
 /**
  * @fn ACGvar
+ *
+ * Local variable: push load instruction with index from symbol table
  */
 node_st *ACGvar(node_st *node)
 {
@@ -314,6 +507,8 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
 
 /**
  * @fn ACGnum
+ *
+ * Constant: push 'loadc' instruction with index from constant table
  */
 node_st *ACGnum(node_st *node)
 {
@@ -322,6 +517,8 @@ node_st *ACGnum(node_st *node)
 
 /**
  * @fn ACGfloat
+ *
+ * Constant: push 'loadc' instruction with index from constant table
  */
 node_st *ACGfloat(node_st *node)
 {
@@ -330,6 +527,8 @@ node_st *ACGfloat(node_st *node)
 
 /**
  * @fn ACGbool
+ *
+ * Constant: push 'loadc' instruction with index from constant table
  */
 node_st *ACGbool(node_st *node)
 {
