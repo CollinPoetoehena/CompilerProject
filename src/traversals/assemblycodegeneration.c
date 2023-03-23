@@ -175,6 +175,9 @@ node_st *ACGglobdef(node_st *node)
     TRAVinit(node);
 
     // TODO: perform assembly generation
+    // <type>loadg
+    // loads a global variable
+    // But look at the manual for all the instructions!
     
     return node;
 }
@@ -204,6 +207,7 @@ node_st *ACGfundef(node_st *node)
     // isr 
     // start a new subroutine, eigenlijk wanneer je een functie called, voorbereiden op uitvoer functie
     // sub routine is eigenlijk een functie in assembly
+    // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
 
     // onder isr alle argumenten loaden met 'load'
     //

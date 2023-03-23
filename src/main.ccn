@@ -230,7 +230,7 @@ traversal because a Cast can have a BinOp Expr child as well.
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     // It traverses all Cast expressions that have a boolean result or bool cast type
-    nodes = { Cast, BinOp, FunCall, Bool }
+    nodes = { Cast, BinOp, FunCall, Var, Bool }
 };
 
 // This traversal converts For nodes to While nodes with exactly the same semantics.

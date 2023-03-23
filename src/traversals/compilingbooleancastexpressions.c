@@ -111,6 +111,20 @@ node_st *CBCEfuncall(node_st *node)
 }
 
 /**
+ * @fn CBCEvar
+ */
+node_st *CBCEvar(node_st *node)
+{
+    // Get SteVar link and see if it is a bool type, then set to true, otherwise do nothing
+    if (STEVAR_TYPE(VAR_STE_LINK(node)) == CT_bool) {
+        // Set the bool result value to true
+        operatorTypeIsBool = true;
+    }
+
+    return node;
+}
+
+/**
  * @fn CBCEbool
  */
 node_st *CBCEbool(node_st *node)
