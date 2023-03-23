@@ -15,13 +15,11 @@ start phase RootPhase {
         // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
         ConvertForToWhile;
         // Then generate the assembly code with the AST from the previous traversals
-        AssemblyCodeGeneration;
+        //AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
 };
-
-// TODO:
 
 //TODO: remove when done, these are common commands:
 // make
@@ -35,14 +33,20 @@ start phase RootPhase {
 // so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
 //for the exam and some less stress, etc :)!!!
 
+// TODO: see this repository: https://github.com/Derkades/nutcheck
+// this is a github repo for testing your compiler, particularly the 'cocosnoot' dir
+// You can run it with './nutcheck/test.sh'
+// You should remove the line you do not want to test in 'test.sh' in the nutcheck dir!
+// So if you only want to test cocosnoot, then do: ./run.bash "$CIVICC" cocosnoot 2>/dev/null
+// if you do not only make it one line, it will just only test the first one!
+// see in our compiler: 'test' dir, then 'nutCheckTestFilesOurCompiler' dir for all the test files that are there
+// these files can be copied into the nutcheck dir and then perform the checks!
+// TODO: tested everything with check errors and check success, everything works, now do the outputs checking!
 
 
 // TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
-
-//TODO: what to do with the output file, need to do something else with it or where do you need to 
-// save the output file, etc????
-
+// TODO: ask Simon, should you support
 
 // TODO: in the slides it said traverse down to the last statement, but why not do the stmt and then the next Stmts???
 
@@ -630,15 +634,15 @@ node SteVar {
         // Parent points to a higher nesting level
         SteVar parent { constructor },
         // LinkedList data structure for next symbol table
-        SteVar next { constructor },
-        // This is used for creating assembly instructions with the correct index
-        int assembly_index_vardecl
+        SteVar next { constructor }
     }, 
 
     attributes {
         string name { constructor },
         Type type { constructor },
-        int nesting_level { constructor }
+        int nesting_level { constructor },
+        // This is used for creating assembly instructions with the correct index
+        int assembly_index
     }
 };
 
@@ -659,7 +663,7 @@ node SteFun {
         // the FunDef params. From the first value the LinkedList chain can be followed.
         Param params { constructor },
         // This is used for creating assembly instructions with the correct index
-        int assembly_index_fundef
+        int assembly_index
     }
 };
 

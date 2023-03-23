@@ -1,0 +1,13 @@
+extern void printInt(int val);
+
+export int main() {
+    int a = 0;
+
+    do {
+        a = a + 7;
+    } while (a < 100);
+
+    printInt(a);
+
+    return 0;
+}
