@@ -585,6 +585,8 @@ node_st *TMAFbinop(node_st *node)
         tempType = inferedTypeBinOp;
         // Update this operator node with the type signature just obtained to use later in code generation
         BINOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeBinOp;
+        // Save the left operand type to use for logical operators in assembly
+        BINOP_LEFT_OPERAND_TYPE(node) = binopLeftExprType;
     } else {
         // If the function returned CT_NULL than it could not infer a type, so error!
         // Prints the error when it occurs, so in this line

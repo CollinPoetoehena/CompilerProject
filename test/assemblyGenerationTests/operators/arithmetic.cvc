@@ -1,0 +1,17 @@
+extern void printInt(int val);
+extern void printFloat(float val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+export int main() {
+    int intA = 5;
+    int intB = 10;
+    int intZ = (2 * intA) + (intB / 42);
+    int remainder = intB % intA;
+
+    float floatA = 2.4352;
+    float floatB = 4.5633;
+    float floatC = (2.654 * floatA) - (floatB / floatA);
+
+    return 0;
+}

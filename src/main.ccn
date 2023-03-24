@@ -529,7 +529,9 @@ node Binop {
     attributes {
         BinOpEnum op { constructor },
         // Save the infered operator type in typechecking in the node to use in code generation later
-        Type operator_type_signature
+        Type operator_type_signature,
+        // This is used to save the operand types of logical operators (necessary for assembly generation)
+        Type left_operand_type
     }
 };
 

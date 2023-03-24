@@ -466,49 +466,53 @@ node_st *ACGbinop(node_st *node)
     // Add the correct type in front of the build up string
     if (BINOP_OPERATOR_TYPE_SIGNATURE(node) != CT_NULL) {
         char *assemblyTypeString = getOperandTypeAssembly(BINOP_OPERATOR_TYPE_SIGNATURE(node));
-        if (assemblyTypeString != NULL) {
+        // Logical operators have the type of their operand, so also get that type
+        char *leftOperandTypeBinop = getOperandTypeAssembly(BINOP_LEFT_OPERAND_TYPE(node));
+        if (assemblyTypeString != NULL && leftOperandTypeBinop != NULL) {
             // Add the type in front of the string, such as i, then at the end it will be iadd
-            binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
-        }
+            //binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
 
-        // Then append the type of the operator assembly instruction
-        // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
-        switch (BINOP_OP(node)) {
-            case BO_add:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "add");
-                break;
-            case BO_sub:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "sub");
-                break;
-            case BO_mul:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "mul");
-                break;
-            case BO_div:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "div");
-                break;
-            case BO_mod:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "rem");
-                break;
-            case BO_lt:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "lt");
-                break;
-            case BO_le:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "le");
-                break;
-            case BO_gt:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "gt");
-                break;
-            case BO_ge:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "ge");
-                break;
-            case BO_eq:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "eq");
-                break;
-            case BO_ne:
-                binopInstructionSymbol = STRcat(binopInstructionSymbol, "ne");
-                break;
-            case BO_NULL:
-                DBUG_ASSERT(false, "unknown binop detected!");
+            // Then append the the type with the type of the operator assembly instruction
+            // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
+            switch (BINOP_OP(node)) {
+                case BO_add:
+                    // Append the type first. Arightmetic operators have 
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "add");
+                    break;
+                case BO_sub:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "sub");
+                    break;
+                case BO_mul:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "mul");
+                    break;
+                case BO_div:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "div");
+                    break;
+                case BO_mod:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "rem");
+                    break;
+                case BO_lt:
+                    // Logical operators have the type of the operands
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "lt");
+                    break;
+                case BO_le:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "le");
+                    break;
+                case BO_gt:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "gt");
+                    break;
+                case BO_ge:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "ge");
+                    break;
+                case BO_eq:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "eq");
+                    break;
+                case BO_ne:
+                    binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "ne");
+                    break;
+                case BO_NULL:
+                    DBUG_ASSERT(false, "unknown binop detected!");
+            }
         }
 
         // Push the instruction symbol at the end

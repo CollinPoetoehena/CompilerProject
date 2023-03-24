@@ -1,0 +1,10 @@
+extern void printInt(int val);
+
+export int main() {
+    int a = 10;
+    int b = (int) ((float) a + 1.6);
+
+    printInt(b);
+
+    return 0;
+}

@@ -1,4 +1,5 @@
 extern void printInt(int val);
+extern void printFloat(float val);
 extern void printSpaces(int num);
 extern void printNewlines(int num);
 

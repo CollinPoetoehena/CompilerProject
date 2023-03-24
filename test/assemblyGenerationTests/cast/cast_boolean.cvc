@@ -1,0 +1,8 @@
+export int main() {
+    float a = 10.0;
+    bool b = (bool) a;
+    bool c = (bool) true;
+    bool d = (bool) 5;
+    bool e = b && c && d;
+    return 0;
+}
