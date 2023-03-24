@@ -1,12 +1,14 @@
 extern void printInt(int val);
-extern void printFloat(float val);
 extern void printSpaces(int num);
 extern void printNewlines(int num);
 
 export int main() {
-    int x = 5;
+    int x = 0;
     int y = 10;
-    int z = (2 * x) + (y / 42);
-
+    do {
+        x = x + 1;
+        y = y - 1;
+    } while (x <= y);
+    
     return 0;
 }

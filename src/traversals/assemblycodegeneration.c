@@ -414,16 +414,22 @@ node_st *ACGwhile(node_st *node)
  * @fn ACGdowhile
  */
 node_st *ACGdowhile(node_st *node)
-{
-        // TODO
+{    
+    // First create a label for the do-while loop
+    struct data_acg *data = DATA_ACG_GET();
+    int currentLabelIndex = labelIndex;
+    fprintf(data->assembly_output_file, "%d_doWhile\n", currentLabelIndex);
+    // Increment the label after creating a label
+    labelIndex++;
 
-    // Traverse the condition Expr
-    TRAVcond(node);
-
-    // Traverse the block Stmts
+    // Then first traverse the block for a do-while loop
     TRAVblock(node);
 
-    // TODO: with do-while, the block is done first, then the condition evaluation, think of how to do that!
+    // Then traverse the condition Expr
+    TRAVcond(node);
+
+    // Then create a conditional jump back to the do-while loop if the condition is true
+    fprintf(data->assembly_output_file, "branch_t %d_doWhile\n", currentLabelIndex);
 
     return node;
 }
@@ -449,9 +455,6 @@ node_st *ACGreturn(node_st *node)
 {
     // First, traverse the return Expr
     TRAVexpr(node);
-
-    // Save the <type>return instruction in the output file
-    // TODO: save temp fundef link in global variable and use it for the return type of the fundef rettype
 
     // Then save the return assembly instruction after traversing the return Expr
     struct data_acg *data = DATA_ACG_GET();
@@ -607,7 +610,8 @@ node_st *ACGternaryop(node_st *node)
     // First traverse the predicate
     TRAVpredicate(node);
     
-    // Evaluate the predicate expression by adding a conditional jump to a label
+    // Evaluate the predicate expression by adding a conditional jump to a label x_elseExpr
+    // this will also skip the evaluation of the then_expr because it jumps over that part if necessary
     int currentLabelIndex = labelIndex;
     fprintf(data->assembly_output_file, "branch_f %d_elseExpr\n", currentLabelIndex);
     // Increment the label after creating a label
