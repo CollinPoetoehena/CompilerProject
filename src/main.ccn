@@ -6,14 +6,14 @@ start phase RootPhase {
         ContextAnalysis;
         // Then convert variable initializations into regular assignments, after ContextAnalysis
         RegularAssignments;
+        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
+        ConvertForToWhile;
         // Then perform TypeChecking
         TypeChecking;
         // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
         CompilingBooleanDisjunctionAndConjunction;
         // Then compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
-        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
-        ConvertForToWhile;
         // Then generate the assembly code with the AST from the previous traversals
         AssemblyCodeGeneration;
         // Then print the output of the compiler
@@ -153,6 +153,14 @@ traversal RegularAssignments {
     nodes = { Program, Decls, GlobDef, FunBody, VarDecl}
 };
 
+// TODO: everything still working with it now being before typechecking?? Probably yes because it only does something to For nodes
+// This traversal converts For nodes to While nodes with exactly the same semantics.
+// This is done before TypeChecking to update the new binops with their typesignatures
+traversal ConvertForToWhile {
+    uid = CFTW,
+    nodes = { For }
+};
+
 // The TypeChecking phase is used to check all the types
 phase TypeChecking {
     actions {
@@ -229,12 +237,6 @@ traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     // It traverses all Cast expressions that have a boolean result or bool cast type
     nodes = { Cast, BinOp, FunCall, Var, Bool }
-};
-
-// This traversal converts For nodes to While nodes with exactly the same semantics.
-traversal ConvertForToWhile {
-    uid = CFTW,
-    nodes = { For }
 };
 
 /*

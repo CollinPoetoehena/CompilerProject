@@ -261,6 +261,8 @@ node_st *ACGfundef(node_st *node)
     TRAVbody(node);
     TRAVparams(node);
 
+    // TODO: void function needs the instruction 'return' at the end, even if there is no return
+
     return node;
 }
 
