@@ -11,7 +11,7 @@ export int main() {
         c = 1;
     }
 
-    printInt(c);
+    //printInt(c);
 
 	return 0;
 }

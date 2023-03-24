@@ -382,16 +382,34 @@ node_st *ACGifelse(node_st *node)
     // dit gaat naar else als de conditie false is en dan hieronder de if code en daaronder de else code
     // TODO: maar voer een file uit in de reference compiler en zie hoe die structuur is (optimized, dus expressies hoeven niet hetzelfde!)
 
-    // Traverse the condition Expr
+    // First traverse the condition Expr
     TRAVcond(node);
 
-    // Traverse the then Stmts
+    struct data_acg *data = DATA_ACG_GET();
+    // Jump to else if the condition is false by adding the following instruction
+    int currentLabelIndexElse = labelIndex;
+    fprintf(data->assembly_output_file, "branch_f %d_else\n", currentLabelIndexElse);
+    // Increment the label after creating a label
+    labelIndex++;
+
+    // If the condition is true, then the above will be skipped and the then block should be executed
     TRAVthen(node);
+    // Append a jump to the end of the ifelse at the end of the then block to skip the else instructions
+    int currentLabelIndexEnd = labelIndex;
+    fprintf(data->assembly_output_file, "jump %d_end\n", currentLabelIndexEnd);
+    // Increment the label after creating a label
+    labelIndex++;
 
-    // TODO: if the condition is true, what to do with the else block???
-
-    // Traverse the else_block
+    // Create the else label and the instructions for the else block
+    fprintf(data->assembly_output_file, "%d_else\n", currentLabelIndexElse);
+    // Traverse the else block to create the assembly instructions
     TRAVelse_block(node);
+
+    // Create the end label at the end of the ifelse node, everything after will be in here
+    fprintf(data->assembly_output_file, "%d_end\n", currentLabelIndexEnd);
+
+
+    // TODO: does something need to be done when there is no else or??? Test that if it still works!
     return node;
 }
 
@@ -478,7 +496,7 @@ node_st *ACGreturn(node_st *node)
     // Get the return type of the current fundef
     char *assemblyTypeString = getOperandTypeAssembly(STEFUN_TYPE(currentSteFunFunDef));
     // Append the type infront of the return instruction (void type will automatically become 'return')
-    fprintf(data->assembly_output_file, STRcat(assemblyTypeString, "return"));
+    fprintf(data->assembly_output_file, STRcat(assemblyTypeString, "return\n"));
 
     return node;
 }
@@ -636,11 +654,19 @@ node_st *ACGternaryop(node_st *node)
 
     // Then create the assembly for the then_expr
     TRAVthen_expr(node);
+    // Append a jump to the end of the TernaryOp to skip the elseExpr if the condition is true
+    int currentLabelIndexEnd = labelIndex;
+    fprintf(data->assembly_output_file, "jump %d_end\n", currentLabelIndexEnd);
+    // Increment the label after creating a label
+    labelIndex++;
 
     // Then create a label for the else expression (labelformat: "token :"")
     fprintf(data->assembly_output_file, "%d_elseExpr:\n", currentLabelIndex);
     // Then traverse the else_expr
     TRAVelse_expr(node);
+
+    // Create the end label at the end of the ternary op, everything after this node will be in here
+    fprintf(data->assembly_output_file, "%d_end\n", currentLabelIndexEnd);
 
     return node;
 }
