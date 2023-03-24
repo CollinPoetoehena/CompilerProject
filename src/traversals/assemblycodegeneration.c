@@ -37,6 +37,9 @@ int labelIndex = 1;
 // Save the current fundef first SteVar to use for return instruction
 node_st *currentSteFunFunDef = NULL;
 
+// This string is used to store all the pseudo instructions for functions in
+char *pseudoInstructionsFuns = NULL;
+
 // This function is performed at the start of the traversal
 void ACGinit() {
     // Initialize file pointer, ensures there is a file.
@@ -48,6 +51,10 @@ void ACGinit() {
         // Get the file pointer from the travdata of the ACG traversal and update it
         struct data_acg *data = DATA_ACG_GET();
         data->assembly_output_file = file;
+
+        // TODO: is this correct??
+        // Initialize the pseudo instructions for functions string with an empty string
+        pseudoInstructionsFuns = STRcat(pseudoInstructionsFuns, "");
 
         // Write to a file with 'fprintf'.
         //fprintf(data->assembly_output_file, "Hello World 2\n");
@@ -126,6 +133,69 @@ char *getOperandTypeAssembly(enum Type type) {
     return assemblyType;
 }
 
+// Helper function to get the string type of the enum Type for printing
+char *getTypeForSignature(enum Type type) {
+    // Get the type
+    char *printType = NULL;
+
+    // Get the type
+    switch (type) {
+        case CT_int:
+            printType = "int";
+            break;
+        case CT_float:
+            printType = "float";
+            break;
+        case CT_bool:
+            printType = "bool";
+            break;
+        case CT_void:
+            printType = "void";
+            break;
+        case CT_NULL:
+            DBUG_ASSERT(false, "unknown type detected!");
+    }
+
+    return printType;
+}
+
+// Helper function to get the function signature from an SteFun
+char *getFunctionSignatureFromSte(node_st *steFun) {
+    // Check if the steFun is not NULL
+    if (STEFUN_NAME(steFun) != NULL) {
+        // Escape the " with a backslash
+        char *functionSignatureString = STRcat("", "\"");
+        // Append the function name
+        functionSignatureString = STRcat(functionSignatureString, STEFUN_NAME(steFun));
+        // Append the " by escaping it again, add a space at the end for the return type
+        functionSignatureString = STRcat(functionSignatureString, "\" ");
+        // Append the return type
+        functionSignatureString = STRcat(functionSignatureString, getTypeForSignature(STEFUN_TYPE(steFun)));
+        // Append all the parameter types if it has any parameter
+        if (STEFUN_PARAMS(steFun) != NULL) {
+            // Get the first param from the SteFun node
+            node_st *paramIterator = STEFUN_PARAMS(steFun);
+            do {
+                // Append the type of the param into the function signature, also append a space per type
+                functionSignatureString = STRcat(
+                    functionSignatureString,
+                    STRcat(" ", getTypeForSignature(PARAM_TYPE(paramIterator)))
+                );
+
+                // Update parameter
+                paramIterator = PARAM_NEXT(paramIterator);
+            } while (paramIterator != NULL);
+        }
+
+        // Return the build function signature string
+        return functionSignatureString;
+
+    }
+
+    // No function signature created, return NULL
+    return NULL;
+}
+
 // Get the number of variables in a FunDef SteVar chain
 int getLocalVariablesCount(node_st *firstSteVarNode) {
     if (firstSteVarNode != NULL) {
@@ -158,6 +228,10 @@ node_st *ACGprogram(node_st *node)
     TRAVdecls(node);
 
     // TODO: at the end of the program, print the functionSignatures pseudo instructions??? (See CiviC_VM last pages!)
+
+    // Print the pseudo instructions at the end of the file
+    struct data_acg *data = DATA_ACG_GET();
+    fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsFuns);
 
     return node;
 }
@@ -272,29 +346,38 @@ node_st *ACGfundef(node_st *node)
     // But keep in mind, it has a lot of optimizations, so the assembly of yours is different, but the 
     // output should be the same, and the function structure with labels and esr, etc is probably the same as well!
 
+    // First check if the FunDef is a FunDec node (funbody is NULL and exported)
+    // If it is, it needs to be imported
+    if (FUNDEF_BODY(node) == NULL && FUNDEF_EXPORT(node)) {
+        // Append the function import to the pseudo instructions string
+        char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
+        pseudoInstructionsFuns = STRcat(
+            pseudoInstructionsFuns,
+            STRcat(".importfun ", functionSignature)
+        );
+    } else {
+        // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
+        vardeclsIndex = 0;
 
-    // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
-    // TODO: is it correct that only the vardeclsIndex needs to be reset
-    vardeclsIndex = 0;
+        // Set the current FunDef SteFun link to use for traversing the children of this fundef
+        currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node);    
 
-    // Set the current FunDef SteFun link to use for traversing the children of this fundef
-    currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node);    
+        // Start the FunDef node with its label (the name of the FunDef)
+        struct data_acg *data = DATA_ACG_GET();
+        fprintf(data->assembly_output_file, "%s:\n", FUNDEF_NAME(node));
 
-    // Start the FunDef node with its label (the name of the FunDef)
-    struct data_acg *data = DATA_ACG_GET();
-    fprintf(data->assembly_output_file, "%s:\n", FUNDEF_NAME(node));
+        // Then create the 'esr' instruction with the number of local variables
+        // Get the number of local variables to use in the 'esr' instruction
+        int localVariablesCount = getLocalVariablesCount(FUNDEF_FIRST_STE_VARIABLES(node));
+        fprintf(data->assembly_output_file, "esr %d\n", localVariablesCount);
+        
+        // Traverse the children
+        TRAVbody(node);
+        TRAVparams(node);
 
-    // Then create the 'esr' instruction with the number of local variables
-    // Get the number of local variables to use in the 'esr' instruction
-    int localVariablesCount = getLocalVariablesCount(FUNDEF_FIRST_STE_VARIABLES(node));
-    fprintf(data->assembly_output_file, "esr %d\n", localVariablesCount);
-    
-    // Traverse the children
-    TRAVbody(node);
-    TRAVparams(node);
-
-    // Print a new line at the end of every FunDef
-    fprintf(data->assembly_output_file, "\n");
+        // Print a new line at the end of every FunDef
+        fprintf(data->assembly_output_file, "\n");
+    }
 
     // TODO: void function needs the instruction 'return' at the end, even if there is no return
 
