@@ -1,0 +1,16 @@
+extern void printInt(int val);
+extern void printFloat(float val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+export int main() {
+    int a = 5;
+    float b = 4.353;
+    bool c = true;
+
+    // TODO: print when everything is finished:
+    // printInt(a);
+    // printFloat(b);
+
+    return 0;
+}

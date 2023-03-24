@@ -15,7 +15,7 @@ start phase RootPhase {
         // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
         ConvertForToWhile;
         // Then generate the assembly code with the AST from the previous traversals
-        //AssemblyCodeGeneration;
+        AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
@@ -376,7 +376,9 @@ node GlobDecl {
 
     attributes {
         Type type { constructor },
-        string name { constructor }
+        string name { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 

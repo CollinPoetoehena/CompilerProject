@@ -172,8 +172,13 @@ node_st *CVSglobdecl(node_st *node)
     // Current scope is guarenteed to be global scope
     currentScopeVar = 0;
 
-    // Create a symbol table entry
-    createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node), node);
+    // Create a symbol table entry (link it later in the Var, Varlet and Funcall)
+    node_st *createdSteVarEntry = createSymbolTableEntry(GLOBDECL_NAME(node), GLOBDECL_TYPE(node), node);
+    // Save the created SteVar of itself in the node to use later if it was successfull
+    if (createdSteVarEntry != NULL) {
+        // SteVar of itself can be used later on in assembly generation for example
+        GLOBDECL_SYMBOL_TABLE(node) = createdSteVarEntry;
+    }
 
     return node;
 }

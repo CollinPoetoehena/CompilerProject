@@ -29,6 +29,8 @@
 int constandIndex = 0;
 // Save the index of the VarDecls in a global variable to use for creation assembly
 int vardeclsIndex = 0;
+// Save the index of the global VarDecls in a global variable to use for creation assembly
+int globalVarDeclIndex = 0;
 
 // Save the current fundef first SteVar to use
 //node_st *firstSteVarCurrentFunDefACG = NULL;
@@ -161,6 +163,9 @@ node_st *ACGglobdecl(node_st *node)
 {
     // No children for basic here, so perform assembly generation
 
+    // Save index of global variable in the ste link
+    //globalVarDeclIndex++;
+
     // TODO
 
     return node;
@@ -171,10 +176,14 @@ node_st *ACGglobdecl(node_st *node)
  */
 node_st *ACGglobdef(node_st *node)
 {
-    // Traverse to the init Expr
+
+    // TODO:
+    // Save index of global variable in the ste link
+
+    // Traverse to the init Expr, probably nothing here because it is separated with RegularAssignments
     TRAVinit(node);
 
-    // TODO: perform assembly generation
+    // TODO: perform assembly generation when global is occurred
     // <type>loadg
     // loads a global variable
     // But look at the manual for all the instructions!
@@ -204,6 +213,12 @@ node_st *ACGfundef(node_st *node)
         - OR: what you can also do is create a hash table in the travdata with the funName and the index, but the above is easier
 
     */
+
+    // Very helpful slides in the last lecture: 70-72, 97-108
+    // FunDef:
+    // Create a label with the FunDef name from the SteFun link, this can then be used to jump
+    // to the FunDef label with the SteFun link name to easily go there, so use fundef name!
+    // FunCall:
     // isr 
     // start a new subroutine, eigenlijk wanneer je een functie called, voorbereiden op uitvoer functie
     // sub routine is eigenlijk een functie in assembly
@@ -291,8 +306,15 @@ node_st *ACGvardecl(node_st *node)
  */
 node_st *ACGstmts(node_st *node)
 {
+    // TODO: remove after creating it
     // In the slides it said traverse down to the last statement, but it meant the last statement in the line, so
     // basically the last expression
+    // TODO:
+    // But in this traversal it can probably be easier because you are writing the file from top to bottom, so 
+    // the order is already correct, so you can just write the program into assembly in the file from top to 
+    // bottom most of the time as well!
+
+    // TODO:
 
     // Traverse the Stmt
     TRAVstmt(node);
@@ -313,11 +335,11 @@ These are the statement nodes (Stmt)
  */
 node_st *ACGassign(node_st *node)
 {    
-    // First traverse the left hand side variable
-    TRAVlet(node);
-
-    // Then traverse the Expr
+    // First traverse the Expr
     TRAVexpr(node);
+
+    // Then traverse the VarLet to store the expression result in
+    TRAVlet(node);
 
     return node;
 }
@@ -401,7 +423,7 @@ node_st *ACGfor(node_st *node)
 node_st *ACGreturn(node_st *node)
 {
     // Traverse the return Expr
-    TRAVexpr(node);
+    //TRAVexpr(node);
 
     // // Allocate memory for a string of up to 99 characters
     // char *monopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
@@ -564,9 +586,17 @@ node_st *ACGvarlet(node_st *node)
 {
     // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
     int varletIndex = STEVAR_ASSEMBLY_INDEX(VARLET_STE_LINK(node));
+
     // Save the VarLet into the assembly
-    // instruction: <type>store <index>
-    //fprintf(data->assembly_output_file, "iloadc %d\n", constandIndex);
+    char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VARLET_STE_LINK(node)));
+    if (assemblyTypeString != NULL) {
+        printf("getting here!\n");
+        // Append the store assembly instruction to the type
+        assemblyTypeString = STRcat(assemblyTypeString, "store");
+        // Save the instruction in the assembly output file
+        struct data_acg *data = DATA_ACG_GET();
+        fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, constandIndex);
+    }
 
     return node;
 }
@@ -620,7 +650,7 @@ node_st *ACGnum(node_st *node)
 {
     // TODO: how to do the indexing of the constants, because you do not have Ste's for that
 
-
+    // Load the constant with the current constants index
     struct data_acg *data = DATA_ACG_GET();
     fprintf(data->assembly_output_file, "iloadc %d\n", constandIndex);
 
