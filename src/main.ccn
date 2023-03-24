@@ -653,7 +653,9 @@ node SteFun {
         // the FunDef params. From the first value the LinkedList chain can be followed.
         Param params { constructor },
         // This is used for creating assembly instructions with the correct index
-        int assembly_index
+        int assembly_index,
+        // This variable is used to check if the FunDef is an external function
+        bool externalFunction
     }
 };
 

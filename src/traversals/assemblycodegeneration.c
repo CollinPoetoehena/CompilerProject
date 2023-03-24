@@ -35,9 +35,8 @@ int globalVarDeclIndex = 0;
 int labelIndex = 1;
 
 // This global variable is used for the number of extern functions (to use in FunCall later)
+// Counter variable for functions in this program not necessary, jump to them with the label funName!
 int externFunsIndex = 0;
-// This global variable is used for the number of functions in this program (to use in FunCall later)
-int globalFunsIndex = 0;
 
 // Save the current fundef first SteVar to use for return instruction
 node_st *currentSteFunFunDef = NULL;
@@ -371,6 +370,8 @@ node_st *ACGfundef(node_st *node)
         STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)) = externFunsIndex;
         // Increment the globalFunsIndex for the next FunDef
         externFunsIndex++;
+        // Set extern to true to use in FunCall node
+        STEFUN_EXTERNALFUNCTION(FUNDEF_SYMBOL_TABLE(node)) = true;
     } else {
         // Append the function signature to the pseudo instructions string if it is exported
         if (FUNDEF_EXPORT(node)) {
@@ -385,15 +386,6 @@ node_st *ACGfundef(node_st *node)
 
         // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
         vardeclsIndex = 0;
-
-    // TODO: this gives an invalid pointer error, why??? It is specifically this part, the above setting goes right
-    // it gives a segmentation fault if I make it a separate variable, so something is not going well with the types
-    // It is only specifically this part, commenting the rest does not solve it
-
-        STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)) = globalFunsIndex;
-        printf("assemblu number index %d\n",STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)));
-        // Increment the globalFunsIndex for the next FunDef
-        globalFunsIndex++;
 
         // Set the current FunDef SteFun link to use for traversing the children of this fundef
         currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node); 
@@ -419,6 +411,15 @@ node_st *ACGfundef(node_st *node)
 
     return node;
 }
+ // TODO: this gives an error but not used anyway, because you jump to a function in here with its name!!
+    // So remove the below part and save it somewhere that you know it does not work, but not necessary because in
+    // the FunCall you can jump to a function in the program with the name!
+
+        // STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)) = globalFunsIndex;
+        // printf("stefun assembly index is NULL not extern %d\n",STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)));
+        // printf("stefun link is NULL not extern %s\n",FUNDEF_SYMBOL_TABLE(node) == NULL ? "true" : "false");
+        // // Increment the globalFunsIndex for the next FunDef
+        // globalFunsIndex++;
 
 /*
 ***********************************************************************************************************************************************
@@ -892,8 +893,9 @@ node_st *ACGfuncall(node_st *node)
     // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
     // onder isr alle argumenten loaden met 'load'
 
+    // TODO: check if extern from link, if it is extern, get the assembly index, otherwise use the label funName, no index necessary!
     // Get the index from the SteFun link (saved in FunDef earlier)
-    int funIndex = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
+    //int funIndex = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
 
     return node;
 }
