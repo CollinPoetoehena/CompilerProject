@@ -398,14 +398,29 @@ node_st *ACGifelse(node_st *node)
  */
 node_st *ACGwhile(node_st *node)
 {
-        // TODO
-        // see VM manual example for how to do it!
+    // First create a label for the while loop
+    struct data_acg *data = DATA_ACG_GET();
+    int currentLabelIndexWhile = labelIndex;
+    fprintf(data->assembly_output_file, "%d_while\n", currentLabelIndexWhile);
+    // Increment the label after creating a label
+    labelIndex++;
 
-    // Traverse the condition Expr
+    // Then first traverse the condition Expr for a while loop
     TRAVcond(node);
+    
+    // Then create a conditional jump to the end of the while loop if the condition is false
+    int currentLabelIndexEnd = labelIndex;
+    fprintf(data->assembly_output_file, "branch_f %d_end\n", currentLabelIndexEnd);
+    // Increment the label after creating a label
+    labelIndex++;
 
-    // Traverse the block Stmts
+    // Then traverse the block
     TRAVblock(node);
+    // Append a jump to the start of the while loop again at the end of the block
+    fprintf(data->assembly_output_file, "jump %d_while\n", currentLabelIndexWhile);
+
+    // Create the end label at the end of the while loop, everything after will be in here
+    fprintf(data->assembly_output_file, "%d_end\n", currentLabelIndexEnd);
 
     return node;
 }

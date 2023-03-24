@@ -4,13 +4,15 @@ main:
     istore 0
     iloadc 0
     istore 1
-1_dowhile:
-    iinc_1 0               ; add -> inc
-    idec_1 1               ; sub -> dec
+1_while:
     iload_0
     iload_1
     ile
-    branch_t 1_dowhile
+    branch_f 2_end
+    iinc_1 0               ; add -> inc
+    idec_1 1               ; sub -> dec
+    jump 1_while
+2_end:
     iloadc_0
     ireturn
 
