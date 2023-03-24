@@ -1,3 +1,4 @@
+extern void prinFloat(int val);
 extern void printInt(int val);
 
 export int main() {
@@ -11,7 +12,7 @@ export int main() {
         c = 1;
     }
 
-    //printInt(c);
+    printInt(c);
 
 	return 0;
 }

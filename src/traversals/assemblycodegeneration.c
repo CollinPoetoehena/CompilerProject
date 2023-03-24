@@ -34,6 +34,11 @@ int globalVarDeclIndex = 0;
 // Global helper variable to save the label index of the current label (starts at 1)
 int labelIndex = 1;
 
+// This global variable is used for the number of extern functions (to use in FunCall later)
+int externFunsIndex = 0;
+// This global variable is used for the number of functions in this program (to use in FunCall later)
+int globalFunsIndex = 0;
+
 // Save the current fundef first SteVar to use for return instruction
 node_st *currentSteFunFunDef = NULL;
 
@@ -224,6 +229,10 @@ int getLocalVariablesCount(node_st *firstSteVarNode) {
  */
 node_st *ACGprogram(node_st *node)
 {
+    // TODO: remove
+    // // Set the first global SteFun node to use for traversing the children
+    // firstGlobalSteFunAssembly = PROGRAM_FIRST_STE_FUNCTIONS(node);
+
     // Traverse to the children
     TRAVdecls(node);
 
@@ -357,6 +366,11 @@ node_st *ACGfundef(node_st *node)
                 STRcat(".importfun ", functionSignature)
             ), "\n"
         );
+
+        // Get the SteFun of this FunDef and update it with the assembly index to use later
+        STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)) = externFunsIndex;
+        // Increment the globalFunsIndex for the next FunDef
+        externFunsIndex++;
     } else {
         // Append the function signature to the pseudo instructions string if it is exported
         if (FUNDEF_EXPORT(node)) {
@@ -372,8 +386,17 @@ node_st *ACGfundef(node_st *node)
         // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
         vardeclsIndex = 0;
 
+    // TODO: this gives an invalid pointer error, why??? It is specifically this part, the above setting goes right
+    // it gives a segmentation fault if I make it a separate variable, so something is not going well with the types
+    // It is only specifically this part, commenting the rest does not solve it
+
+        STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)) = globalFunsIndex;
+        printf("assemblu number index %d\n",STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)));
+        // Increment the globalFunsIndex for the next FunDef
+        globalFunsIndex++;
+
         // Set the current FunDef SteFun link to use for traversing the children of this fundef
-        currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node);    
+        currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node); 
 
         // Start the FunDef node with its label (the name of the FunDef)
         struct data_acg *data = DATA_ACG_GET();
@@ -419,7 +442,7 @@ node_st *ACGfunbody(node_st *node)
  */
 node_st *ACGparam(node_st *node)
 {
-    // TODO
+    // TODO: what to do here?? Probably nothing right
 
     // Traverse the next param
     TRAVnext(node);
@@ -855,6 +878,7 @@ node_st *ACGfuncall(node_st *node)
     // isr -> initiates a subroutine, probably 'isrg' to initiate a call to global (basic only one scope!)
     // <type>load -> then load all the variables needed for the parameters of the funcall (can also be an expression, see ass 6)
     // jsr A O -> jumps to subroutine with A number of arguments and O offset, O can also be a Label, that is easier, such as jsr 2 factorial
+    // Of: jsre L -> this is for external functions. Index L can be picked from the SteFun link!
     // Than the function call assembly is finished. Or if you want to go to an external function (function with exported true as link)
     // (maybe that needs to be added to the SteFun as well???)
     // Then it is jsre I -> with I as the index in the import table (see index of the FunDef from the SteFun! You can then directly save if
@@ -867,6 +891,9 @@ node_st *ACGfuncall(node_st *node)
     // sub routine is eigenlijk een functie in assembly
     // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
     // onder isr alle argumenten loaden met 'load'
+
+    // Get the index from the SteFun link (saved in FunDef earlier)
+    int funIndex = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
 
     return node;
 }

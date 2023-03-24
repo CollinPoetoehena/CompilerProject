@@ -1,20 +1,31 @@
 main:
-    esr 1
-    bloadc_f
-    bstore 0
-    bload_0
-    branch_f 1_else
+    esr 3
     iloadc 0
-    ireturn
+    istore 0
+    iloadc 1
+    istore 1
+    iload_0
+    iloadc 2
+    iadd
+    iload_1
+    igt
+    branch_f 1_else
+    iloadc_0
+    istore 2
     jump 2_end
 1_else:
-    iloadc 1
-    ireturn
+    iloadc_1
+    istore 2
 2_end:
+    isrg
+    iload_2
+    jsre 1
     iloadc_0
     ireturn
 
+.const int 560
+.const int 320
 .const int 5
-.const int 2
 .exportfun "main" int main
+.importfun "prinFloat" void int
 .importfun "printInt" void int
