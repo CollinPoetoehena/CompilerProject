@@ -345,7 +345,7 @@ node_st *ACGassign(node_st *node)
     // First traverse the Expr
     TRAVexpr(node);
 
-    // Then traverse the VarLet to store the expression result in
+    // Then traverse the VarLet to store the expression result in the VarLet
     TRAVlet(node);
 
     return node;
@@ -432,10 +432,8 @@ node_st *ACGreturn(node_st *node)
     // Traverse the return Expr
     //TRAVexpr(node);
 
-    // // Allocate memory for a string of up to 99 characters
-    // char *monopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
-    // // Initialize with empty string to avoid weird memory address value being used at the start
-    // strcpy(monopInstructionSymbol, "");
+    // Save the <type>return instruction in the output file
+    // TODO
 
     return node;
 }
@@ -469,9 +467,6 @@ node_st *ACGbinop(node_st *node)
         // Logical operators have the type of their operand, so also get that type
         char *leftOperandTypeBinop = getOperandTypeAssembly(BINOP_LEFT_OPERAND_TYPE(node));
         if (assemblyTypeString != NULL && leftOperandTypeBinop != NULL) {
-            // Add the type in front of the string, such as i, then at the end it will be iadd
-            //binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
-
             // Then append the the type with the type of the operator assembly instruction
             // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
             switch (BINOP_OP(node)) {
@@ -581,7 +576,7 @@ node_st *ACGmonop(node_st *node)
  */
 node_st *ACGternaryop(node_st *node)
 {
-    // The AND (&&) and OR (||) operators are handled here 
+    // The AND (&&) and OR (||) operators are handled here
 
     //TODO
 
@@ -641,6 +636,15 @@ node_st *ACGcast(node_st *node)
  */
 node_st *ACGfuncall(node_st *node)
 {
+    // FunCall:
+    // isr -> initiates a subroutine, probably 'isrg' to initiate a call to global (basic only one scope!)
+    // <type>load -> then load all the variables needed for the parameters of the funcall (can also be an expression, see ass 6)
+    // jsr A O -> jumps to subroutine with A number of arguments and O offset, O can also be a Label, that is easier, such as jsr 2 factorial
+    // Than the function call assembly is finished. Or if you want to go to an external function (function with exported true as link)
+    // (maybe that needs to be added to the SteFun as well???)
+    // Then it is jsre I -> with I as the index in the import table (see index of the FunDef from the SteFun! You can then directly save if
+    // it is exported as well in the FunDef traversal of this traversal!)
+
     return node;
 }
 
