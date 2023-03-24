@@ -98,7 +98,7 @@ This is how you can then perform the output for a file using civas and civvm
     4. ../bin/civvm <fileName2>.as
 */
 
-// Helper function to get the string type of the enum Type
+// Helper function to get the string type of the enum Type for assembly instructions
 // Define at the top to avoid C return type error
 char *getOperandTypeAssembly(enum Type type) {
     // Get the type
@@ -124,6 +124,29 @@ char *getOperandTypeAssembly(enum Type type) {
     }
 
     return assemblyType;
+}
+
+// Get the number of variables in a FunDef SteVar chain
+int getLocalVariablesCount(node_st *firstSteVarNode) {
+    if (firstSteVarNode != NULL) {
+        // Get the number of SteVar in the FunDef node
+        int localVariablesCount = 0;
+        // Set the first SteVar node
+        node_st *steVarIterator = firstSteVarNode;
+        do {
+            // Increment count
+            localVariablesCount++;
+
+            // Update the iterator
+            steVarIterator = STEVAR_NEXT(steVarIterator);
+        } while (steVarIterator != NULL);
+
+        // Return the number of local variables
+        return localVariablesCount;
+    }
+
+    // If the first SteVar node is NULL, then the number of local variables is 0
+    return 0;
 }
 
 /**
@@ -254,12 +277,24 @@ node_st *ACGfundef(node_st *node)
     // TODO: is it correct that only the vardeclsIndex needs to be reset
     vardeclsIndex = 0;
 
-    // Set the current FunDef SteFun link
-    currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node);
+    // Set the current FunDef SteFun link to use for traversing the children of this fundef
+    currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node);    
+
+    // Start the FunDef node with its label (the name of the FunDef)
+    struct data_acg *data = DATA_ACG_GET();
+    fprintf(data->assembly_output_file, "%s:\n", FUNDEF_NAME(node));
+
+    // Then create the 'esr' instruction with the number of local variables
+    // Get the number of local variables to use in the 'esr' instruction
+    int localVariablesCount = getLocalVariablesCount(FUNDEF_FIRST_STE_VARIABLES(node));
+    fprintf(data->assembly_output_file, "esr %d\n", localVariablesCount);
     
     // Traverse the children
     TRAVbody(node);
     TRAVparams(node);
+
+    // Print a new line at the end of every FunDef
+    fprintf(data->assembly_output_file, "\n");
 
     // TODO: void function needs the instruction 'return' at the end, even if there is no return
 
@@ -331,7 +366,7 @@ node_st *ACGstmts(node_st *node)
     // the order is already correct, so you can just write the program into assembly in the file from top to 
     // bottom most of the time as well!
 
-    // TODO:
+    // TODO: this is probably finished, so the above can be removed
 
     // Traverse the Stmt
     TRAVstmt(node);
@@ -377,11 +412,6 @@ node_st *ACGexprstmt(node_st *node)
  */
 node_st *ACGifelse(node_st *node)
 {
-    // TODO, makkelijkst om eerst de conditie te doen, dan 
-    // branch_f 1_else
-    // dit gaat naar else als de conditie false is en dan hieronder de if code en daaronder de else code
-    // TODO: maar voer een file uit in de reference compiler en zie hoe die structuur is (optimized, dus expressies hoeven niet hetzelfde!)
-
     // First traverse the condition Expr
     TRAVcond(node);
 
@@ -401,12 +431,12 @@ node_st *ACGifelse(node_st *node)
     labelIndex++;
 
     // Create the else label and the instructions for the else block
-    fprintf(data->assembly_output_file, "%d_else\n", currentLabelIndexElse);
+    fprintf(data->assembly_output_file, "%d_else:\n", currentLabelIndexElse);
     // Traverse the else block to create the assembly instructions
     TRAVelse_block(node);
 
     // Create the end label at the end of the ifelse node, everything after will be in here
-    fprintf(data->assembly_output_file, "%d_end\n", currentLabelIndexEnd);
+    fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
 
 
     // TODO: does something need to be done when there is no else or??? Test that if it still works!
@@ -421,7 +451,7 @@ node_st *ACGwhile(node_st *node)
     // First create a label for the while loop
     struct data_acg *data = DATA_ACG_GET();
     int currentLabelIndexWhile = labelIndex;
-    fprintf(data->assembly_output_file, "%d_while\n", currentLabelIndexWhile);
+    fprintf(data->assembly_output_file, "%d_while:\n", currentLabelIndexWhile);
     // Increment the label after creating a label
     labelIndex++;
 
@@ -440,7 +470,7 @@ node_st *ACGwhile(node_st *node)
     fprintf(data->assembly_output_file, "jump %d_while\n", currentLabelIndexWhile);
 
     // Create the end label at the end of the while loop, everything after will be in here
-    fprintf(data->assembly_output_file, "%d_end\n", currentLabelIndexEnd);
+    fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
 
     return node;
 }
@@ -453,7 +483,7 @@ node_st *ACGdowhile(node_st *node)
     // First create a label for the do-while loop
     struct data_acg *data = DATA_ACG_GET();
     int currentLabelIndex = labelIndex;
-    fprintf(data->assembly_output_file, "%d_doWhile\n", currentLabelIndex);
+    fprintf(data->assembly_output_file, "%d_doWhile:\n", currentLabelIndex);
     // Increment the label after creating a label
     labelIndex++;
 
@@ -666,7 +696,7 @@ node_st *ACGternaryop(node_st *node)
     TRAVelse_expr(node);
 
     // Create the end label at the end of the ternary op, everything after this node will be in here
-    fprintf(data->assembly_output_file, "%d_end\n", currentLabelIndexEnd);
+    fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
 
     return node;
 }
