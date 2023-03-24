@@ -4,8 +4,8 @@ extern void printNewlines(int num);
 
 export int main() {
     int x = 5;
-    // int y = 10;
-    // int z = (2 * x) + (y / 42);
+    int y = 10;
+    int z = (2 * x) + (y / 42);
 
     return 0;
 }

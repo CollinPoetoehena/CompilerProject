@@ -448,12 +448,15 @@ These are the operator nodes (also part of Expr, Operations)
 /**
  * @fn ACGbinop
  *
- * Push instruction symbol
- * Traverse into right operand
- * Traverse into left operand
  */
 node_st *ACGbinop(node_st *node)
 {
+    // First traverse into the left operand
+    TRAVleft(node);
+
+    // Then traverse into the right operand
+    TRAVright(node);
+
     // Allocate memory for a string of up to 99 characters
     char *binopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
     // Initialize with empty string to avoid weird memory address value being used at the start
@@ -467,10 +470,6 @@ node_st *ACGbinop(node_st *node)
             // Add the type in front of the string, such as i, then at the end it will be iadd
             binopInstructionSymbol = STRcat(binopInstructionSymbol, assemblyTypeString);
         }
-
-        // TODO: also, what to use, STRcat or strcat???
-        // Strings are difficult in C, so I do not know when to use what because it does not work.
-        // strcat works, but STRcat does not append anything
 
         // Then append the type of the operator assembly instruction
         // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
@@ -520,12 +519,6 @@ node_st *ACGbinop(node_st *node)
 
         printf("printed binop instruction: %s\n", binopInstructionSymbol);
     }
-
-    // Then traverse into the right operand
-    TRAVright(node);
-
-    // Then traverse into the left operand
-    TRAVleft(node);
 
     // TODO: how to store it on the stack and how to do the sequence???
 
@@ -624,6 +617,7 @@ node_st *ACGvarlet(node_st *node)
  */
 node_st *ACGcast(node_st *node)
 {
+
     return node;
 }
 
