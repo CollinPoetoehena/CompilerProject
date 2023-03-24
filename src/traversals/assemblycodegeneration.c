@@ -594,7 +594,7 @@ node_st *ACGvarlet(node_st *node)
     // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
     int varletIndex = STEVAR_ASSEMBLY_INDEX(VARLET_STE_LINK(node));
 
-    // Save the VarLet into the assembly
+    // Save the VarLet into the assembly file. . First get the type
     char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VARLET_STE_LINK(node)));
     // Check if it is not NULL
     if (assemblyTypeString != NULL) {
@@ -604,12 +604,12 @@ node_st *ACGvarlet(node_st *node)
         // Check if the variable is a global or a local variable
         if (STEVAR_NESTING_LEVEL(VARLET_STE_LINK(node)) > 0) {
             // If the nesting level is greater than zero, it is a local variable
-            // Save the instruction in the assembly output file as a local variable (<type>load C)
+            // Save the instruction in the assembly output file as a local variable (<type>store C)
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
         } else {
             // Otherwise, it is a global variable, so so the assembly instruction for storing a global
-            // in the global table by appending "g" at the end of the load instruction
+            // in the global table by appending "g" at the end of the instruction
             assemblyTypeString = STRcat(assemblyTypeString, "g");
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
@@ -650,6 +650,30 @@ node_st *ACGexprs(node_st *node)
  */
 node_st *ACGvar(node_st *node)
 {
+    // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
+    int varIndex = STEVAR_ASSEMBLY_INDEX(VAR_STE_LINK(node));
+
+    // Save the Var into the assembly file. First get the type
+    char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VAR_STE_LINK(node)));
+    // Check if it is not NULL
+    if (assemblyTypeString != NULL) {
+        // Append the load assembly instruction to the type
+        assemblyTypeString = STRcat(assemblyTypeString, "load");
+
+        // Check if the variable is a global or a local variable
+        if (STEVAR_NESTING_LEVEL(VAR_STE_LINK(node)) > 0) {
+            // If the nesting level is greater than zero, it is a local variable
+            // Save the instruction in the assembly output file as a local variable (<type>load C)
+            struct data_acg *data = DATA_ACG_GET();
+            fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
+        } else {
+            // Otherwise, it is a global variable, so so the assembly instruction for loading a global
+            // in the global table by appending "g" at the end of the instruction
+            assemblyTypeString = STRcat(assemblyTypeString, "g");
+            struct data_acg *data = DATA_ACG_GET();
+            fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
+        }
+    }
 
     return node;
 }
