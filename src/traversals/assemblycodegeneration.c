@@ -207,7 +207,8 @@ node_st *ACGfundef(node_st *node)
     TODO: this is how you handle external functions that are build in:
         - check if the fundef is exported and if the funbody is NULL, then it is a FunDec
         - No need to check for a name of the built in functions, extern functions are always this way, so just follow this:
-        - Then create the assembly instruction for the external built in function:
+        - Then create the assembly instruction for the external built in function. This needs to be printed 
+        only when you get to the end of the program, maybe save it in a char * with function signatures?? (See Civic VM last pages!):
             .importfun "funName" <retType> <args>
         - Then update this fundef ste link node with its index in the assembly instructions (global variable)
             STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node));
@@ -217,7 +218,6 @@ node_st *ACGfundef(node_st *node)
             then you add the following assembly instruction:
             jsre <indexFromSteLink>
             This is: jump to external subroutine (which is the external function that is done for you already!)
-        - OR: what you can also do is create a hash table in the travdata with the funName and the index, but the above is easier
 
     */
 
@@ -225,24 +225,23 @@ node_st *ACGfundef(node_st *node)
     // FunDef:
     // Create a label with the FunDef name from the SteFun link, this can then be used to jump
     // to the FunDef label with the SteFun link name to easily go there, so use fundef name!
-    // FunCall:
-    // isr 
-    // start a new subroutine, eigenlijk wanneer je een functie called, voorbereiden op uitvoer functie
-    // sub routine is eigenlijk een functie in assembly
-    // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
-
-    // onder isr alle argumenten loaden met 'load'
-    //
 
     // label is een unieke naam die je in de assembly neerzet, gebruik het overal waar je moet jumpen
     // dit gebruik je eigenlijk als de offset, dat gebruik je in de 'jsr'
-    // alle labels moeten uniek zijn, dat moet je bijhouden, bijv. met een counter voor labels
+    // alle labels moeten uniek zijn, dat moet je bijhouden, bijv. met een counter voor labels, bijv 1_while
 
     // je kan ook jumpen naar een subroutine als iets true is, zoals met
     // branch_t O
     // Dit jumpt alleen als iets true is, met offset O
     // Maar bekijk de CiviC VM manual gewoon en lees alles dan zie je wat alles doet en hoe het werkt, etc!
     // werk weer in kleine stapjes!
+
+
+
+    // TODO: every FunDef starts with an 'esr' instruction, which means enter subroutine!
+    // esr L -> with L elements, thus reserving space for L local variables (can be calculated
+    // by going through the chain of SteVars of this FunDef, this way you can easily count that number!)
+    // TODO: is that the correct way to do it, ask a TA and test it!???
 
 
     // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
@@ -645,6 +644,14 @@ node_st *ACGfuncall(node_st *node)
     // (maybe that needs to be added to the SteFun as well???)
     // Then it is jsre I -> with I as the index in the import table (see index of the FunDef from the SteFun! You can then directly save if
     // it is exported as well in the FunDef traversal of this traversal!)
+
+    // TODO: remove after testing, this was how the TA explained it:
+    // FunCall:
+    // isr 
+    // start a new subroutine, eigenlijk wanneer je een functie called, voorbereiden op uitvoer functie
+    // sub routine is eigenlijk een functie in assembly
+    // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
+    // onder isr alle argumenten loaden met 'load'
 
     return node;
 }
