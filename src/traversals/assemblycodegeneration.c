@@ -578,7 +578,7 @@ node_st *ACGternaryop(node_st *node)
 {
     // The AND (&&) and OR (||) operators are handled here
 
-    //TODO
+    // TODO: this needs to be done as well for the first assembly milestone
 
     return node;
 }
@@ -627,7 +627,7 @@ node_st *ACGvarlet(node_st *node)
  */
 node_st *ACGcast(node_st *node)
 {
-
+    // TODO: this needs to be done as well for the first assembly milestone
     return node;
 }
 
@@ -636,6 +636,7 @@ node_st *ACGcast(node_st *node)
  */
 node_st *ACGfuncall(node_st *node)
 {
+    // TODO
     // FunCall:
     // isr -> initiates a subroutine, probably 'isrg' to initiate a call to global (basic only one scope!)
     // <type>load -> then load all the variables needed for the parameters of the funcall (can also be an expression, see ass 6)
@@ -653,6 +654,7 @@ node_st *ACGfuncall(node_st *node)
  */
 node_st *ACGexprs(node_st *node)
 {
+    // TODO: later with funcalls, do this, probably fairly simple, just traverse expr and then after that next or the other way around
     return node;
 }
 
