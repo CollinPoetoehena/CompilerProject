@@ -352,10 +352,23 @@ node_st *ACGfundef(node_st *node)
         // Append the function import to the pseudo instructions string
         char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
         pseudoInstructionsFuns = STRcat(
-            pseudoInstructionsFuns,
-            STRcat(".importfun ", functionSignature)
+            STRcat(
+                pseudoInstructionsFuns,
+                STRcat(".importfun ", functionSignature)
+            ), "\n"
         );
     } else {
+        // Append the function signature to the pseudo instructions string if it is exported
+        if (FUNDEF_EXPORT(node)) {
+            char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
+            pseudoInstructionsFuns = STRcat(
+                STRcat(
+                    pseudoInstructionsFuns,
+                    STRcat(".exportfun ", functionSignature)
+                ), "\n"
+            );
+        }
+
         // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
         vardeclsIndex = 0;
 
