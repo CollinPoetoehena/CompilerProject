@@ -309,20 +309,12 @@ node_st *ACGglobdef(node_st *node)
 node_st *ACGfundef(node_st *node)
 {
     /*
-    TODO: this is how you handle external functions that are build in:
-        - check if the fundef is exported and if the funbody is NULL, then it is a FunDec
-        - No need to check for a name of the built in functions, extern functions are always this way, so just follow this:
-        - Then create the assembly instruction for the external built in function. This needs to be printed 
-        only when you get to the end of the program, maybe save it in a char * with function signatures?? (See Civic VM last pages!):
-            .importfun "funName" <retType> <args>
-        - Then update this fundef ste link node with its index in the assembly instructions (global variable)
-            STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node));
-            = globalVariable
-        - Then when you get the funcall node of this fundef (can be found with the stefun link)
+        - When you get the funcall node of this fundef (can be found with the stefun link)
             get the index, check if STEFUN_ASSEMBLY_INDEX(FUNCALL)_STE_LINK(node)) != NULL, then:
             then you add the following assembly instruction:
             jsre <indexFromSteLink>
             This is: jump to external subroutine (which is the external function that is done for you already!)
+            Or use the name for a not external function, no index necessary, use the label name!
 
     */
 
