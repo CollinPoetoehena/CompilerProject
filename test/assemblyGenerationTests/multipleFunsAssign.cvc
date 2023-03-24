@@ -1,0 +1,23 @@
+extern void printInt(int val);
+extern void printFloat(float val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+void foo() {
+    int a = 3;
+    float b = 6.435;
+    bool c = false;
+}
+
+export int main() {
+    // The vardeclsIndex should have reset now because the local variable scopes are reset!
+    int a = 5;
+    float b = 4.353;
+    bool c = true;
+
+    // TODO: print when everything is finished:
+    // printInt(a);
+    // printFloat(b);
+
+    return 0;
+}

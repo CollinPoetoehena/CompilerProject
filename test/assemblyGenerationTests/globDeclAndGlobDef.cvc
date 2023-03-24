@@ -1,0 +1,30 @@
+extern void printInt(int val);
+extern void printFloat(float val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+// GlobDefs
+int a = 10;
+float b = 6.4353;
+bool c = false;
+
+// GlobDecls
+extern int d;
+extern float e;
+
+export int main() {
+    // Should reger to the global variables
+    int a = a;
+    float b = b;
+    bool c = c;
+
+    // Should store the value in the GlobDecl node d and e
+    d = 10;
+    e = 5.3453;
+
+    // TODO: print when everything is finished:
+    // printInt(a);
+    // printFloat(b);
+
+    return 0;
+}

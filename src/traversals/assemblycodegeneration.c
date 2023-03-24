@@ -595,7 +595,7 @@ node_st *ACGvarlet(node_st *node)
         assemblyTypeString = STRcat(assemblyTypeString, "store");
         // Save the instruction in the assembly output file
         struct data_acg *data = DATA_ACG_GET();
-        fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, constandIndex);
+        fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
     }
 
     return node;
@@ -648,12 +648,11 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
-    // TODO: how to do the indexing of the constants, because you do not have Ste's for that
-
     // Load the constant with the current constants index
     struct data_acg *data = DATA_ACG_GET();
     fprintf(data->assembly_output_file, "iloadc %d\n", constandIndex);
 
+    // Increment the constantsIndex for the next constant
     constandIndex++;
 
     return node;
@@ -666,6 +665,13 @@ node_st *ACGnum(node_st *node)
  */
 node_st *ACGfloat(node_st *node)
 {
+    // Load the constant with the current constants index
+    struct data_acg *data = DATA_ACG_GET();
+    fprintf(data->assembly_output_file, "floadc %d\n", constandIndex);
+
+    // Increment the constantsIndex for the next constant
+    constandIndex++;
+
     return node;
 }
 
@@ -676,6 +682,13 @@ node_st *ACGfloat(node_st *node)
  */
 node_st *ACGbool(node_st *node)
 {
+    // Load the constant with the current constants index
+    struct data_acg *data = DATA_ACG_GET();
+    fprintf(data->assembly_output_file, "bloadc %d\n", constandIndex);
+
+    // Increment the constantsIndex for the next constant
+    constandIndex++;
+
     return node;
 }
 
