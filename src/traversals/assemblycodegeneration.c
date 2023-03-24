@@ -492,7 +492,7 @@ node_st *ACGbinop(node_st *node)
                     binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "rem");
                     break;
                 case BO_lt:
-                    // Logical operators have the type of the operands
+                    // Relational operators have the type of the operands
                     binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, leftOperandTypeBinop), "lt");
                     break;
                 case BO_le:
@@ -513,18 +513,17 @@ node_st *ACGbinop(node_st *node)
                 case BO_NULL:
                     DBUG_ASSERT(false, "unknown binop detected!");
             }
+
+            // Save the assembly instruction in the output file
+            struct data_acg *data = DATA_ACG_GET();
+            // Append a new line at the end of the instruction symbol string
+            binopInstructionSymbol = STRcat(binopInstructionSymbol, "\n");
+            fprintf(data->assembly_output_file, binopInstructionSymbol);
+
+            // TODO: remove after debugging
+            printf("printed binop instruction: %s\n", binopInstructionSymbol);
         }
-
-        // Push the instruction symbol at the end
-        struct data_acg *data = DATA_ACG_GET();
-        // Append a new line at the end of the binop instruction symbol string
-        binopInstructionSymbol = STRcat(binopInstructionSymbol, "\n");
-        fprintf(data->assembly_output_file, binopInstructionSymbol);
-
-        printf("printed binop instruction: %s\n", binopInstructionSymbol);
     }
-
-    // TODO: how to store it on the stack and how to do the sequence???
 
     return node;
 }
@@ -537,13 +536,16 @@ node_st *ACGbinop(node_st *node)
  */
 node_st *ACGmonop(node_st *node)
 {
+    // First traverse into the operand
+    TRAVoperand(node);
+
     // Allocate memory for a string of up to 99 characters
     char *monopInstructionSymbol = MEMmalloc(100 * sizeof(char)); 
     // Initialize with empty string to avoid weird memory address value being used at the start
     strcpy(monopInstructionSymbol, "");
 
-    if (BINOP_OPERATOR_TYPE_SIGNATURE(node) != CT_NULL) {
-        char *assemblyTypeString = getOperandTypeAssembly(BINOP_OPERATOR_TYPE_SIGNATURE(node));
+    if (MONOP_OPERATOR_TYPE_SIGNATURE(node) != CT_NULL) {
+        char *assemblyTypeString = getOperandTypeAssembly(MONOP_OPERATOR_TYPE_SIGNATURE(node));
         if (assemblyTypeString != NULL) {
             // Add the type in front of the string, such as i, then at the end it will be iadd
             monopInstructionSymbol = STRcat(monopInstructionSymbol, assemblyTypeString);
@@ -560,6 +562,15 @@ node_st *ACGmonop(node_st *node)
             case MO_NULL:
                 DBUG_ASSERT(false, "unknown monop detected!");
         }
+
+        // Save the assembly instruction in the output file
+        struct data_acg *data = DATA_ACG_GET();
+        // Append a new line at the end of the instruction symbol string
+        monopInstructionSymbol = STRcat(monopInstructionSymbol, "\n");
+        fprintf(data->assembly_output_file, monopInstructionSymbol);
+
+        // TODO: remove after debugging
+        printf("printed monop instruction: %s\n", monopInstructionSymbol);
     }
 
     return node;
