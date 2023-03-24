@@ -44,14 +44,12 @@ start phase RootPhase {
 // TODO: tested everything with check errors and check success, everything works, now do the outputs checking!
 
 
+
+
+// TODO: how to do the assembly generation for TernaryOp node???
+
+
 // TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
-
-// TODO: ask Simon, should you support
-
-// TODO: in the slides it said traverse down to the last statement, but why not do the stmt and then the next Stmts???
-
-
-
 
 
 // TODO: now when I run my compiler without the flag "-o <fileName>"
@@ -274,7 +272,9 @@ TODO:
     chmod +x ./civcc -> geeft permission voor alles
     gebruik uit de /bin folder de reference compiler: civcc
     run die compiler dan vervolgens op een .cvc file
-    hoeft niet 1 op 1 overeen te komen met jou compiler, zolang de output maar gelijk is.
+    hoeft niet 1 op 1 overeen te komen met jou compiler, zolang de output maar gelijk is. Zoals:
+    ./civcc ../test/assemblyGenerationTests/operators/logical.cvc -o test
+    Zo kan je ook zien welke assembly er door de reference compiler gemaakt wordt
 
     Algemene tips:
     functies zijn voornamelijk moeilijk, ruimte op de stack maken voor variabele
@@ -291,22 +291,6 @@ traversal AssemblyCodeGeneration {
         user file_ptr assembly_output_file
     }
 };
-
-/*
-TODO: this is done during CodeGeneration, but when and how, etc???
-    Explanation about Strict logic disjunction and conjunction:
-        Strict logic disjunction and conjunction are logical operations that implement the logical OR 
-        and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
-        conjunction, the operators are defined as arithmetic operators for addition and multiplication, respectively, 
-        and not as logical operators. This means that they operate on Boolean values as if they were integers, 
-        with the value true being treated as 1 and the value false being treated as 0.
-
-        In strict logic disjunction, the result is true if either or both operands are true, and false otherwise. 
-        It is implemented by the addition operator (+).
-
-        In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
-        It is implemented by the multiplication operator (*).
-*/
 
 enum Type {
     // T_ collides with bison/flex generated stuff.

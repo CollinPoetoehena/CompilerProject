@@ -31,6 +31,8 @@ int constandIndex = 0;
 int vardeclsIndex = 0;
 // Save the index of the global VarDecls in a global variable to use for creation assembly
 int globalVarDeclIndex = 0;
+// Global helper variable to save the label index of the current label (starts at 1)
+int labelIndex = 1;
 
 // Save the current fundef first SteVar to use
 //node_st *firstSteVarCurrentFunDefACG = NULL;
@@ -124,10 +126,6 @@ char *getOperandTypeAssembly(enum Type type) {
     return assemblyType;
 }
 
-// int getIndexFromSteVarChain(node_st *firstSteVarEntry) {
-
-// }
-
 /**
  * @fn ACGprogram
  */
@@ -135,6 +133,8 @@ node_st *ACGprogram(node_st *node)
 {
     // Traverse to the children
     TRAVdecls(node);
+
+    // TODO: at the end of the program, print the functionSignatures pseudo instructions??? (See CiviC_VM last pages!)
 
     return node;
 }
@@ -242,6 +242,12 @@ node_st *ACGfundef(node_st *node)
     // esr L -> with L elements, thus reserving space for L local variables (can be calculated
     // by going through the chain of SteVars of this FunDef, this way you can easily count that number!)
     // TODO: is that the correct way to do it, ask a TA and test it!???
+
+
+    // TODO: see the output of the reference compiler for how to do the functions, etc!
+    //     ./civcc ../test/assemblyGenerationTests/operators/logical.cvc -o test
+    // But keep in mind, it has a lot of optimizations, so the assembly of yours is different, but the 
+    // output should be the same, and the function structure with labels and esr, etc is probably the same as well!
 
 
     // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
@@ -366,6 +372,11 @@ node_st *ACGexprstmt(node_st *node)
  */
 node_st *ACGifelse(node_st *node)
 {
+    // TODO, makkelijkst om eerst de conditie te doen, dan 
+    // branch_f 1_else
+    // dit gaat naar else als de conditie false is en dan hieronder de if code en daaronder de else code
+    // TODO: maar voer een file uit in de reference compiler en zie hoe die structuur is (optimized, dus expressies hoeven niet hetzelfde!)
+
     // Traverse the condition Expr
     TRAVcond(node);
 
@@ -384,6 +395,9 @@ node_st *ACGifelse(node_st *node)
  */
 node_st *ACGwhile(node_st *node)
 {
+        // TODO
+        // see VM manual example for how to do it!
+
     // Traverse the condition Expr
     TRAVcond(node);
 
@@ -398,6 +412,8 @@ node_st *ACGwhile(node_st *node)
  */
 node_st *ACGdowhile(node_st *node)
 {
+        // TODO
+
     // Traverse the condition Expr
     TRAVcond(node);
 
@@ -470,7 +486,7 @@ node_st *ACGbinop(node_st *node)
             // AND (&&) and OR (||) operators are omitted because they are transformed into TernaryOp nodes!
             switch (BINOP_OP(node)) {
                 case BO_add:
-                    // Append the type first. Arightmetic operators have 
+                    // Append the type first. Arightmetic operators have
                     binopInstructionSymbol = STRcat(STRcat(binopInstructionSymbol, assemblyTypeString), "add");
                     break;
                 case BO_sub:
@@ -576,8 +592,24 @@ node_st *ACGmonop(node_st *node)
 node_st *ACGternaryop(node_st *node)
 {
     // The AND (&&) and OR (||) operators are handled here
+    struct data_acg *data = DATA_ACG_GET();
 
-    // TODO: this needs to be done as well for the first assembly milestone
+    // First traverse the predicate
+    TRAVpredicate(node);
+    
+    // Evaluate the predicate expression by adding a conditional jump to a label
+    int currentLabelIndex = labelIndex;
+    fprintf(data->assembly_output_file, "branch_f %d_elseExpr\n", currentLabelIndex);
+    // Increment the label after creating a label
+    labelIndex++;
+
+    // Then create the assembly for the then_expr
+    TRAVthen_expr(node);
+
+    // Then create a label for the else expression (labelformat: "token :"")
+    fprintf(data->assembly_output_file, "%d_elseExpr:\n", currentLabelIndex);
+    // Then traverse the else_expr
+    TRAVelse_expr(node);
 
     return node;
 }

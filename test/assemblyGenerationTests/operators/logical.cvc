@@ -3,14 +3,24 @@ extern void printFloat(float val);
 extern void printSpaces(int num);
 extern void printNewlines(int num);
 
+// void printBool(bool b) {
+//     if(b) {
+//         printInt(1);
+//     } else {
+//         printInt(0);
+//     }
+
+//     printNewlines(1);
+// }
+
 export int main() {
     bool a = 60 < 50 || 30 > 10;
     bool b = 5.3463 > 1.5235 && 5 > 6;
 
     bool c = true && false;
-    bool d = false && true;
+    bool d = a && b;
     bool e = false || true;
-    bool f = true || false;
+    bool f = b || a;
 
     return 0;
 }
