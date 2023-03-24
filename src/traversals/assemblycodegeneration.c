@@ -161,10 +161,12 @@ These nodes are Decl nodes
  */
 node_st *ACGglobdecl(node_st *node)
 {
-    // No children for basic here, so perform assembly generation
+    // No children for basic here
 
-    // Save index of global variable in the ste link
-    //globalVarDeclIndex++;
+    // Get the SteVar of this global decl and update it with the assembly index to use later
+    STEVAR_ASSEMBLY_INDEX(GLOBDECL_SYMBOL_TABLE(node)) = globalVarDeclIndex;
+    // Increment the global vars index for the next global vardecl
+    globalVarDeclIndex++;
 
     // TODO
 
@@ -179,6 +181,11 @@ node_st *ACGglobdef(node_st *node)
 
     // TODO:
     // Save index of global variable in the ste link
+
+    // Get the SteVar of this global decl and update it with the assembly index to use later
+    STEVAR_ASSEMBLY_INDEX(GLOBDEF_SYMBOL_TABLE(node)) = globalVarDeclIndex;
+    // Increment the global vars index for the next global vardecl
+    globalVarDeclIndex++;
 
     // Traverse to the init Expr, probably nothing here because it is separated with RegularAssignments
     TRAVinit(node);
@@ -589,13 +596,24 @@ node_st *ACGvarlet(node_st *node)
 
     // Save the VarLet into the assembly
     char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VARLET_STE_LINK(node)));
+    // Check if it is not NULL
     if (assemblyTypeString != NULL) {
-        printf("getting here!\n");
         // Append the store assembly instruction to the type
         assemblyTypeString = STRcat(assemblyTypeString, "store");
-        // Save the instruction in the assembly output file
-        struct data_acg *data = DATA_ACG_GET();
-        fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
+
+        // Check if the variable is a global or a local variable
+        if (STEVAR_NESTING_LEVEL(VARLET_STE_LINK(node)) > 0) {
+            // If the nesting level is greater than zero, it is a local variable
+            // Save the instruction in the assembly output file as a local variable (<type>load C)
+            struct data_acg *data = DATA_ACG_GET();
+            fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
+        } else {
+            // Otherwise, it is a global variable, so so the assembly instruction for storing a global
+            // in the global table by appending "g" at the end of the load instruction
+            assemblyTypeString = STRcat(assemblyTypeString, "g");
+            struct data_acg *data = DATA_ACG_GET();
+            fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
+        }
     }
 
     return node;
