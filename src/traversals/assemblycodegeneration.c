@@ -34,8 +34,8 @@ int globalVarDeclIndex = 0;
 // Global helper variable to save the label index of the current label (starts at 1)
 int labelIndex = 1;
 
-// Save the current fundef first SteVar to use
-//node_st *firstSteVarCurrentFunDefACG = NULL;
+// Save the current fundef first SteVar to use for return instruction
+node_st *currentSteFunFunDef = NULL;
 
 // This function is performed at the start of the traversal
 void ACGinit() {
@@ -253,6 +253,9 @@ node_st *ACGfundef(node_st *node)
     // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
     // TODO: is it correct that only the vardeclsIndex needs to be reset
     vardeclsIndex = 0;
+
+    // Set the current FunDef SteFun link
+    currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node);
     
     // Traverse the children
     TRAVbody(node);
@@ -444,11 +447,18 @@ node_st *ACGfor(node_st *node)
  */
 node_st *ACGreturn(node_st *node)
 {
-    // Traverse the return Expr
-    //TRAVexpr(node);
+    // First, traverse the return Expr
+    TRAVexpr(node);
 
     // Save the <type>return instruction in the output file
-    // TODO
+    // TODO: save temp fundef link in global variable and use it for the return type of the fundef rettype
+
+    // Then save the return assembly instruction after traversing the return Expr
+    struct data_acg *data = DATA_ACG_GET();
+    // Get the return type of the current fundef
+    char *assemblyTypeString = getOperandTypeAssembly(STEFUN_TYPE(currentSteFunFunDef));
+    // Append the type infront of the return instruction (void type will automatically become 'return')
+    fprintf(data->assembly_output_file, STRcat(assemblyTypeString, "return"));
 
     return node;
 }
@@ -667,7 +677,7 @@ node_st *ACGcast(node_st *node)
  */
 node_st *ACGfuncall(node_st *node)
 {
-    // TODO
+    // TODO:
     // FunCall:
     // isr -> initiates a subroutine, probably 'isrg' to initiate a call to global (basic only one scope!)
     // <type>load -> then load all the variables needed for the parameters of the funcall (can also be an expression, see ass 6)
@@ -694,6 +704,8 @@ node_st *ACGfuncall(node_st *node)
 node_st *ACGexprs(node_st *node)
 {
     // TODO: later with funcalls, do this, probably fairly simple, just traverse expr and then after that next or the other way around
+    // with doing some assembly instructions in between maybe!
+
     return node;
 }
 
