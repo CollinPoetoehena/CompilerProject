@@ -26,7 +26,7 @@
 #include "palm/dbug.h"
 
 // Save the index of the constant in a global variable to use for creation assembly
-int constandIndex = 0;
+int constantIndex = 0;
 // Save the index of the VarDecls in a global variable to use for creation assembly
 int vardeclsIndex = 0;
 // Save the index of the global VarDecls in a global variable to use for creation assembly
@@ -46,6 +46,8 @@ node_st *currentSteFunFunDef = NULL;
 
 // This string is used to store all the pseudo instructions for functions in
 char *pseudoInstructionsFuns = NULL;
+// This string is used to store all the pseudo instructions for functions in
+char *pseudoInstructionsConstants = NULL;
 
 // This function is performed at the start of the traversal
 void ACGinit() {
@@ -242,6 +244,9 @@ node_st *ACGprogram(node_st *node)
 
     // Print the pseudo instructions at the end of the file
     struct data_acg *data = DATA_ACG_GET();
+    // First print the constants pseudo instructions
+    fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsConstants);
+    // Then print the function pseudo instructions
     fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsFuns);
 
     return node;
@@ -991,12 +996,30 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
-    // Load the constant with the current constants index
-    struct data_acg *data = DATA_ACG_GET();
-    fprintf(data->assembly_output_file, "iloadc %d\n", constandIndex);
+            // TODO: check value, if 1 iload_1 ...., see VM manual!
 
-    // Increment the constantsIndex for the next constant
-    constandIndex++;
+    if (NUM_VAL(node) == 0) {
+        // Load an int constant 0, no need to update the 
+        // constants index or a pseudo instruction now
+        fprintf(data->assembly_output_file, "iloadc_1\n");
+    } else if (NUM_VAL(node) == 1) {
+        // Loda the int constant value 1
+        fprintf(data->assembly_output_file, "iloadc_1\n");
+    } else {
+        // Load the constant with the current constants index
+        struct data_acg *data = DATA_ACG_GET();
+        fprintf(data->assembly_output_file, "iloadc %d\n", constantIndex);
+
+        // Create the pseudo instruction for the constant and append it to already present instructions
+        pseudoInstructionsConstants = STRcat(
+            STRcat(
+                pseudoInstructionsConstants, ".const int %d", NUM_VAL(node)
+            ), "\n"
+        );
+
+        // Increment the constantsIndex for the next constant
+        constantIndex++;
+    }
 
     return node;
 }
@@ -1008,12 +1031,31 @@ node_st *ACGnum(node_st *node)
  */
 node_st *ACGfloat(node_st *node)
 {
-    // Load the constant with the current constants index
-    struct data_acg *data = DATA_ACG_GET();
-    fprintf(data->assembly_output_file, "floadc %d\n", constandIndex);
+        // TODO: check value, if 1.0 fload_1 ...., see VM manual!
 
-    // Increment the constantsIndex for the next constant
-    constandIndex++;
+    if (FLOAT_VAL(node) == 0.0) {
+        // Load a float constant 0.0, no need to update the 
+        // constants index or a pseudo instruction now
+        fprintf(data->assembly_output_file, "floadc_1\n");
+    } else if (FLOAT_VAL(node) == 1.0) {
+        // Loda the float constant value 1.0
+        fprintf(data->assembly_output_file, "floadc_1\n");
+    } else {
+        // Otherwise create a pseudo instruction and update the constants index
+        // Load the constant with the current constants index
+        struct data_acg *data = DATA_ACG_GET();
+        fprintf(data->assembly_output_file, "floadc %d\n", constantIndex);
+
+        // Create the pseudo instruction for the constant and append it to already present instructions
+        pseudoInstructionsConstants = STRcat(
+            STRcat(
+                pseudoInstructionsConstants, ".const float %f", FLOAT_VAL(node)
+            ), "\n"
+        );
+
+        // Increment the constantsIndex for the next constant
+        constantIndex++;
+    }
 
     return node;
 }
@@ -1027,10 +1069,16 @@ node_st *ACGbool(node_st *node)
 {
     // Load the constant with the current constants index
     struct data_acg *data = DATA_ACG_GET();
-    fprintf(data->assembly_output_file, "bloadc %d\n", constandIndex);
 
-    // Increment the constantsIndex for the next constant
-    constandIndex++;
+    // Check the boolean value, a constant boolean is always true or false
+    if (BOOL_VAL(node)) {
+        // Load a boolean constant true, no need to update the 
+        // constants index or a pseudo instruction now
+        fprintf(data->assembly_output_file, "bloadc_t\n");
+    } else {
+        // Otherwise load the boolean constant false
+        fprintf(data->assembly_output_file, "bloadc_f\n");
+    }
 
     return node;
 }
