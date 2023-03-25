@@ -996,7 +996,9 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
-            // TODO: check value, if 1 iload_1 ...., see VM manual!
+        // TODO: check integer out of range
+
+    struct data_acg *data = DATA_ACG_GET();
 
     if (NUM_VAL(node) == 0) {
         // Load an int constant 0, no need to update the 
@@ -1006,16 +1008,15 @@ node_st *ACGnum(node_st *node)
         // Loda the int constant value 1
         fprintf(data->assembly_output_file, "iloadc_1\n");
     } else {
+        // Otherwise create a pseudo instruction and update the constants index
         // Load the constant with the current constants index
-        struct data_acg *data = DATA_ACG_GET();
         fprintf(data->assembly_output_file, "iloadc %d\n", constantIndex);
 
         // Create the pseudo instruction for the constant and append it to already present instructions
-        pseudoInstructionsConstants = STRcat(
-            STRcat(
-                pseudoInstructionsConstants, ".const int %d", NUM_VAL(node)
-            ), "\n"
-        );
+        //pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, ".const int %d\n", NUM_VAL(node));
+        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, "\n.const int ");
+        // Then concatenate the int value to it
+        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, STRitoa(NUM_VAL(node)));
 
         // Increment the constantsIndex for the next constant
         constantIndex++;
@@ -1031,7 +1032,10 @@ node_st *ACGnum(node_st *node)
  */
 node_st *ACGfloat(node_st *node)
 {
-        // TODO: check value, if 1.0 fload_1 ...., see VM manual!
+    // TODO: check float out of range
+
+
+    struct data_acg *data = DATA_ACG_GET();
 
     if (FLOAT_VAL(node) == 0.0) {
         // Load a float constant 0.0, no need to update the 
@@ -1043,15 +1047,18 @@ node_st *ACGfloat(node_st *node)
     } else {
         // Otherwise create a pseudo instruction and update the constants index
         // Load the constant with the current constants index
-        struct data_acg *data = DATA_ACG_GET();
         fprintf(data->assembly_output_file, "floadc %d\n", constantIndex);
 
         // Create the pseudo instruction for the constant and append it to already present instructions
-        pseudoInstructionsConstants = STRcat(
-            STRcat(
-                pseudoInstructionsConstants, ".const float %f", FLOAT_VAL(node)
-            ), "\n"
-        );
+        // Start the new instruction with a new line (avoids having a line between constants and funs pseudo ins)
+        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, "\n.const float ");
+        // Then append the value to it. Allocate memory for a string of up to 99 characters.
+        char *floatValString = MEMmalloc(100 * sizeof(char));
+        // Initialize with empty string to avoid weird memory address value being used at the start
+        strcpy(floatValString, ""); 
+        sprintf(floatValString, "%f", FLOAT_VAL(node));
+        // Append the float value string to the current pseudo instruction
+        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, floatValString);
 
         // Increment the constantsIndex for the next constant
         constantIndex++;
@@ -1067,7 +1074,6 @@ node_st *ACGfloat(node_st *node)
  */
 node_st *ACGbool(node_st *node)
 {
-    // Load the constant with the current constants index
     struct data_acg *data = DATA_ACG_GET();
 
     // Check the boolean value, a constant boolean is always true or false
