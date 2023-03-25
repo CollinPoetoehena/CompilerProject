@@ -38,6 +38,9 @@ int labelIndex = 1;
 // Counter variable for functions in this program not necessary, jump to them with the label funName!
 int externFunsIndex = 0;
 
+// This helper variable is used to keep track of the number of args for the funcall
+int tempFunCallArgsCount = 0;
+
 // Save the current fundef first SteVar to use for return instruction
 node_st *currentSteFunFunDef = NULL;
 
@@ -363,15 +366,16 @@ node_st *ACGfundef(node_st *node)
         // Increment the globalFunsIndex for the next FunDef
         externFunsIndex++;
         // Set extern to true to use in FunCall node
-        STEFUN_EXTERNALFUNCTION(FUNDEF_SYMBOL_TABLE(node)) = true;
+        STEFUN_IS_EXTERNAL(FUNDEF_SYMBOL_TABLE(node)) = true;
     } else {
         // Append the function signature to the pseudo instructions string if it is exported
+        // An exported function also ends with the function label name at the end with a space in front
         if (FUNDEF_EXPORT(node)) {
             char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
             pseudoInstructionsFuns = STRcat(
                 STRcat(
-                    pseudoInstructionsFuns,
-                    STRcat(".exportfun ", functionSignature)
+                    STRcat(pseudoInstructionsFuns, STRcat(".exportfun ", functionSignature)),
+                    STRcat(" " ,FUNDEF_NAME(node))
                 ), "\n"
             );
         }
@@ -889,6 +893,35 @@ node_st *ACGfuncall(node_st *node)
     // Get the index from the SteFun link (saved in FunDef earlier)
     //int funIndex = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
 
+    // Reset the number of arguments for every FunCall node
+    tempFunCallArgsCount = 0;
+
+    struct data_acg *data = DATA_ACG_GET();
+    // Check if the function is external
+    if (STEFUN_IS_EXTERNAL(FUNCALL_STE_LINK(node))) {
+        printf("external funcall found\n");
+        printf("assembly index is %d\n", STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node)));
+
+        // Initiate the global subroutine with the instruction 'isrg'
+        fprintf(data->assembly_output_file, "isrg\n");
+        // Then traverse the arguments
+        if (FUNCALL_ARGS(node) != NULL) {
+            TRAVargs(node);
+        }
+        // Then jump to the external subroutine with the index of the external function
+        int externalFunIndexFunCall = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
+        fprintf(data->assembly_output_file, "jsre %d\n", externalFunIndexFunCall);
+    } else {
+        // Initiate the subroutine with the instruction 'isr' if the function is not external
+        fprintf(data->assembly_output_file, "isr\n");
+        // Then traverse the arguments if they are not NULL (checked to calculate the correct args count)
+        if (FUNCALL_ARGS(node) != NULL) {
+            TRAVargs(node);
+        }
+        // Then jump to the subroutine with the number of arguments and the name of the FunDef label
+        fprintf(data->assembly_output_file, "jsr %d %s\n", tempFunCallArgsCount, STEFUN_NAME(FUNCALL_STE_LINK(node)));
+    }
+
     return node;
 }
 
@@ -899,6 +932,14 @@ node_st *ACGexprs(node_st *node)
 {
     // TODO: later with funcalls, do this, probably fairly simple, just traverse expr and then after that next or the other way around
     // with doing some assembly instructions in between maybe!
+
+    // Increment the arguments count for every argument in the FunCall node
+    // If the args is NULL then it will not get here, so therefore this counter will be valid
+    tempFunCallArgsCount++;
+
+    // Then traverse the children
+    TRAVexpr(node);
+    TRAVnext(node);
 
     return node;
 }

@@ -655,7 +655,7 @@ node SteFun {
         // This is used for creating assembly instructions with the correct index
         int assembly_index,
         // This variable is used to check if the FunDef is an external function
-        bool externalFunction
+        bool is_external
     }
 };
 
