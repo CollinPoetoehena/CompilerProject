@@ -328,6 +328,26 @@ node_st *ACGglobdef(node_st *node)
  */
 node_st *ACGfundef(node_st *node)
 {
+//*****************************************************************************************************************************************
+// TODO: the __init function of the regular assignments is not exported and therefore a lot of tests fail, make sure it
+// is created with pseudo instructions! Maybe make it true in the Regular Assignments traversal, but it gives a segmentation fault then
+// investigate why or think of a different solution to make the pseudo instruction for that, such as checking if the name is
+// __init in the FunDef node and then making a pseudo instruction if the name is equal to "__init"
+
+// TODO: then test everything again (see debugging explanation in main if necessary!)
+// Then create a lot of your own tests and use the older tests and test them and also from the nutcheck framework
+// Then when everything is working good, merge to master and test everything once again
+// then follow the instructions for delivering it and test everything once more and then deliver it!
+// Then update the report and also deliver that
+// then when you are done, relax a bit for the next period :)!
+
+
+
+
+
+
+
+
     /*
         - When you get the funcall node of this fundef (can be found with the stefun link)
             get the index, check if STEFUN_ASSEMBLY_INDEX(FUNCALL)_STE_LINK(node)) != NULL, then:
