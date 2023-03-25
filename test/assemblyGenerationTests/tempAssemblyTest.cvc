@@ -22,7 +22,13 @@ bool f() {
 }
 
 export int main() {
-    printBool(t() == f());
-    
+    printBool((bool)5);
+    printBool((bool)0);
+    printNewlines(1);
+
+    printBool((bool)5.0);
+    printBool((bool)0.0);
+    printNewlines(1);
+
     return 0;
 }

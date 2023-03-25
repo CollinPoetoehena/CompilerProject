@@ -787,6 +787,8 @@ node_st *ACGmonop(node_st *node)
  */
 node_st *ACGternaryop(node_st *node)
 {
+    // TODO: found problem, it needs to be another binop with 5 > 0, not just the number!
+    
     // The AND (&&) and OR (||) operators are handled here
     struct data_acg *data = DATA_ACG_GET();
 

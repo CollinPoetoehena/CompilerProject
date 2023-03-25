@@ -238,7 +238,7 @@ traversal because a Cast can have a BinOp Expr child as well.
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     // It traverses all Cast expressions that have a boolean result or bool cast type
-    nodes = { Cast, BinOp, FunCall, Var, Bool }
+    nodes = { Cast, BinOp, FunCall, Var, Num, Float, Bool }
 };
 
 /*
@@ -312,9 +312,9 @@ This is how you can then perform the output for a file using civas and civvm
     3. ../bin/civas <fileName> -o <fileName2>.as
         This creates the output file with the CiviC assembler
     4. ../bin/civvm <fileName2>.as
-    These are examples (use for copying and quick testing):
+    These are examples (use for copying and quick testing, open 2 terminals, one with your compiler and one with bin folder):
     ./civicc ../test/<testFilePath> -o test
-    (Now you need to be in the bin folder:)
+    (Now you need to be in the bin folder, with the file that is made in build-debug copied to the bin folder:)
     ../bin/civas test -o test.as
     ../bin/civvm test.as
 */

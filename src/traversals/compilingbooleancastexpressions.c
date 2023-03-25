@@ -25,6 +25,9 @@
 // Helper variable to determine if the Cast expression result is binop
 bool operatorTypeIsBool = false;
 
+// Global helper variable to save the type in
+enum Type tempTypeForCastConversion = CT_NULL; // CT_NULL is the NULL type
+
 /**
  * @fn CBCEcast
  */
@@ -39,18 +42,45 @@ node_st *CBCEcast(node_st *node)
     // If the Cast type is bool than it needs to be converted
     // Or if the result features boolean operators it needs to be converted
     if (CAST_TYPE(node) == CT_bool) {
-        // Will be transformed to TernaryOp node: predicate  ? true : false
+        // Will be transformed to TernaryOp node: predicate ? true : false
         // where the predicate will use the numbers num >=1 -> true; num < 1 -> false;
-        node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTbool(true), 
-            ASTbool(false), CT_float);
+        // resulting type will be bool, so set the type signature to bool
+        if (tempTypeForCastConversion == CT_int) {
+            // Create a Binop for an int type, also set the left operand and type signature type for assembly generation!
+            node_st *newBinopNode = ASTbinop(CAST_EXPR(node), ASTnum(1), BO_ge);
+            BINOP_LEFT_OPERAND_TYPE(newBinopNode) = tempTypeForCastConversion;
+            // Resulting type of the BinOp ge operation will be bool
+            BINOP_OPERATOR_TYPE_SIGNATURE(newBinopNode) = CT_bool;
 
-        // Set temp variable for boolean operator to true because there is a bool cast
-        operatorTypeIsBool = true;
+            // Then create the TernaryOp node
+            node_st *newConvertedNode = ASTternaryop(newBinopNode, ASTbool(true), 
+                ASTbool(false), CT_bool);
 
-        // Return the new TernaryOp node
-        return newConvertedNode;
+            // Set temp variable for boolean operator to true because there is a bool cast
+            operatorTypeIsBool = true;
+
+            // Return the new TernaryOp node
+            return newConvertedNode;
+        } else if (tempTypeForCastConversion == CT_float) {
+            // Create a Binop for a float type, also set the left operand and type signature type for assembly generation!
+            node_st *newBinopNode = ASTbinop(CAST_EXPR(node), ASTfloat(1.0), BO_ge);
+            BINOP_LEFT_OPERAND_TYPE(newBinopNode) = tempTypeForCastConversion;
+            // Resulting type of the BinOp ge operation will be bool
+            BINOP_OPERATOR_TYPE_SIGNATURE(newBinopNode) = CT_bool;
+
+            // Then create the TernaryOp node
+            node_st *newConvertedNode = ASTternaryop(newBinopNode, ASTbool(true), 
+                ASTbool(false), CT_bool);
+
+            // Set temp variable for boolean operator to true because there is a bool cast
+            operatorTypeIsBool = true;
+
+            // Return the new TernaryOp node
+            return newConvertedNode;
+        }
     } else if (operatorTypeIsBool && CAST_TYPE(node) == CT_int) {
         // Will be transformed to TernaryOp node: predicate ? 1 : 0
+        // resulting type will be int, so set the type signature to int
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTnum(1), 
             ASTnum(0), CT_int);
 
@@ -61,8 +91,9 @@ node_st *CBCEcast(node_st *node)
         return newConvertedNode;
     } else if (operatorTypeIsBool && CAST_TYPE(node) == CT_float) {
         // Will be transformed to TernaryOp node: predicate ? 1.0 : 0.0
+        // resulting type will be float, so set the type signature to float
         node_st *newConvertedNode = ASTternaryop(CAST_EXPR(node), ASTfloat(1.0), 
-            ASTfloat(0.0), CT_bool);
+            ASTfloat(0.0), CT_float);
 
         // Set temp variable for boolean operator to true because there is a bool result cast
         operatorTypeIsBool = true;
@@ -90,6 +121,9 @@ node_st *CBCEbinop(node_st *node)
         operatorTypeIsBool = true;
     }
 
+    // Save the temp type
+    tempTypeForCastConversion = BINOP_OPERATOR_TYPE_SIGNATURE(node);
+
     return node;
 }
 
@@ -107,6 +141,9 @@ node_st *CBCEfuncall(node_st *node)
         operatorTypeIsBool = true;
     }
 
+    // Save the temp type
+    tempTypeForCastConversion = STEFUN_TYPE(FUNCALL_STE_LINK(node));
+
     return node;
 }
 
@@ -120,6 +157,31 @@ node_st *CBCEvar(node_st *node)
         // Set the bool result value to true
         operatorTypeIsBool = true;
     }
+
+    // Save the temp type
+    tempTypeForCastConversion = STEVAR_TYPE(VAR_STE_LINK(node));
+
+    return node;
+}
+
+/**
+ * @fn CBCEnum
+ */
+node_st *CBCEnum(node_st *node)
+{
+    // Save the temp type
+    tempTypeForCastConversion = CT_int;
+
+    return node;
+}
+
+/**
+ * @fn CBCEfloat
+ */
+node_st *CBCEfloat(node_st *node)
+{
+    // Save the temp type
+    tempTypeForCastConversion = CT_float;
 
     return node;
 }
