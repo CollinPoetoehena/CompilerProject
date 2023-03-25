@@ -35,12 +35,35 @@ breturn
 main:
 esr 0
 isrg
-isrg
-jsr 0 t
+floadc 0
+floadc_1
+fge
+branch_f 3_elseExpr
+bloadc_t
+jump 4_end
+3_elseExpr:
+bloadc_f
+4_end:
 jsr 1 printBool
+isrg
+floadc_1
+floadc_1
+fge
+branch_f 5_elseExpr
+bloadc_t
+jump 6_end
+5_elseExpr:
+bloadc_f
+6_end:
+jsr 1 printBool
+isrg
+iloadc_1
+jsre 1
 iloadc_0
 ireturn
 
+
+.const float 5.000000
 .importfun "printInt" void int
 .importfun "printNewlines" void int
 .exportfun "main" int main

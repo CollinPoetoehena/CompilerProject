@@ -317,6 +317,15 @@ This is how you can then perform the output for a file using civas and civvm
     (Now you need to be in the bin folder, with the file that is made in build-debug copied to the bin folder:)
     ../bin/civas test -o test.as
     ../bin/civvm test.as
+
+
+******************************************************************************************************************************************
+Debugging assembly:
+    - Comment smaller pieces everytime and see where the problem is occurring.
+    - Then look at the assembly to see if something is going wrong.
+    - Maybe also run that small part in the reference compiler and compare the assembly to see if
+        something is very off maybe that is causing the issue!
+    - Then look at the codes and see if you can fix it!
 */
 
 enum Type {

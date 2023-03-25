@@ -1055,7 +1055,7 @@ node_st *ACGfloat(node_st *node)
     if (FLOAT_VAL(node) == 0.0) {
         // Load a float constant 0.0, no need to update the 
         // constants index or a pseudo instruction now
-        fprintf(data->assembly_output_file, "floadc_1\n");
+        fprintf(data->assembly_output_file, "floadc_0\n");
     } else if (FLOAT_VAL(node) == 1.0) {
         // Loda the float constant value 1.0
         fprintf(data->assembly_output_file, "floadc_1\n");
