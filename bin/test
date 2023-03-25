@@ -1,17 +1,57 @@
-__init:
-    iloadc 0
-    istoreg 0
+printBool:
+    bload_0
+    branch_f 5_else
+    isrg
+    iloadc_1
+    jsre 0
+    jump 6_end
+5_else:
+    isrg
+    iloadc_0
+    jsre 0
+6_end:
+    isrg
+    iloadc_1
+    jsre 1
     return
+
+t:
+    isrg
+    iloadc_1
+    jsre 0
+    bloadc_t
+    breturn
+
+f:
+    isrg
+    iloadc_0
+    jsre 0
+    bloadc_f
+    breturn
 
 main:
     isrg
-    iloadg 0
-    jsre 0
+    isrg
+    jsr 0 t
+    branch_f 3_false_expr
+    iloadc_1
+    jump 4_end
+3_false_expr:
+    iloadc_0
+4_end:
+    isrg
+    jsr 0 f
+    branch_f 1_false_expr
+    iloadc_1
+    jump 2_end
+1_false_expr:
+    iloadc_0
+2_end:
+    ieq
+    jsr 1 printBool
     iloadc_0
     ireturn
 
-.const int 10
-.exportfun "__init" void __init
 .exportfun "main" int main
-.global int
 .importfun "printInt" void int
+.importfun "printNewlines" void int

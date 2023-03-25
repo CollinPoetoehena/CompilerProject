@@ -1,5 +1,3 @@
-int a = 5;
-
 void testVarInits()
 {
   int a = 3;

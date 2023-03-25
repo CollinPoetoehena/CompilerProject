@@ -48,9 +48,6 @@ void bar() {
 }
 
 export int main() {
-    // This should give a type error, int with void is not correct
-    // fun() + bar();
-
     fun();
     bar();
     return 0;

@@ -61,10 +61,6 @@ void ACGinit() {
         struct data_acg *data = DATA_ACG_GET();
         data->assembly_output_file = file;
 
-        // TODO: is this correct??
-        // Initialize the pseudo instructions for functions string with an empty string
-        pseudoInstructionsFuns = STRcat(pseudoInstructionsFuns, "");
-
         // Write to a file with 'fprintf'.
         //fprintf(data->assembly_output_file, "Hello World 2\n");
 
@@ -230,12 +226,16 @@ node_st *ACGprogram(node_st *node)
 
     // TODO: at the end of the program, print the functionSignatures pseudo instructions??? (See CiviC_VM last pages!)
 
-    // Print the pseudo instructions at the end of the file
+    // Print the pseudo instructions at the end of the file if they are not NULL
     struct data_acg *data = DATA_ACG_GET();
-    // First print the constants pseudo instructions
-    fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsConstants);
-    // Then print the function pseudo instructions
-    fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsFuns);
+    if (pseudoInstructionsConstants != NULL) {
+        // First print the constants pseudo instructions
+        fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsConstants);
+    }
+    if (pseudoInstructionsFuns != NULL) {
+        // Then print the function pseudo instructions
+        fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsFuns);
+    }
 
     return node;
 }
@@ -864,6 +864,18 @@ node_st *ACGvarlet(node_st *node)
 node_st *ACGcast(node_st *node)
 {
     // TODO: this needs to be done as well for the first assembly milestone
+
+    // First traverse the expression
+    TRAVexpr(node);
+
+    // Then check what type it is and perform the cast instruction
+    struct data_acg *data = DATA_ACG_GET();
+    if (CAST_TYPE(node) == CT_int) {
+        fprintf(data->assembly_output_file, "f2i\n");
+    } else if (CAST_TYPE(node) == CT_int) {
+        fprintf(data->assembly_output_file, "i2f\n");
+    }
+
     return node;
 }
 
@@ -901,9 +913,6 @@ node_st *ACGfuncall(node_st *node)
     struct data_acg *data = DATA_ACG_GET();
     // Check if the function is external
     if (STEFUN_IS_EXTERNAL(FUNCALL_STE_LINK(node))) {
-        printf("external funcall found\n");
-        printf("assembly index is %d\n", STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node)));
-
         // Initiate the global subroutine with the instruction 'isrg'
         fprintf(data->assembly_output_file, "isrg\n");
         // Then traverse the arguments
@@ -914,8 +923,10 @@ node_st *ACGfuncall(node_st *node)
         int externalFunIndexFunCall = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
         fprintf(data->assembly_output_file, "jsre %d\n", externalFunIndexFunCall);
     } else {
+        // TODO: change to isrg with comments
+
         // Initiate the subroutine with the instruction 'isr' if the function is not external
-        fprintf(data->assembly_output_file, "isr\n");
+        fprintf(data->assembly_output_file, "isrg\n");
         // Then traverse the arguments if they are not NULL (checked to calculate the correct args count)
         if (FUNCALL_ARGS(node) != NULL) {
             TRAVargs(node);

@@ -48,6 +48,8 @@ start phase RootPhase {
 
 // TODO: how to do the assembly generation for TernaryOp node???
 
+// TODO: assembly, why do you need to do a isrg always in basic??? why not isr and what is the difference??
+
 
 // TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
