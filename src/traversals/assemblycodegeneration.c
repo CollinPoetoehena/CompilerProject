@@ -44,10 +44,13 @@ int tempFunCallArgsCount = 0;
 // Save the current fundef first SteVar to use for return instruction
 node_st *currentSteFunFunDef = NULL;
 
-// This string is used to store all the pseudo instructions for functions in
-char *pseudoInstructionsFuns = NULL;
-// This string is used to store all the pseudo instructions for functions in
-char *pseudoInstructionsConstants = NULL;
+// // This string is used to store all the pseudo instructions for functions in
+// char *pseudoInstructionsString = NULL;
+// // This string is used to store all the pseudo instructions for functions in
+// char *pseudoInstructionsString = NULL;
+
+// TODO: convert the above to one pseudo instructions variable
+char *pseudoInstructionsString = NULL;
 
 // This function is performed at the start of the traversal
 void ACGinit() {
@@ -237,27 +240,16 @@ node_st *ACGprogram(node_st *node)
     // TODO: maybe the make check fails because of the global variables not being in travdata??
     // or you can try to reset all the global variables to 0 in the fini????
     // index is failing so maybe that is the problem???
-
-
-
-    // TODO: remove
-    // // Set the first global SteFun node to use for traversing the children
-    // firstGlobalSteFunAssembly = PROGRAM_FIRST_STE_FUNCTIONS(node);
+    // This works now, it is not that, so leave that, it works fine without the travdata and just the globals!
 
     // Traverse to the children
     TRAVdecls(node);
 
-    // TODO: at the end of the program, print the functionSignatures pseudo instructions??? (See CiviC_VM last pages!)
-
     // Print the pseudo instructions at the end of the file if they are not NULL
     struct data_acg *data = DATA_ACG_GET();
-    if (pseudoInstructionsConstants != NULL) {
+    if (pseudoInstructionsString != NULL) {
         // First print the constants pseudo instructions
-        fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsConstants);
-    }
-    if (pseudoInstructionsFuns != NULL) {
-        // Then print the function pseudo instructions
-        fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsFuns);
+        fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsString);
     }
 
     return node;
@@ -287,12 +279,20 @@ node_st *ACGglobdecl(node_st *node)
 {
     // No children for basic here
 
+    // Create the pseudo instruction for the global and append it to already present instructions
+    pseudoInstructionsString = STRcat(
+        STRcat(
+            STRcat(
+                pseudoInstructionsString,
+                ".global "
+            ), getTypeForSignature(GLOBDECL_TYPE(node))
+        ), "\n"
+    );
+
     // Get the SteVar of this global decl and update it with the assembly index to use later
     STEVAR_ASSEMBLY_INDEX(GLOBDECL_SYMBOL_TABLE(node)) = globalVarDeclIndex;
     // Increment the global vars index for the next global vardecl
     globalVarDeclIndex++;
-
-    // TODO
 
     return node;
 }
@@ -302,22 +302,23 @@ node_st *ACGglobdecl(node_st *node)
  */
 node_st *ACGglobdef(node_st *node)
 {
-
-    // TODO:
-    // Save index of global variable in the ste link
-
     // Get the SteVar of this global decl and update it with the assembly index to use later
     STEVAR_ASSEMBLY_INDEX(GLOBDEF_SYMBOL_TABLE(node)) = globalVarDeclIndex;
     // Increment the global vars index for the next global vardecl
     globalVarDeclIndex++;
 
+    // Create the pseudo instruction for the global and append it to already present instructions
+    pseudoInstructionsString = STRcat(
+        STRcat(
+            STRcat(
+                pseudoInstructionsString,
+                ".global "
+            ), getTypeForSignature(GLOBDEF_TYPE(node))
+        ), "\n"
+    );
+
     // Traverse to the init Expr, probably nothing here because it is separated with RegularAssignments
     TRAVinit(node);
-
-    // TODO: perform assembly generation when global is occurred
-    // <type>loadg
-    // loads a global variable
-    // But look at the manual for all the instructions!
     
     return node;
 }
@@ -370,9 +371,9 @@ node_st *ACGfundef(node_st *node)
     if (FUNDEF_BODY(node) == NULL && FUNDEF_EXPORT(node)) {
         // Append the function import to the pseudo instructions string
         char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
-        pseudoInstructionsFuns = STRcat(
+        pseudoInstructionsString = STRcat(
             STRcat(
-                pseudoInstructionsFuns,
+                pseudoInstructionsString,
                 STRcat(".importfun ", functionSignature)
             ), "\n"
         );
@@ -388,9 +389,9 @@ node_st *ACGfundef(node_st *node)
         // An exported function also ends with the function label name at the end with a space in front
         if (FUNDEF_EXPORT(node)) {
             char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
-            pseudoInstructionsFuns = STRcat(
+            pseudoInstructionsString = STRcat(
                 STRcat(
-                    STRcat(pseudoInstructionsFuns, STRcat(".exportfun ", functionSignature)),
+                    STRcat(pseudoInstructionsString, STRcat(".exportfun ", functionSignature)),
                     STRcat(" " ,FUNDEF_NAME(node))
                 ), "\n"
             );
@@ -409,7 +410,10 @@ node_st *ACGfundef(node_st *node)
         // Then create the 'esr' instruction with the number of local variables
         // Get the number of local variables to use in the 'esr' instruction
         int localVariablesCount = getLocalVariablesCount(FUNDEF_FIRST_STE_VARIABLES(node));
-        fprintf(data->assembly_output_file, "esr %d\n", localVariablesCount);
+        // Only load the esr instruction if the variable count is greater than 0
+        if (localVariablesCount > 0) {
+            fprintf(data->assembly_output_file, "esr %d\n", localVariablesCount);
+        }
         
         // Traverse the children
         TRAVbody(node);
@@ -1028,10 +1032,14 @@ node_st *ACGnum(node_st *node)
         fprintf(data->assembly_output_file, "iloadc %d\n", constantIndex);
 
         // Create the pseudo instruction for the constant and append it to already present instructions
-        //pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, ".const int %d\n", NUM_VAL(node));
-        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, "\n.const int ");
-        // Then concatenate the int value to it
-        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, STRitoa(NUM_VAL(node)));
+        pseudoInstructionsString = STRcat(pseudoInstructionsString, ".const int ");
+        // Then concatenate the int value to it with a new line
+        pseudoInstructionsString = STRcat(
+            STRcat(
+                pseudoInstructionsString,
+                STRitoa(NUM_VAL(node))
+            ), "\n"
+        );
 
         // Increment the constantsIndex for the next constant
         constantIndex++;
@@ -1065,15 +1073,14 @@ node_st *ACGfloat(node_st *node)
         fprintf(data->assembly_output_file, "floadc %d\n", constantIndex);
 
         // Create the pseudo instruction for the constant and append it to already present instructions
-        // Start the new instruction with a new line (avoids having a line between constants and funs pseudo ins)
-        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, "\n.const float ");
+        pseudoInstructionsString = STRcat(pseudoInstructionsString, ".const float ");
         // Then append the value to it. Allocate memory for a string of up to 99 characters.
         char *floatValString = MEMmalloc(100 * sizeof(char));
         // Initialize with empty string to avoid weird memory address value being used at the start
         strcpy(floatValString, ""); 
-        sprintf(floatValString, "%f", FLOAT_VAL(node));
+        sprintf(floatValString, "%f\n", FLOAT_VAL(node));
         // Append the float value string to the current pseudo instruction
-        pseudoInstructionsConstants = STRcat(pseudoInstructionsConstants, floatValString);
+        pseudoInstructionsString = STRcat(pseudoInstructionsString, floatValString);
 
         // Increment the constantsIndex for the next constant
         constantIndex++;

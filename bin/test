@@ -1,70 +1,17 @@
-printBool:
-esr 1
-bload 0
-branch_f 1_else
-isrg
-iloadc_1
-jsre 0
-jump 2_end
-1_else:
-isrg
-iloadc_0
-jsre 0
-2_end:
-isrg
-iloadc_1
-jsre 1
-return
-
-t:
-esr 0
-isrg
-iloadc_1
-jsre 0
-bloadc_t
-breturn
-
-f:
-esr 0
-isrg
-iloadc_0
-jsre 0
-bloadc_f
-breturn
+__init:
+    iloadc 0
+    istoreg 0
+    return
 
 main:
-esr 0
-isrg
-floadc 0
-floadc_1
-fge
-branch_f 3_elseExpr
-bloadc_t
-jump 4_end
-3_elseExpr:
-bloadc_f
-4_end:
-jsr 1 printBool
-isrg
-floadc_1
-floadc_1
-fge
-branch_f 5_elseExpr
-bloadc_t
-jump 6_end
-5_elseExpr:
-bloadc_f
-6_end:
-jsr 1 printBool
-isrg
-iloadc_1
-jsre 1
-iloadc_0
-ireturn
+    isrg
+    iloadg 0
+    jsre 0
+    iloadc_0
+    ireturn
 
-
-.const float 5.000000
-.importfun "printInt" void int
-.importfun "printNewlines" void int
+.const int 10
+.exportfun "__init" void __init
 .exportfun "main" int main
-
+.global int
+.importfun "printInt" void int
