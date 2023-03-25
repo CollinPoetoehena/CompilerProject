@@ -182,7 +182,7 @@ char *getFunctionSignatureFromSte(node_st *steFun) {
     return NULL;
 }
 
-// Get the number of variables in a FunDef SteVar chain
+// Helper function to get the number of variables in a FunDef SteVar chain
 int getLocalVariablesCount(node_st *firstSteVarNode) {
     if (firstSteVarNode != NULL) {
         // Get the number of SteVar in the FunDef node
@@ -202,6 +202,29 @@ int getLocalVariablesCount(node_st *firstSteVarNode) {
     }
 
     // If the first SteVar node is NULL, then the number of local variables is 0
+    return 0;
+}
+
+// Helper function to get the number of arguments for a funcall node 
+int getArgumentCountFuncall(node_st *firstArgsNodeFuncall) {
+    if (firstArgsNodeFuncall != NULL) {
+        // Get the count, start at 0
+        int argsCountFuncallNode = 0;
+        // Set the first SteVar node
+        node_st *argsIterator = firstArgsNodeFuncall;
+        do {
+            // Increment count
+            argsCountFuncallNode++;
+
+            // Update the iterator
+            argsIterator = STEVAR_NEXT(argsIterator);
+        } while (argsIterator != NULL);
+
+        // Return the count variable
+        return argsCountFuncallNode;
+    }
+
+    // If the args node is NULL, then the number of arguments is 0
     return 0;
 }
 
@@ -786,9 +809,7 @@ node_st *ACGmonop(node_st *node)
  * @fn ACGternaryop
  */
 node_st *ACGternaryop(node_st *node)
-{
-    // TODO: found problem, it needs to be another binop with 5 > 0, not just the number!
-    
+{    
     // The AND (&&) and OR (||) operators are handled here
     struct data_acg *data = DATA_ACG_GET();
 
@@ -886,7 +907,7 @@ node_st *ACGcast(node_st *node)
  */
 node_st *ACGfuncall(node_st *node)
 {
-    // TODO:
+    // TODO: remove at the end!
     // FunCall:
     // isr -> initiates a subroutine, probably 'isrg' to initiate a call to global (basic only one scope!)
     // <type>load -> then load all the variables needed for the parameters of the funcall (can also be an expression, see ass 6)
@@ -905,12 +926,6 @@ node_st *ACGfuncall(node_st *node)
     // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
     // onder isr alle argumenten loaden met 'load'
 
-    // TODO: check if extern from link, if it is extern, get the assembly index, otherwise use the label funName, no index necessary!
-    // Get the index from the SteFun link (saved in FunDef earlier)
-    //int funIndex = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
-
-    // Reset the number of arguments for every FunCall node
-    tempFunCallArgsCount = 0;
 
     struct data_acg *data = DATA_ACG_GET();
     // Check if the function is external
@@ -918,23 +933,18 @@ node_st *ACGfuncall(node_st *node)
         // Initiate the global subroutine with the instruction 'isrg'
         fprintf(data->assembly_output_file, "isrg\n");
         // Then traverse the arguments
-        if (FUNCALL_ARGS(node) != NULL) {
-            TRAVargs(node);
-        }
+        TRAVargs(node);
         // Then jump to the external subroutine with the index of the external function
         int externalFunIndexFunCall = STEFUN_ASSEMBLY_INDEX(FUNCALL_STE_LINK(node));
         fprintf(data->assembly_output_file, "jsre %d\n", externalFunIndexFunCall);
     } else {
-        // TODO: change to isrg with comments
-
-        // Initiate the subroutine with the instruction 'isr' if the function is not external
+        // Initiate the global subroutine with the instruction 'isrg'
         fprintf(data->assembly_output_file, "isrg\n");
-        // Then traverse the arguments if they are not NULL (checked to calculate the correct args count)
-        if (FUNCALL_ARGS(node) != NULL) {
-            TRAVargs(node);
-        }
+        // Then traverse the arguments
+        TRAVargs(node);
         // Then jump to the subroutine with the number of arguments and the name of the FunDef label
-        fprintf(data->assembly_output_file, "jsr %d %s\n", tempFunCallArgsCount, STEFUN_NAME(FUNCALL_STE_LINK(node)));
+        int currentFuncallArgsCount = getArgumentCountFuncall(FUNCALL_ARGS(node));
+        fprintf(data->assembly_output_file, "jsr %d %s\n", currentFuncallArgsCount, STEFUN_NAME(FUNCALL_STE_LINK(node)));
     }
 
     return node;
@@ -945,14 +955,7 @@ node_st *ACGfuncall(node_st *node)
  */
 node_st *ACGexprs(node_st *node)
 {
-    // TODO: later with funcalls, do this, probably fairly simple, just traverse expr and then after that next or the other way around
-    // with doing some assembly instructions in between maybe!
-
-    // Increment the arguments count for every argument in the FunCall node
-    // If the args is NULL then it will not get here, so therefore this counter will be valid
-    tempFunCallArgsCount++;
-
-    // Then traverse the children
+    // Traverse the children to create the assembly instructions
     TRAVexpr(node);
     TRAVnext(node);
 
