@@ -1,3 +1,9 @@
 extern void printInt(int val);
 
 int a = 10;
+
+export int main() {
+    printInt(a);
+
+    return 0;
+}

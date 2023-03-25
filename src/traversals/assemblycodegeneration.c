@@ -233,6 +233,13 @@ int getLocalVariablesCount(node_st *firstSteVarNode) {
  */
 node_st *ACGprogram(node_st *node)
 {
+    // **************************************************************************************************************************************
+    // TODO: maybe the make check fails because of the global variables not being in travdata??
+    // or you can try to reset all the global variables to 0 in the fini????
+    // index is failing so maybe that is the problem???
+
+
+
     // TODO: remove
     // // Set the first global SteFun node to use for traversing the children
     // firstGlobalSteFunAssembly = PROGRAM_FIRST_STE_FUNCTIONS(node);
@@ -997,6 +1004,8 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
 node_st *ACGnum(node_st *node)
 {
         // TODO: check integer out of range
+
+        // TODO: fix format a bit with the new lines, think of 
 
     struct data_acg *data = DATA_ACG_GET();
 
