@@ -293,6 +293,29 @@ traversal AssemblyCodeGeneration {
         user file_ptr assembly_output_file
     }
 };
+/*
+TODO: this is how you generate a file:
+./civicc ../test/basic/functional/for_to_while.cvc -o <fileName>
+The file will be made in the current directory, so you run this in the build-debug,
+so the file can then be found in that directory!
+
+You can run this command in the build-debug to see more information about civicc
+./civicc
+
+This is how you can then perform the output for a file using civas and civvm
+(You need to have the civas and civvm in your bin folder for this to work):
+    1. First go to the build-debug directory, then do:
+    2. ./civicc ../test/<testFilePath> -o <fileName>
+        This creates the assembly instructions for the test file provided
+    3. ../bin/civas <fileName> -o <fileName2>.as
+        This creates the output file with the CiviC assembler
+    4. ../bin/civvm <fileName2>.as
+    These are examples (use for copying and quick testing):
+    ./civicc ../test/<testFilePath> -o test
+    (Now you need to be in the bin folder:)
+    ../bin/civas test -o test.as
+    ../bin/civvm test.as
+*/
 
 enum Type {
     // T_ collides with bison/flex generated stuff.

@@ -1,31 +1,17 @@
-main:
-    esr 3
+__init:
     iloadc 0
-    istore 0
-    iloadc 1
-    istore 1
-    iload_0
-    iloadc 2
-    iadd
-    iload_1
-    igt
-    branch_f 1_else
-    iloadc_0
-    istore 2
-    jump 2_end
-1_else:
-    iloadc_1
-    istore 2
-2_end:
+    istoreg 0
+    return
+
+main:
     isrg
-    iload_2
-    jsre 1
+    iloadg 0
+    jsre 0
     iloadc_0
     ireturn
 
-.const int 560
-.const int 320
-.const int 5
+.const int 10
+.exportfun "__init" void __init
 .exportfun "main" int main
-.importfun "printFloat" void float
+.global int
 .importfun "printInt" void int

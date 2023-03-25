@@ -95,25 +95,6 @@ void ACGfini() {
     return;
 }
 
-/*
-TODO: this is how you generate a file:
-./civicc ../test/basic/functional/for_to_while.cvc -o <fileName>
-The file will be made in the current directory, so you run this in the build-debug,
-so the file can then be found in that directory!
-
-You can run this command in the build-debug to see more information about civicc
-./civicc
-
-This is how you can then perform the output for a file using civas and civvm
-(You need to have the civas and civvm in your bin folder for this to work):
-    1. First go to the build-debug directory, then do:
-    2. ./civicc ../test/<testFilePath> -o <fileName>
-        This creates the assembly instructions for the test file provided
-    3. ../bin/civas <fileName> -o <fileName2>.as
-        This creates the output file with the CiviC assembler
-    4. ../bin/civvm <fileName2>.as
-*/
-
 // Helper function to get the string type of the enum Type for assembly instructions
 // Define at the top to avoid C return type error
 char *getOperandTypeAssembly(enum Type type) {
@@ -410,6 +391,10 @@ node_st *ACGfundef(node_st *node)
         // Traverse the children
         TRAVbody(node);
         TRAVparams(node);
+        // Check if the function is a void function, if so, add a 'return' instruction
+        if (FUNDEF_TYPE(node) == CT_void) {
+            fprintf(data->assembly_output_file, "return\n");
+        }
 
         // Print a new line at the end of every FunDef
         fprintf(data->assembly_output_file, "\n");
@@ -651,10 +636,15 @@ node_st *ACGreturn(node_st *node)
 
     // Then save the return assembly instruction after traversing the return Expr
     struct data_acg *data = DATA_ACG_GET();
-    // Get the return type of the current fundef
-    char *assemblyTypeString = getOperandTypeAssembly(STEFUN_TYPE(currentSteFunFunDef));
-    // Append the type infront of the return instruction (void type will automatically become 'return')
-    fprintf(data->assembly_output_file, STRcat(assemblyTypeString, "return\n"));
+
+    // Check if the function is a void function, if not, print the instruction
+    // the 'return' instruction for a void function is handled in the fundef traversal
+    if (STEFUN_TYPE(currentSteFunFunDef) != CT_void) {
+        // Get the return type of the current fundef
+        char *assemblyTypeString = getOperandTypeAssembly(STEFUN_TYPE(currentSteFunFunDef));
+        // Append the type infront of the return instruction (void type will automatically become 'return')
+        fprintf(data->assembly_output_file, STRcat(assemblyTypeString, "return\n"));
+    }
 
     return node;
 }
@@ -1012,7 +1002,7 @@ node_st *ACGnum(node_st *node)
     if (NUM_VAL(node) == 0) {
         // Load an int constant 0, no need to update the 
         // constants index or a pseudo instruction now
-        fprintf(data->assembly_output_file, "iloadc_1\n");
+        fprintf(data->assembly_output_file, "iloadc_0\n");
     } else if (NUM_VAL(node) == 1) {
         // Loda the int constant value 1
         fprintf(data->assembly_output_file, "iloadc_1\n");
