@@ -330,64 +330,6 @@ node_st *ACGglobdef(node_st *node)
  */
 node_st *ACGfundef(node_st *node)
 {
-//*****************************************************************************************************************************************
-// TODO: the __init function of the regular assignments is not exported and therefore a lot of tests fail, make sure it
-// is created with pseudo instructions! Maybe make it true in the Regular Assignments traversal, but it gives a segmentation fault then
-// investigate why or think of a different solution to make the pseudo instruction for that, such as checking if the name is
-// __init in the FunDef node and then making a pseudo instruction if the name is equal to "__init"
-
-// TODO: then test everything again (see debugging explanation in main if necessary!)
-// Then create a lot of your own tests and use the older tests and test them and also from the nutcheck framework
-// Then when everything is working good, merge to master and test everything once again
-// then follow the instructions for delivering it and test everything once more and then deliver it!
-// Then update the report and also deliver that
-// then when you are done, relax a bit for the next period :)!
-
-
-
-
-
-
-
-
-    /*
-        - When you get the funcall node of this fundef (can be found with the stefun link)
-            get the index, check if STEFUN_ASSEMBLY_INDEX(FUNCALL)_STE_LINK(node)) != NULL, then:
-            then you add the following assembly instruction:
-            jsre <indexFromSteLink>
-            This is: jump to external subroutine (which is the external function that is done for you already!)
-            Or use the name for a not external function, no index necessary, use the label name!
-
-    */
-
-    // Very helpful slides in the last lecture: 70-72, 97-108
-    // FunDef:
-    // Create a label with the FunDef name from the SteFun link, this can then be used to jump
-    // to the FunDef label with the SteFun link name to easily go there, so use fundef name!
-
-    // label is een unieke naam die je in de assembly neerzet, gebruik het overal waar je moet jumpen
-    // dit gebruik je eigenlijk als de offset, dat gebruik je in de 'jsr'
-    // alle labels moeten uniek zijn, dat moet je bijhouden, bijv. met een counter voor labels, bijv 1_while
-
-    // je kan ook jumpen naar een subroutine als iets true is, zoals met
-    // branch_t O
-    // Dit jumpt alleen als iets true is, met offset O
-    // Maar bekijk de CiviC VM manual gewoon en lees alles dan zie je wat alles doet en hoe het werkt, etc!
-    // werk weer in kleine stapjes!
-
-
-
-    // TODO: every FunDef starts with an 'esr' instruction, which means enter subroutine!
-    // esr L -> with L elements, thus reserving space for L local variables (can be calculated
-    // by going through the chain of SteVars of this FunDef, this way you can easily count that number!)
-    // TODO: is that the correct way to do it, ask a TA and test it!???
-
-
-    // TODO: see the output of the reference compiler for how to do the functions, etc!
-    //     ./civcc ../test/assemblyGenerationTests/operators/logical.cvc -o test
-    // But keep in mind, it has a lot of optimizations, so the assembly of yours is different, but the 
-    // output should be the same, and the function structure with labels and esr, etc is probably the same as well!
-
     // First check if the FunDef is a FunDec node (funbody is NULL and extern, handled in parser already)
     // If it is, it needs to be imported
     if (FUNDEF_IS_FUNDECL(node)) {
@@ -454,19 +396,8 @@ node_st *ACGfundef(node_st *node)
         fprintf(data->assembly_output_file, "\n");
     }
 
-    // TODO: void function needs the instruction 'return' at the end, even if there is no return
-
     return node;
 }
- // TODO: this gives an error but not used anyway, because you jump to a function in here with its name!!
-    // So remove the below part and save it somewhere that you know it does not work, but not necessary because in
-    // the FunCall you can jump to a function in the program with the name!
-
-        // STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)) = globalFunsIndex;
-        // printf("stefun assembly index is NULL not extern %d\n",STEFUN_ASSEMBLY_INDEX(FUNDEF_SYMBOL_TABLE(node)));
-        // printf("stefun link is NULL not extern %s\n",FUNDEF_SYMBOL_TABLE(node) == NULL ? "true" : "false");
-        // // Increment the globalFunsIndex for the next FunDef
-        // globalFunsIndex++;
 
 /*
 ***********************************************************************************************************************************************

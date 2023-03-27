@@ -322,6 +322,10 @@ This is how you can then perform the output for a file using civas and civvm
     ../bin/civas test -o test.as
     ../bin/civvm test.as
 
+You can also use: 'civrun' <file> 
+    to directly see the output of a file!
+    such as: ./civrun ../test/basic_added_tests/check_success/basic.cvc
+
 
 ******************************************************************************************************************************************
 Debugging assembly:

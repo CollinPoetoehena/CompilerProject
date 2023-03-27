@@ -1,0 +1,12 @@
+extern void printInt(int val);
+
+export int main() {
+    int a = 5;
+    int b = 6;
+
+    for (int a = 0, b) {
+        printInt(a);
+    }
+
+    return 0;
+}
