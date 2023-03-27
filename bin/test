@@ -1,9 +1,52 @@
 __init:
     iloadc 0
     istoreg 0
+    floadc 1
+    fstoreg 1
+    bloadc_f
+    bstoreg 2
     return
 
-.const int 222
+printBool:
+    bload_0
+    branch_f 1_else
+    isrg
+    iloadc_1
+    jsre 0
+    jump 2_end
+1_else:
+    isrg
+    iloadc_0
+    jsre 0
+2_end:
+    return
+
+main:
+    isrg
+    iloade 0
+    jsre 0
+    isrg
+    iloadc_1
+    jsre 1
+    iloadc_0
+    ireturn
+
+.const int 7
+.const float 5.4363
 .exportfun "__init" void __init
-.exportvar "foo" 0
+.exportvar "a" 0
+.exportvar "b" 1
+.exportvar "c" 2
+.exportfun "main" int main
 .global int
+.global float
+.global bool
+.importfun "printInt" void int
+.importfun "printNewlines" void int
+.importfun "printFloat" void float
+.importvar "foo" int
+.importvar "faa" int
+.importvar "fooFloat" float
+.importvar "faaFloat" float
+.importvar "fooBool" bool
+.importvar "faaBool" bool

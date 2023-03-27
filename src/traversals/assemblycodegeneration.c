@@ -31,6 +31,8 @@ int constantIndex = 0;
 int localParamVarDeclsIndex = 0;
 // Save the index of the global VarDecls in a global variable to use for creation assembly
 int globalVarDeclIndex = 0;
+// This is used for the import table index, the above is for the global table
+int importTableIndex = 0;
 // Global helper variable to save the label index of the current label (starts at 1)
 int labelIndex = 1;
 
@@ -224,12 +226,6 @@ int getArgumentCountFuncall(node_st *firstArgsNodeFuncall) {
  */
 node_st *ACGprogram(node_st *node)
 {
-    // **************************************************************************************************************************************
-    // TODO: maybe the make check fails because of the global variables not being in travdata??
-    // or you can try to reset all the global variables to 0 in the fini????
-    // index is failing so maybe that is the problem???
-    // This works now, it is not that, so leave that, it works fine without the travdata and just the globals!
-
     // Traverse to the children
     TRAVdecls(node);
 
@@ -265,38 +261,25 @@ These nodes are Decl nodes
  */
 node_st *ACGglobdecl(node_st *node)
 {
-    // No children for basic here
-
-    // TODO: add instruction to import it here in the pseudo instructions
-
     // Create the pseudo instruction for the global and append it to already present instructions
     char *globdeclNameForPseudo = STRcat("\"", STRcat(GLOBDECL_NAME(node), "\" "));
-        pseudoInstructionsString = STRcat(
+    pseudoInstructionsString = STRcat(
+        STRcat(
             STRcat(
                 STRcat(
-                    STRcat(
-                        pseudoInstructionsString,
-                        ".importvar "
-                    ), globdeclNameForPseudo
-                ), getTypeForSignature(GLOBDECL_TYPE(node))
-            ), "\n"
-        );
-    // // Then append the .global pseudo instruction of this globdecl
-    // pseudoInstructionsString = STRcat(
-    //     STRcat(
-    //         STRcat(
-    //             pseudoInstructionsString,
-    //             ".global "
-    //         ), getTypeForSignature(GLOBDECL_TYPE(node))
-    //     ), "\n"
-    // );
+                    pseudoInstructionsString,
+                    ".importvar "
+                ), globdeclNameForPseudo
+            ), getTypeForSignature(GLOBDECL_TYPE(node))
+        ), "\n"
+    );
 
     // Set extern to true to use the correct assembly instruction in the var and VarLet later
     STEVAR_IS_EXTERNAL(GLOBDECL_SYMBOL_TABLE(node)) = true;
     // Get the SteVar of this global decl and update it with the assembly index to use later
-    STEVAR_ASSEMBLY_INDEX(GLOBDECL_SYMBOL_TABLE(node)) = globalVarDeclIndex;
+    STEVAR_ASSEMBLY_INDEX(GLOBDECL_SYMBOL_TABLE(node)) = importTableIndex;
     // Increment the global vars index for the next global vardecl
-    globalVarDeclIndex++;
+    importTableIndex++;
 
     return node;
 }
@@ -305,12 +288,8 @@ node_st *ACGglobdecl(node_st *node)
  * @fn ACGglobdef
  */
 node_st *ACGglobdef(node_st *node)
-{
-    // Get the SteVar of this global decl and update it with the assembly index to use later
-    STEVAR_ASSEMBLY_INDEX(GLOBDEF_SYMBOL_TABLE(node)) = globalVarDeclIndex;
-    
-    // TODO: check if it is extern or not, if so make importvar, otherwise .global
-    // TODO: add pseudo instruction to export the var
+{   
+    // Check if the variable is exported, if so add to the export table
     if (GLOBDEF_EXPORT(node)) {
         // Create the pseudo instruction for the global and append it to already present instructions
         char *globdefNameForPseudo = STRcat("\"", STRcat(GLOBDEF_NAME(node), "\" "));
@@ -335,6 +314,8 @@ node_st *ACGglobdef(node_st *node)
         ), "\n"
     );
 
+    // Get the SteVar of this global decl and update it with the assembly index to use later
+    STEVAR_ASSEMBLY_INDEX(GLOBDEF_SYMBOL_TABLE(node)) = globalVarDeclIndex;
     // Increment the global vars index for the next global vardecl at the end
     globalVarDeclIndex++;
 
@@ -852,9 +833,6 @@ node_st *ACGmonop(node_st *node)
         // Append a new line at the end of the instruction symbol string
         monopInstructionSymbol = STRcat(monopInstructionSymbol, "\n");
         fprintf(data->assembly_output_file, monopInstructionSymbol);
-
-        // TODO: remove after debugging
-        printf("printed monop instruction: %s\n", monopInstructionSymbol);
     }
 
     return node;
@@ -934,6 +912,7 @@ node_st *ACGvarlet(node_st *node)
                 // append a "g" to the instruction, global variable
                 assemblyTypeString = STRcat(assemblyTypeString, "g");
             }
+            // Print the instruction to the assembly code file
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
         }
@@ -947,8 +926,6 @@ node_st *ACGvarlet(node_st *node)
  */
 node_st *ACGcast(node_st *node)
 {
-    // TODO: this needs to be done as well for the first assembly milestone
-
     // First traverse the expression
     TRAVexpr(node);
 
@@ -1045,7 +1022,6 @@ node_st *ACGvar(node_st *node)
             // If the nesting level is greater than zero, it is a local variable
             // Save the instruction in the assembly output file as a local variable (<type>load C)
             struct data_acg *data = DATA_ACG_GET();
-            fprintf(data->assembly_output_file, "; %s %d\n", assemblyTypeString, varIndex);
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
         } else {
             // Otherwise, it is a global variable, so so the assembly instruction for loading a global (or external)
@@ -1057,6 +1033,7 @@ node_st *ACGvar(node_st *node)
                 // append a "g" to the instruction, global variable
                 assemblyTypeString = STRcat(assemblyTypeString, "g");
             }
+            // Print the instruction to the assembly code file
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
         }

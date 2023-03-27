@@ -2,10 +2,57 @@
 
 extern void printInt(int val);
 extern void printNewlines(int num);
+extern void printFloat( float val);
 
 extern int foo;
+extern int faa;
+extern float fooFloat;
+extern float faaFloat;
+extern bool fooBool;
+extern bool faaBool;
+
+export int a = 7;
+export float b = 5.436300;
+export bool c = false;
+
+void printBool(bool b) {
+    if(b) {
+        printInt(1);
+    } else {
+        printInt(0);
+    }
+}
 
 export int main() {
+    // manipulate two external variables that are imported
+    foo = 10;
+    fooFloat = 7.453423;
+    
+    // External variables
     printInt(foo);
+    printNewlines(1);
+    printInt(faa);
+    printNewlines(1);
+
+    printFloat(fooFloat);
+    printNewlines(1);
+    printFloat(faaFloat);
+    printNewlines(1);
+
+    printBool(fooBool);
+    printNewlines(1);
+    printBool(faaBool);
+    printNewlines(2);
+
+    // Manipulate a globdecl in this program
+    a = 10;
+
+    // Global variables defined in this module
+    printInt(a);
+    printNewlines(1);
+    printFloat(b);
+    printNewlines(1);
+    printBool(c);
+
     return 0;
 }
