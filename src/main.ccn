@@ -50,6 +50,8 @@ start phase RootPhase {
 
 // TODO: assembly, why do you need to do a isrg always in basic??? why not isr and what is the difference??
 
+// TODO: fix last tests, mostly with casts, see what that is about and fix it! Also some things with loops, investigate!
+
 
 // TODO: now when I run my compiler without the flag "-o <fileName>"
 // it gives an error for output file not found, is that correct or????

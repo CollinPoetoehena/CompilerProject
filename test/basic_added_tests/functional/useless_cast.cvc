@@ -1,0 +1,42 @@
+extern void printInt(int val);
+extern void printNewlines(int num);
+extern void printFloat( float val);
+
+void printBool(bool b) {
+    if(b) {
+        printInt(1);
+    } else {
+        printInt(0);
+    }
+}
+
+export int main() {
+    int a = 0;
+    float b = 0.0;
+    bool c = false;
+
+    a = (int) 5;
+    printInt(a);
+    printNewlines(1);
+    a = (int) a + 5;
+    printInt(a);
+    printNewlines(1);
+
+    b = (float) 5.0;
+    printFloat(b);
+    printNewlines(1);
+    b = (float) (int) 5;
+    printFloat(b);
+    printNewlines(1);
+    b = (float) b;
+    printFloat(b);
+    printNewlines(1);
+
+    c = (bool) !c;
+    printBool(c);
+    printNewlines(1);
+    c = (bool) true;
+    printBool(c);
+
+    return 0;
+}
