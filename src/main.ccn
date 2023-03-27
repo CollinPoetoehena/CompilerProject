@@ -463,7 +463,9 @@ node Param {
 
     attributes {
         string name { constructor, mandatory },
-        Type type { constructor }
+        Type type { constructor },
+        // Link to its own symbol table, can be used in Assembly generation for example
+        SteVar symbol_table
     }
 };
 

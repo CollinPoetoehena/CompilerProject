@@ -27,8 +27,8 @@
 
 // Save the index of the constant in a global variable to use for creation assembly
 int constantIndex = 0;
-// Save the index of the VarDecls in a global variable to use for creation assembly
-int vardeclsIndex = 0;
+// Save the index of the VarDecls and Params (local vars) in a global variable to use for creation assembly
+int localParamVarDeclsIndex = 0;
 // Save the index of the global VarDecls in a global variable to use for creation assembly
 int globalVarDeclIndex = 0;
 // Global helper variable to save the label index of the current label (starts at 1)
@@ -411,10 +411,7 @@ node_st *ACGfundef(node_st *node)
         An exported function also ends with the function label name at the end with a space in front
         */
         if (FUNDEF_EXPORT(node) || strcmp(FUNDEF_NAME(node), "__init") == 0) {
-            printf("Getting into pseudo instruction with name %s\n", FUNDEF_NAME(node));
-            printf("ste is NULL? %s\n", FUNDEF_SYMBOL_TABLE(node) == NULL ? "true" : "false");
             char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
-            printf("pseudo instructions: %s\n", functionSignature);
             pseudoInstructionsString = STRcat(
                 STRcat(
                     STRcat(pseudoInstructionsString, STRcat(".exportfun ", functionSignature)),
@@ -423,8 +420,8 @@ node_st *ACGfundef(node_st *node)
             );
         }
 
-        // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
-        vardeclsIndex = 0;
+        // Reset global counter for localParamVarDeclsIndex for every fundef (constantsIndex and others not necessary)
+        localParamVarDeclsIndex = 0;
 
         // Set the current FunDef SteFun link to use for traversing the children of this fundef
         currentSteFunFunDef = FUNDEF_SYMBOL_TABLE(node); 
@@ -441,9 +438,11 @@ node_st *ACGfundef(node_st *node)
             fprintf(data->assembly_output_file, "esr %d\n", localVariablesCount);
         }
         
-        // Traverse the children
-        TRAVbody(node);
+        // First traverse the params (the first local variables are the params)
         TRAVparams(node);
+        // Then traverse the body
+        TRAVbody(node);
+
         // Check if the function is a void function, if so, add a 'return' instruction
         if (FUNDEF_TYPE(node) == CT_void) {
             fprintf(data->assembly_output_file, "return\n");
@@ -491,6 +490,11 @@ node_st *ACGparam(node_st *node)
 {
     // TODO: what to do here?? Probably nothing right
 
+    // Get the SteVar of this Param and update it with the assembly index to use later
+    STEVAR_ASSEMBLY_INDEX(PARAM_SYMBOL_TABLE(node)) = localParamVarDeclsIndex;
+    // Increment the vardecls index for the next VarDecl
+    localParamVarDeclsIndex++;
+
     // Traverse the next param
     TRAVnext(node);
 
@@ -508,9 +512,9 @@ These nodes are children of the FunBody node
 node_st *ACGvardecl(node_st *node)
 {
     // Get the SteVar of this VarDecl and update it with the assembly index to use later
-    STEVAR_ASSEMBLY_INDEX(VARDECL_SYMBOL_TABLE(node)) = vardeclsIndex;
+    STEVAR_ASSEMBLY_INDEX(VARDECL_SYMBOL_TABLE(node)) = localParamVarDeclsIndex;
     // Increment the vardecls index for the next VarDecl
-    vardeclsIndex++;
+    localParamVarDeclsIndex++;
 
     // Traverse into the children
     TRAVinit(node);
@@ -999,8 +1003,14 @@ node_st *ACGexprs(node_st *node)
  */
 node_st *ACGvar(node_st *node)
 {
+    printf("link name: %s\n", STEVAR_NAME(VAR_STE_LINK(node)));
+
     // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
     int varIndex = STEVAR_ASSEMBLY_INDEX(VAR_STE_LINK(node));
+
+    // TODO: in vardecl it is going correct and here it is 0 every time, why???
+
+    printf("*****************index in var node is %d\n", varIndex);
 
     // Save the Var into the assembly file. First get the type
     char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VAR_STE_LINK(node)));
@@ -1014,6 +1024,7 @@ node_st *ACGvar(node_st *node)
             // If the nesting level is greater than zero, it is a local variable
             // Save the instruction in the assembly output file as a local variable (<type>load C)
             struct data_acg *data = DATA_ACG_GET();
+            fprintf(data->assembly_output_file, "; %s %d\n", assemblyTypeString, varIndex);
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
         } else {
             // Otherwise, it is a global variable, so so the assembly instruction for loading a global

@@ -1,17 +1,82 @@
-__init:
-    iloadc 0
-    istoreg 0
-    return
+foo:
+; esr 3
+iload 0
+fload 0
+f2i
+iadd
+iload 2
+iadd
+ireturn
+
+fun:
+esr 6
+iloadc_1
+istore 0
+iloadc 0
+istore 1
+iloadc 1
+
+istore 2
+iloadc 2
+
+istore 3
+floadc_1
+fstore 4
+floadc 3
+fstore 5
+isrg
+iload 0
+iload 2
+ilt
+branch_f 1_elseExpr
+iloadc_1
+jump 2_end
+1_elseExpr:
+iloadc_0
+
+2_end:
+fload 4
+fload 5
+fadd
+iload 1
+iload 3
+ilt
+
+branch_f 3_elseExpr
+iloadc_1
+jump 4_end
+3_elseExpr:
+iloadc_0
+4_end:
+jsr 3 foo
+istore 3
+isrg
+iload 3
+
+jsre 0
+isrg
+iloadc_1
+jsre 5
+iloadc_1
+ireturn
 
 main:
-    isrg
-    iloadg 0
-    jsre 0
-    iloadc_0
-    ireturn
+isrg
+jsr 0 fun
+; ipop is here in the reference compiler
+ipop
+iloadc_0
+ireturn
 
-.const int 10
-.exportfun "__init" void __init
-.exportfun "main" int main
-.global int
 .importfun "printInt" void int
+.importfun "printFloat" void float
+.importfun "scanInt" int
+.importfun "scanFloat" float
+.importfun "printSpaces" void int
+.importfun "printNewlines" void int
+.const int 2
+.const int 3
+.const int 4
+.const float 2.000000
+.exportfun "main" int main
+
