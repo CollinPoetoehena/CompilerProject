@@ -415,12 +415,12 @@ node_st *ACGfundef(node_st *node)
             printf("ste is NULL? %s\n", FUNDEF_SYMBOL_TABLE(node) == NULL ? "true" : "false");
             char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
             printf("pseudo instructions: %s\n", functionSignature);
-            // pseudoInstructionsString = STRcat(
-            //     STRcat(
-            //         STRcat(pseudoInstructionsString, STRcat(".exportfun ", functionSignature)),
-            //         STRcat(" " ,FUNDEF_NAME(node))
-            //     ), "\n"
-            // );
+            pseudoInstructionsString = STRcat(
+                STRcat(
+                    STRcat(pseudoInstructionsString, STRcat(".exportfun ", functionSignature)),
+                    STRcat(" " ,FUNDEF_NAME(node))
+                ), "\n"
+            );
         }
 
         // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)

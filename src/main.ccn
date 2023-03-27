@@ -15,7 +15,7 @@ start phase RootPhase {
         // Then compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
         // Then generate the assembly code with the AST from the previous traversals
-        //AssemblyCodeGeneration;
+        AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
@@ -326,6 +326,10 @@ Debugging assembly:
     - Maybe also run that small part in the reference compiler and compare the assembly to see if
         something is very off maybe that is causing the issue!
     - Then look at the codes and see if you can fix it!
+
+TODO: cleanup later, but look at this for potential problems.
+Potential problems that can occur:
+    - Changed travesal CFS to ASTstefun instead of stevar, maybe it can cause a problem
 */
 
 enum Type {
