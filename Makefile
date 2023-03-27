@@ -1,4 +1,4 @@
-TEST_DIRS := basic # nested_funs arrays preprocess
+TEST_DIRS := basic basic_added_tests # nested_funs arrays preprocess
 TEST_CFLAGS := ""
 TEST_RUN_FUNCTIONAL := 1 # set to one when you want to test functional tests or 0 if not
 TEST_CIVAS := bin/civas
