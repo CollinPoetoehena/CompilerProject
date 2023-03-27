@@ -1057,6 +1057,9 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
+    // Value of INT_MIN is -32767 (-215+1) or less*
+    // Value of INT_MAX is 2147483647 (-231 to 231-1)
+
         // TODO: check integer out of range
 
         // TODO: fix format a bit with the new lines, think of 
@@ -1099,7 +1102,9 @@ node_st *ACGnum(node_st *node)
  */
 node_st *ACGfloat(node_st *node)
 {
-    // TODO: check float out of range
+    // TODO: what is smallest and largest floating point number??
+
+    
 
 
     struct data_acg *data = DATA_ACG_GET();

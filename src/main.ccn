@@ -48,12 +48,7 @@ start phase RootPhase {
 
 
 
-// TODO: how to do the assembly generation for TernaryOp node???
-
 // TODO: assembly, why do you need to do a isrg always in basic??? why not isr and what is the difference??
-
-
-// TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
 
 // TODO: now when I run my compiler without the flag "-o <fileName>"
@@ -62,16 +57,12 @@ start phase RootPhase {
 
 // TODO: when to check for integer and float out of range, etc???
 // at the end, but when, ask Simon, probably in the Num and Float node for Assembly generation right?
+    // TODO: what is smallest and largest floating point number??
+    // TODO: what is smallest and largest integer number??
 
 
 
-
-
-// TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?
-// Answer: makkelijker om het allebei apart te doen in assembly, het is een klein beetje anders, bij do- while
-// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen in assembly kan makkelijk.
-// Het kan dus allebei maar in assembly een do-while loop assembly genereren is goed te doen, net als while,
-// het enige verschil is dat bij do-while, eerst de executie van de body gedaan wordt en dan de conditie.
+// TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
 
 // ************************************************************************************************************************************
