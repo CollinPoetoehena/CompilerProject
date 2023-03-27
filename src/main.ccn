@@ -15,7 +15,7 @@ start phase RootPhase {
         // Then compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
         // Then generate the assembly code with the AST from the previous traversals
-        AssemblyCodeGeneration;
+        //AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }

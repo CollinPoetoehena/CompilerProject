@@ -71,8 +71,8 @@ bool isSymbolUniqueSteFun(char *name) {
 node_st *createSymbolTableEntrySteFun(char *name, enum Type type, node_st *nodeForErrorLoc) {
     // First check if the name is already present, if so, save it in errors
     if (isSymbolUniqueSteFun(name)) {
-        // Parent of fundefs is in basic always NULL, next is set later, so for now NULL
-        node_st *newSte = ASTstevar(NULL, NULL, name, type, currentScopeFun);
+        // Parent of fundefs is in basic always NULL, next and params are set later, so for now NULL
+        node_st *newSte = ASTstefun(NULL, NULL, name, type, currentScopeFun, NULL);
 
         // Update global symbol tables in this traversal
         updateGlobSymbolTablesSteFun(newSte);

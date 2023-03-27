@@ -153,9 +153,9 @@ node_st *PRTfundef(node_st *node)
     This is left here with a purpose for teachers to if they would like to see the Ste's!
     */
     // Print the ste's of the variables as a structured comment
-    // printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
-    // // Print its own symbol table for its function definition
-    // printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
+    printSteVarChain(FUNDEF_FIRST_STE_VARIABLES(node));
+    // Print its own symbol table for its function definition
+    printOneSteFun(FUNDEF_SYMBOL_TABLE(node));
 
     return node;
 }

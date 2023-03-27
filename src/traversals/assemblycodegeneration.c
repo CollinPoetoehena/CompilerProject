@@ -405,16 +405,22 @@ node_st *ACGfundef(node_st *node)
         // Set extern to true to use in FunCall node
         STEFUN_IS_EXTERNAL(FUNDEF_SYMBOL_TABLE(node)) = true;
     } else {
-        // Append the function signature to the pseudo instructions string if it is exported
-        // An exported function also ends with the function label name at the end with a space in front
-        if (FUNDEF_EXPORT(node)) {
+        /*
+        Append the function signature to the pseudo instructions string if it is exported
+        Or the function is "__init" because this needs to be guarenteed exported
+        An exported function also ends with the function label name at the end with a space in front
+        */
+        if (FUNDEF_EXPORT(node) || strcmp(FUNDEF_NAME(node), "__init") == 0) {
+            printf("Getting into pseudo instruction with name %s\n", FUNDEF_NAME(node));
+            printf("ste is NULL? %s\n", FUNDEF_SYMBOL_TABLE(node) == NULL ? "true" : "false");
             char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
-            pseudoInstructionsString = STRcat(
-                STRcat(
-                    STRcat(pseudoInstructionsString, STRcat(".exportfun ", functionSignature)),
-                    STRcat(" " ,FUNDEF_NAME(node))
-                ), "\n"
-            );
+            printf("pseudo instructions: %s\n", functionSignature);
+            // pseudoInstructionsString = STRcat(
+            //     STRcat(
+            //         STRcat(pseudoInstructionsString, STRcat(".exportfun ", functionSignature)),
+            //         STRcat(" " ,FUNDEF_NAME(node))
+            //     ), "\n"
+            // );
         }
 
         // Reset global counter for vardeclsIndex for every fundef (constantsIndex and others not necessary)
