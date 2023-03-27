@@ -1057,15 +1057,18 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
+    printf("integer value: %d\n", NUM_VAL(node));
+
     // Value of INT_MIN is -32767 (-215+1) or less*
     // Value of INT_MAX is 2147483647 (-231 to 231-1)
-
-        // TODO: check integer out of range
-
-        // TODO: fix format a bit with the new lines, think of 
-
+    // if (NUM_VAL(node) < INT_MIN || NUM_VAL(node) > INT_MAX) {
+    //     // Prints the error when it occurs, so in this line
+    //     CTI(CTI_ERROR, true, "num value %d is out of range (min: %d, max: %d)", NUM_VAL(node), INT_MIN, INT_MAX);
+    //     // Create error action, will stop the current compilation at the end of this Action
+    //     CCNerrorAction();
+    // } else {
+    // Create the assembly instructions
     struct data_acg *data = DATA_ACG_GET();
-
     if (NUM_VAL(node) == 0) {
         // Load an int constant 0, no need to update the 
         // constants index or a pseudo instruction now
@@ -1091,6 +1094,10 @@ node_st *ACGnum(node_st *node)
         // Increment the constantsIndex for the next constant
         constantIndex++;
     }
+
+        // TODO: check integer out of range
+
+        // TODO: fix format a bit with the new lines, think of 
 
     return node;
 }

@@ -1,0 +1,7 @@
+void test() {
+    if (true) {
+
+    } else if (1) {
+
+    }
+}

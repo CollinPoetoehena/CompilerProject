@@ -21,9 +21,14 @@
 #define YY_NO_INPUT
 
 static inline void token_action();
+static int integerOutOfRange(long inputNumber);
 
 int yycolumn = 1;
 #define YY_USER_ACTION token_action();
+
+// These are constants for the maximum int and float values
+int INT_MIN = -2147483648;
+int INT_MAX = 2147483647;
 
 %}
 
@@ -118,8 +123,14 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
                              FILTER( ID);
                            }
 
-{INTEGER}                  { yylval.cint=atoi(yytext);
-                             FILTER( NUM);
+{INTEGER}                  { /* Check if the integer number is out of range */
+                             long inputNumber = atol(yytext);
+                             if (inputNumber < INT_MIN || inputNumber > INT_MAX) {
+                                integerOutOfRange(inputNumber);
+                             } else {
+                                yylval.cint=atoi(yytext);
+                                FILTER( NUM);
+                             }
                            }
 {FLOAT}                    { yylval.cflt=atof(yytext);
                              FILTER( FLOAT);
@@ -135,6 +146,14 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
 [ \t]                      { global.col += yyleng;
                            } 
 %%
+
+static int integerOutOfRange(long inputNumber)
+{
+  CTI(CTI_ERROR, true, "line %d, col %d\nError: Integer number %ld is out of range. Minimal value: %d, maximum value: %d\n",
+            global.line, global.col, inputNumber, INT_MIN, INT_MAX);
+  CTIabortOnError();
+  return( 0);
+}
 
 static inline void token_action() {
     yylloc.first_line = yylloc.last_line = yylineno;
