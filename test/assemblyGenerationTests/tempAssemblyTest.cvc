@@ -1,12 +1,1 @@
-extern void printInt( int val);
-
-int a = 5;
-
-export int main() {
-    int a = 3;
-    float b = 5.3453;
-
-    printInt(a);
-
-    return 0;
-}
+export int foo = 222;

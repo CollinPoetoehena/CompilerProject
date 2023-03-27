@@ -267,16 +267,32 @@ node_st *ACGglobdecl(node_st *node)
 {
     // No children for basic here
 
-    // Create the pseudo instruction for the global and append it to already present instructions
-    pseudoInstructionsString = STRcat(
-        STRcat(
-            STRcat(
-                pseudoInstructionsString,
-                ".global "
-            ), getTypeForSignature(GLOBDECL_TYPE(node))
-        ), "\n"
-    );
+    // TODO: add instruction to import it here in the pseudo instructions
 
+    // Create the pseudo instruction for the global and append it to already present instructions
+    char *globdeclNameForPseudo = STRcat("\"", STRcat(GLOBDECL_NAME(node), "\" "));
+        pseudoInstructionsString = STRcat(
+            STRcat(
+                STRcat(
+                    STRcat(
+                        pseudoInstructionsString,
+                        ".importvar "
+                    ), globdeclNameForPseudo
+                ), getTypeForSignature(GLOBDECL_TYPE(node))
+            ), "\n"
+        );
+    // // Then append the .global pseudo instruction of this globdecl
+    // pseudoInstructionsString = STRcat(
+    //     STRcat(
+    //         STRcat(
+    //             pseudoInstructionsString,
+    //             ".global "
+    //         ), getTypeForSignature(GLOBDECL_TYPE(node))
+    //     ), "\n"
+    // );
+
+    // Set extern to true to use the correct assembly instruction in the var and VarLet later
+    STEVAR_IS_EXTERNAL(GLOBDECL_SYMBOL_TABLE(node)) = true;
     // Get the SteVar of this global decl and update it with the assembly index to use later
     STEVAR_ASSEMBLY_INDEX(GLOBDECL_SYMBOL_TABLE(node)) = globalVarDeclIndex;
     // Increment the global vars index for the next global vardecl
@@ -292,10 +308,24 @@ node_st *ACGglobdef(node_st *node)
 {
     // Get the SteVar of this global decl and update it with the assembly index to use later
     STEVAR_ASSEMBLY_INDEX(GLOBDEF_SYMBOL_TABLE(node)) = globalVarDeclIndex;
-    // Increment the global vars index for the next global vardecl
-    globalVarDeclIndex++;
-
-    // Create the pseudo instruction for the global and append it to already present instructions
+    
+    // TODO: check if it is extern or not, if so make importvar, otherwise .global
+    // TODO: add pseudo instruction to export the var
+    if (GLOBDEF_EXPORT(node)) {
+        // Create the pseudo instruction for the global and append it to already present instructions
+        char *globdefNameForPseudo = STRcat("\"", STRcat(GLOBDEF_NAME(node), "\" "));
+        pseudoInstructionsString = STRcat(
+            STRcat(
+                STRcat(
+                    STRcat(
+                        pseudoInstructionsString,
+                        ".exportvar "
+                    ), globdefNameForPseudo
+                ), STRitoa(globalVarDeclIndex)
+            ), "\n"
+        );
+    }
+    // Then append the .global pseudo instruction of this globdecl
     pseudoInstructionsString = STRcat(
         STRcat(
             STRcat(
@@ -304,6 +334,9 @@ node_st *ACGglobdef(node_st *node)
             ), getTypeForSignature(GLOBDEF_TYPE(node))
         ), "\n"
     );
+
+    // Increment the global vars index for the next global vardecl at the end
+    globalVarDeclIndex++;
 
     // Traverse to the init Expr, probably nothing here because it is separated with RegularAssignments
     TRAVinit(node);
@@ -892,9 +925,15 @@ node_st *ACGvarlet(node_st *node)
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
         } else {
-            // Otherwise, it is a global variable, so so the assembly instruction for storing a global
-            // in the global table by appending "g" at the end of the instruction
-            assemblyTypeString = STRcat(assemblyTypeString, "g");
+            // Otherwise, it is a global variable, so so the assembly instruction for loading a global (or external)
+            // Check if the function is external
+            if (STEVAR_IS_EXTERNAL(VAR_STE_LINK(node))) {
+                // append a "e" to the instruction, external global variable
+                assemblyTypeString = STRcat(assemblyTypeString, "e");
+            } else {
+                // append a "g" to the instruction, global variable
+                assemblyTypeString = STRcat(assemblyTypeString, "g");
+            }
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varletIndex);
         }
@@ -991,14 +1030,8 @@ node_st *ACGexprs(node_st *node)
  */
 node_st *ACGvar(node_st *node)
 {
-    printf("link name: %s\n", STEVAR_NAME(VAR_STE_LINK(node)));
-
     // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
     int varIndex = STEVAR_ASSEMBLY_INDEX(VAR_STE_LINK(node));
-
-    // TODO: in vardecl it is going correct and here it is 0 every time, why???
-
-    printf("*****************index in var node is %d\n", varIndex);
 
     // Save the Var into the assembly file. First get the type
     char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VAR_STE_LINK(node)));
@@ -1015,9 +1048,15 @@ node_st *ACGvar(node_st *node)
             fprintf(data->assembly_output_file, "; %s %d\n", assemblyTypeString, varIndex);
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
         } else {
-            // Otherwise, it is a global variable, so so the assembly instruction for loading a global
-            // in the global table by appending "g" at the end of the instruction
-            assemblyTypeString = STRcat(assemblyTypeString, "g");
+            // Otherwise, it is a global variable, so so the assembly instruction for loading a global (or external)
+            // Check if the function is external
+            if (STEVAR_IS_EXTERNAL(VAR_STE_LINK(node))) {
+                // append a "e" to the instruction, external global variable
+                assemblyTypeString = STRcat(assemblyTypeString, "e");
+            } else {
+                // append a "g" to the instruction, global variable
+                assemblyTypeString = STRcat(assemblyTypeString, "g");
+            }
             struct data_acg *data = DATA_ACG_GET();
             fprintf(data->assembly_output_file, "%s %d\n", assemblyTypeString, varIndex);
         }

@@ -1,0 +1,2 @@
+// This tests multiple variables globally defined
+export int foo = 222;

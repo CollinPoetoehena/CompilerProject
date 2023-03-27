@@ -672,7 +672,9 @@ node SteVar {
         Type type { constructor },
         int nesting_level { constructor },
         // This is used for creating assembly instructions with the correct index
-        int assembly_index
+        int assembly_index,
+        // This variable is used to check if the variable is an external variable
+        bool is_external
     }
 };
 
