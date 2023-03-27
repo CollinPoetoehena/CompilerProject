@@ -440,6 +440,7 @@ node FunDef {
         Type type { constructor },
         string name { constructor, mandatory },
         bool export { constructor },
+        bool is_funDecl,
         // Link to its own symbol table
         SteFun symbol_table,
         // Link to first symbol table of this functions scope

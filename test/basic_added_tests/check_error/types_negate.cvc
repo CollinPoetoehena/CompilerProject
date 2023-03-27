@@ -1,5 +1,4 @@
 export int main() {
-    int[5] a = 0;
-    a = 1;
+    int a = !0;
     return 0;
 }

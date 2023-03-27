@@ -1,6 +1,0 @@
-#include "civic.h"
-
-export int main() {
-    int a = [1, 2, 4];
-    return 0;
-}

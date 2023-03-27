@@ -1,7 +1,0 @@
-void test1(){
-    int a = 5;
-}
-
-void test2(){
-    return test1();
-}

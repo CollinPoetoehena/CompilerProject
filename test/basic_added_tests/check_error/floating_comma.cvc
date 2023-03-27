@@ -1,4 +1,6 @@
+void (5, 6,) {}
+
 export int main() {
-    int a = !0;
+    foo(4, 6);
     return 0;
 }

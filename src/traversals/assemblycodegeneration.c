@@ -388,9 +388,9 @@ node_st *ACGfundef(node_st *node)
     // But keep in mind, it has a lot of optimizations, so the assembly of yours is different, but the 
     // output should be the same, and the function structure with labels and esr, etc is probably the same as well!
 
-    // First check if the FunDef is a FunDec node (funbody is NULL and exported)
+    // First check if the FunDef is a FunDec node (funbody is NULL and extern, handled in parser already)
     // If it is, it needs to be imported
-    if (FUNDEF_BODY(node) == NULL && FUNDEF_EXPORT(node)) {
+    if (FUNDEF_IS_FUNDECL(node)) {
         // Append the function import to the pseudo instructions string
         char *functionSignature = getFunctionSignatureFromSte(FUNDEF_SYMBOL_TABLE(node));
         pseudoInstructionsString = STRcat(
@@ -948,26 +948,6 @@ node_st *ACGcast(node_st *node)
  */
 node_st *ACGfuncall(node_st *node)
 {
-    // TODO: remove at the end!
-    // FunCall:
-    // isr -> initiates a subroutine, probably 'isrg' to initiate a call to global (basic only one scope!)
-    // <type>load -> then load all the variables needed for the parameters of the funcall (can also be an expression, see ass 6)
-    // jsr A O -> jumps to subroutine with A number of arguments and O offset, O can also be a Label, that is easier, such as jsr 2 factorial
-    // Of: jsre L -> this is for external functions. Index L can be picked from the SteFun link!
-    // Than the function call assembly is finished. Or if you want to go to an external function (function with exported true as link)
-    // (maybe that needs to be added to the SteFun as well???)
-    // Then it is jsre I -> with I as the index in the import table (see index of the FunDef from the SteFun! You can then directly save if
-    // it is exported as well in the FunDef traversal of this traversal!)
-
-    // TODO: remove after testing, this was how the TA explained it:
-    // FunCall:
-    // isr 
-    // start a new subroutine, eigenlijk wanneer je een functie called, voorbereiden op uitvoer functie
-    // sub routine is eigenlijk een functie in assembly
-    // isr and its scopes can probably be done easily with basic, just two scopes, global and in funbody
-    // onder isr alle argumenten loaden met 'load'
-
-
     struct data_acg *data = DATA_ACG_GET();
     // Check if the function is external
     if (STEFUN_IS_EXTERNAL(FUNCALL_STE_LINK(node))) {
@@ -1057,18 +1037,9 @@ These are the constant nodes: Num, Float, Bool (also part of Expr, Constants)
  */
 node_st *ACGnum(node_st *node)
 {
-    printf("integer value: %d\n", NUM_VAL(node));
-
-    // Value of INT_MIN is -32767 (-215+1) or less*
-    // Value of INT_MAX is 2147483647 (-231 to 231-1)
-    // if (NUM_VAL(node) < INT_MIN || NUM_VAL(node) > INT_MAX) {
-    //     // Prints the error when it occurs, so in this line
-    //     CTI(CTI_ERROR, true, "num value %d is out of range (min: %d, max: %d)", NUM_VAL(node), INT_MIN, INT_MAX);
-    //     // Create error action, will stop the current compilation at the end of this Action
-    //     CCNerrorAction();
-    // } else {
     // Create the assembly instructions
     struct data_acg *data = DATA_ACG_GET();
+    // Use less Bytes if possible for standard values
     if (NUM_VAL(node) == 0) {
         // Load an int constant 0, no need to update the 
         // constants index or a pseudo instruction now
@@ -1095,10 +1066,6 @@ node_st *ACGnum(node_st *node)
         constantIndex++;
     }
 
-        // TODO: check integer out of range
-
-        // TODO: fix format a bit with the new lines, think of 
-
     return node;
 }
 
@@ -1109,13 +1076,10 @@ node_st *ACGnum(node_st *node)
  */
 node_st *ACGfloat(node_st *node)
 {
-    // TODO: what is smallest and largest floating point number??
-
-    
-
-
+    // Create the assembly instruction
     struct data_acg *data = DATA_ACG_GET();
 
+    // Use less Bytes if possible for standard values
     if (FLOAT_VAL(node) == 0.0) {
         // Load a float constant 0.0, no need to update the 
         // constants index or a pseudo instruction now
