@@ -10,6 +10,8 @@ start phase RootPhase {
         ConvertForToWhile;
         // Then perform TypeChecking
         TypeChecking;
+        // Annotating useless cast expressions is done before Cast nodes are converted or used in another important way
+        AnnotateUselessCastExpressions;
         // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
         CompilingBooleanDisjunctionAndConjunction;
         // Then compile boolean cast (type and result type) expressions with the TernaryOp node
@@ -220,6 +222,17 @@ phase TypeChecking {
 };
 
 /*
+This traversal annotates useless cast expressions before something is done with
+for code generation because it can cause unpredictable bugs and errors
+*/
+traversal AnnotateUselessCastExpressions {
+    uid = AUCE,
+    // It traverses all Cast expressions that have a boolean result or bool cast type
+    // This is done before TernaryOp nodes are present, so no need to use them
+    nodes = { Cast, BinOp, MonOp, FunCall, Var, Num, Float, Bool }
+};
+
+/*
 This traversal extends the intermediate representation of the compiler by conditional
 expressions as exemplified by the C ternary operator pred ?then :else and to systematically
 transform all Boolean operations in question into semantically equivalent conditional expressions.
@@ -238,7 +251,7 @@ traversal because a Cast can have a BinOp Expr child as well.
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     // It traverses all Cast expressions that have a boolean result or bool cast type
-    nodes = { Cast, BinOp, FunCall, Var, Num, Float, Bool }
+    nodes = { Cast, BinOp, MonOp, TernaryOp, FunCall, Var, Num, Float, Bool }
 };
 
 /*
@@ -605,7 +618,9 @@ node Cast {
         Expr expr {constructor, mandatory }
     }, 
     attributes {
-        Type type {constructor }
+        Type type {constructor },
+        // This annotation is used to eliminate useless Cast expressions, such as a = (int) 1;
+        bool useless
     }
 };
 

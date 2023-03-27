@@ -929,12 +929,15 @@ node_st *ACGcast(node_st *node)
     // First traverse the expression
     TRAVexpr(node);
 
-    // Then check what type it is and perform the cast instruction
-    struct data_acg *data = DATA_ACG_GET();
-    if (CAST_TYPE(node) == CT_int) {
-        fprintf(data->assembly_output_file, "f2i\n");
-    } else if (CAST_TYPE(node) == CT_int) {
-        fprintf(data->assembly_output_file, "i2f\n");
+    // Check if the Cast expression is useless, if so, skip creation the conversion
+    if (!CAST_USELESS(node)) {
+        // Then check what type it is and perform the cast instruction
+        struct data_acg *data = DATA_ACG_GET();
+        if (CAST_TYPE(node) == CT_int) {
+            fprintf(data->assembly_output_file, "f2i\n");
+        } else if (CAST_TYPE(node) == CT_int) {
+            fprintf(data->assembly_output_file, "i2f\n");
+        }
     }
 
     return node;

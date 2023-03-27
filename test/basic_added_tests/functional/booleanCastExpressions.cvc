@@ -1,3 +1,15 @@
+extern void printInt(int val);
+extern void printNewlines(int num);
+extern void printFloat( float val);
+
+void printBool(bool b) {
+    if(b) {
+        printInt(1);
+    } else {
+        printInt(0);
+    }
+}
+
 export int main() {
     int a=1;
     int b=2;
@@ -14,32 +26,83 @@ export int main() {
 
     // Boolean cast results
     d = (int)(a<b&&c>d); //d = 0
+    printInt(d);
+    printNewlines(1);
+
     d = (int)(b<d); //d = 1
+    printInt(d);
+    printNewlines(1);
+
     w = (float)(b>d||q); // w = 1.0
+    printFloat(w);
+    printNewlines(1);
+
     w = (float)(b>d&&q); // w = 0.0
+    printFloat(w);
+    printNewlines(1);
+
     w = (float)true;
+    printFloat(w);
+    printNewlines(1);
+
     d = (int)false;
+    printInt(d);
+    printNewlines(1);
+
     // Nested bool casts
     d = (int) ((bool)1);
+    printInt(d);
+    printNewlines(1);
+
     d = (int) boolFun();
+    printInt(d);
+    printNewlines(1);
+
     d = (int) ((bool) ((int) true));
-    // Very deeply nested bool cast
-    d = (int) ((bool) ((int) ((int)((bool) (((int) (bool) 1))))));
+    printInt(d);
+    printNewlines(1);
+
     z = (bool) ((int)(a<b&&c>d));
+    printBool(z);
+    printNewlines(1);
 
     // Boolean cast results
     q = (bool)falseInt; // q = false
+    printBool(q);
+    printNewlines(1);
+
     q = (bool)trueInt; // q = true
+    printBool(q);
+    printNewlines(1);
+
     z = (bool)falseFloat; // z = false
+    printBool(z);
+    printNewlines(1);
+
     z = (bool)trueFloat; // z = true
+    printBool(z);
+    printNewlines(1);
+
     // variables with a bool type
     falseInt = (int)q;
-    trueFloat = (float)z;
+    printInt(falseInt);
+    printNewlines(1);
 
-    // These should not be converted
+    trueFloat = (float)z;
+    printFloat(trueFloat);
+    printNewlines(1);
+
+    // These should not be converted (useless casts)
     d = (int) 5;
+    printInt(d);
+    printNewlines(1);
+
     w = (float) 5.3;
+    printFloat(w);
+    printNewlines(1);
+
     d = (int) intFun();
+    printInt(d);
 
     return 0;
 }

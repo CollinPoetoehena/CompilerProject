@@ -43,6 +43,9 @@ add_executable(civicc ${FLEX_CivicLexer_OUTPUTS} ${BISON_CivicParser_OUTPUTS}
     # TypeChecking traversals
     src/traversals/typechecking/typematchingassignmentsfuncalls.c
 
+    # Annotates useless typecast expressions traversal
+    src/traversals/annotateuselesscastexpressions.c
+
     # Compiling boolean disjunction and conjunction
     src/traversals/compilingbooleandisjunctionandconjunction.c
     

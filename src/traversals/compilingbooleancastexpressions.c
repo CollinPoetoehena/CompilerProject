@@ -33,8 +33,9 @@ enum Type tempTypeForCastConversion = CT_NULL; // CT_NULL is the NULL type
  */
 node_st *CBCEcast(node_st *node)
 {
-    // Reset the boolean value at the start for every Cast node
+    // Reset the boolean value and the temp type at the start for every Cast node
     operatorTypeIsBool = false;
+    tempTypeForCastConversion = CT_NULL;
 
     // First traverse the expression to also convert those Cast nodes first if they are Casts
     TRAVexpr(node);
@@ -58,6 +59,8 @@ node_st *CBCEcast(node_st *node)
 
             // Set temp variable for boolean operator to true because there is a bool cast
             operatorTypeIsBool = true;
+            // Do the same for the temp type but then with the corresponding type
+            tempTypeForCastConversion = CT_int;
 
             // Return the new TernaryOp node
             return newConvertedNode;
@@ -74,6 +77,8 @@ node_st *CBCEcast(node_st *node)
 
             // Set temp variable for boolean operator to true because there is a bool cast
             operatorTypeIsBool = true;
+            // Do the same for the temp type but then with the corresponding type
+            tempTypeForCastConversion = CT_float;
 
             // Return the new TernaryOp node
             return newConvertedNode;
@@ -86,6 +91,8 @@ node_st *CBCEcast(node_st *node)
 
         // Set temp variable for boolean operator to true because there is a bool result cast
         operatorTypeIsBool = true;
+        // Do the same for the temp type but then with the corresponding type
+        tempTypeForCastConversion = CT_int;
 
         // Return the new TernaryOp node
         return newConvertedNode;
@@ -97,6 +104,8 @@ node_st *CBCEcast(node_st *node)
 
         // Set temp variable for boolean operator to true because there is a bool result cast
         operatorTypeIsBool = true;
+        // Do the same for the temp type but then with the corresponding type
+        tempTypeForCastConversion = CT_float;
 
         // Return the new TernaryOp node
         return newConvertedNode;
@@ -123,6 +132,48 @@ node_st *CBCEbinop(node_st *node)
 
     // Save the temp type
     tempTypeForCastConversion = BINOP_OPERATOR_TYPE_SIGNATURE(node);
+
+    return node;
+}
+
+/**
+ * @fn CBCEmonop
+ */
+node_st *CBCEmonop(node_st *node)
+{
+    // First traverse the children expressions to find other monops
+    TRAVoperand(node);
+
+    // Then after traversing determine if the monop is a bool result
+    if (MONOP_OPERATOR_TYPE_SIGNATURE(node) == CT_bool) {
+        // Set the bool result value to true
+        operatorTypeIsBool = true;
+    }
+
+    // Save the temp type
+    tempTypeForCastConversion = MONOP_OPERATOR_TYPE_SIGNATURE(node);
+
+    return node;
+}
+
+/**
+ * @fn CBCEternaryop
+ */
+node_st *CBCEternaryop(node_st *node)
+{
+    // First traverse the children expressions to find other ternary operators
+    TRAVpredicate(node);
+    TRAVthen_expr(node);
+    TRAVelse_expr(node);
+
+    // Then after traversing determine if the ternaryop is a bool result
+    if (TERNARYOP_TYPE_SIGNATURE(node) == CT_bool) {
+        // Set the bool result value to true
+        operatorTypeIsBool = true;
+    }
+
+    // Save the temp type
+    tempTypeForCastConversion = TERNARYOP_TYPE_SIGNATURE(node);
 
     return node;
 }
@@ -193,6 +244,9 @@ node_st *CBCEbool(node_st *node)
 {
     // Set the bool result value to true because it has a bool result type 
     operatorTypeIsBool = true;
+
+    // Save the temp type
+    tempTypeForCastConversion = CT_bool;
 
     return node;
 }
