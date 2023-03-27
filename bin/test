@@ -1,82 +1,172 @@
-foo:
-; esr 3
+fib:
+esr 1
+; iload 0
 iload 0
-fload 0
-f2i
-iadd
-iload 2
+iloadc_1
+ile
+branch_f 1_else
+; iload 0
+iload 0
+ireturn
+jump 2_end
+1_else:
+2_end:
+isrg
+; iload 0
+iload 0
+iloadc_1
+isub
+jsr 1 fib
+isrg
+; iload 0
+iload 0
+iloadc 0
+isub
+jsr 1 fib
 iadd
 ireturn
 
-fun:
-esr 6
-iloadc_1
-istore 0
-iloadc 0
+fibs:
+esr 2
+iloadc_0
 istore 1
-iloadc 1
-
-istore 2
-iloadc 2
-
-istore 3
-floadc_1
-fstore 4
-floadc 3
-fstore 5
-isrg
+3_while:
+; iload 0
 iload 0
-iload 2
-ilt
-branch_f 1_elseExpr
-iloadc_1
-jump 2_end
-1_elseExpr:
-iloadc_0
-
-2_end:
-fload 4
-fload 5
-fadd
+; iload 1
 iload 1
-iload 3
-ilt
-
-branch_f 3_elseExpr
-iloadc_1
-jump 4_end
-3_elseExpr:
-iloadc_0
-4_end:
-jsr 3 foo
-istore 3
+ine
+branch_f 4_end
 isrg
-iload 3
-
+isrg
+; iload 1
+iload 1
+jsr 1 fib
 jsre 0
 isrg
 iloadc_1
-jsre 5
+jsre 1
+; iload 1
+iload 1
 iloadc_1
-ireturn
+iadd
+istore 1
+jump 3_while
+4_end:
+return
+
+isprime:
+esr 2
+; iload 0
+iload 0
+iloadc_1
+ile
+branch_f 5_else
+bloadc_f
+breturn
+jump 6_end
+5_else:
+6_end:
+iloadc 1
+istore 1
+7_while:
+; iload 1
+iload 1
+; iload 0
+iload 0
+ilt
+branch_f 8_end
+; iload 0
+iload 0
+; iload 1
+iload 1
+irem
+iloadc_0
+ieq
+branch_f 9_else
+bloadc_f
+breturn
+jump 10_end
+9_else:
+10_end:
+; iload 1
+iload 1
+iloadc_1
+iadd
+istore 1
+jump 7_while
+8_end:
+bloadc_t
+breturn
+
+primes:
+esr 3
+iloadc_0
+istore 1
+iloadc_0
+istore 2
+11_while:
+; iload 0
+iload 0
+; iload 1
+iload 1
+ine
+branch_f 12_end
+isrg
+; iload 2
+iload 2
+jsr 1 isprime
+branch_f 13_else
+; iload 1
+iload 1
+iloadc_1
+iadd
+istore 1
+isrg
+; iload 2
+iload 2
+jsre 0
+isrg
+iloadc_1
+jsre 1
+jump 14_end
+13_else:
+14_end:
+; iload 2
+iload 2
+iloadc_1
+iadd
+istore 2
+jump 11_while
+12_end:
+return
 
 main:
 isrg
-jsr 0 fun
-; ipop is here in the reference compiler
-ipop
+iloadc 2
+jsr 1 fibs
+isrg
+iloadc_1
+jsre 2
+isrg
+iloadc 3
+jsr 1 primes
+isrg
+iloadc 4
+jsre 2
 iloadc_0
 ireturn
 
 .importfun "printInt" void int
-.importfun "printFloat" void float
-.importfun "scanInt" int
-.importfun "scanFloat" float
 .importfun "printSpaces" void int
 .importfun "printNewlines" void int
+.exportfun "fib" int int fib
 .const int 2
-.const int 3
-.const int 4
-.const float 2.000000
+.exportfun "fibs" void int fibs
+.const int 2
+.exportfun "primes" void int primes
 .exportfun "main" int main
+.const int 5
+.const int 6
+.const int 3
 

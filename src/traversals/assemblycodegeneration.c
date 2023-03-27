@@ -45,11 +45,6 @@ int tempFunCallArgsCount = 0;
 node_st *currentSteFunFunDef = NULL;
 
 // // This string is used to store all the pseudo instructions for functions in
-// char *pseudoInstructionsString = NULL;
-// // This string is used to store all the pseudo instructions for functions in
-// char *pseudoInstructionsString = NULL;
-
-// TODO: convert the above to one pseudo instructions variable
 char *pseudoInstructionsString = NULL;
 
 // This function is performed at the start of the traversal
@@ -63,13 +58,6 @@ void ACGinit() {
         // Get the file pointer from the travdata of the ACG traversal and update it
         struct data_acg *data = DATA_ACG_GET();
         data->assembly_output_file = file;
-
-        // Write to a file with 'fprintf'.
-        //fprintf(data->assembly_output_file, "Hello World 2\n");
-
-        // TODO: veel dingen kan je al direct schrijven, verzin een logica dat de juiste assembly ouput
-        // tabs hoeven niet in de file, zolang de assembly maar de goede instructions heeft, maar
-        // het is goed om te debuggen misschien
     } else {
         // File is NULL, so failed to get the file, give an error
         // Prints the error when it occurs, so in this line
