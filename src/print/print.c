@@ -229,9 +229,9 @@ node_st *PRTvar(node_st *node)
     This is left here with a purpose for teachers to if they would like to see the Ste's!
     */
     // Print the SteVar link to this Var node
-    if (VAR_STE_LINK(node) != NULL) {
-      printOneSteVar(VAR_STE_LINK(node));
-    }
+    // if (VAR_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VAR_STE_LINK(node));
+    // }
 
     return node;
 }
