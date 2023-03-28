@@ -57,7 +57,7 @@ void RFIinit() {
     // Get the hash table from the travdata of the RFI traversal
     struct data_rfi *data = DATA_RFI_GET();
     data->for_identifiers_table = hash_table;
-    data->for_assignNodes_table = hash_table_assignNodes;
+    data->for_stmts_nodes_table = hash_table_assignNodes;
 
     // Set the For stop expr addition variable
     forVarDeclStopExprAdditionString = STRcat("", "_stop");
@@ -115,26 +115,21 @@ node_st *RFIstmts(node_st *node)
         // Get the hash table from the travdata of the RFI traversal
         struct data_rfi *data = DATA_RFI_GET();
 
-        // Get the value from the assignNodes hash table
-        // Use the updated Var identifier from this For Stmt node to find the correct new Assign node
-        node_st *value = (node_st *) HTlookup(data->for_assignNodes_table, FOR_VAR(STMTS_STMT(node)));
+        // Get the value from the stmts hash table
+        // Use the updated Var identifier from this For Stmt node to find the correct new Stmts node
+        node_st *value = (node_st *) HTlookup(data->for_stmts_nodes_table, FOR_VAR(STMTS_STMT(node)));
 
-        // If the new Assign node is not NULL then the For node created a new one, update Stmts sequence
+        // If the value node is not NULL then the For node created a new one, update Stmts sequence
         if (value != NULL) {
-            // Create the new Stmts node with the Assign node from the For node
-            // Create a copy of the old Stmts node you want to prepend the new Assign node to
-            node_st *oldStmtsNode = CCNcopy(node);
-
             // Set the next of the last added statement of this For node to this node
             STMTS_NEXT(STMTS_NEXT(value)) = node;
 
-            // Replace the current node with the new Stmts node containing the new Assign node
-            // and a next reference to the oldStmtsNode
+            // Replace the current node with the new Stmts node containing the new Assign nodes
             node = value;
 
-            // Skip traversing this node again to avoid a loop, instead go to the next of the next node
+            // Skip traversing this node again to avoid a loop, instead go to the 
+            // next of the next of the next node (because two new Stmts nodes were added)
             TRAVnext(STMTS_NEXT(STMTS_NEXT(node)));
-            // TODO: probably next of next now with the new Stmts!
         }
     } else {
         // Otherwise, just traverse the other Stmts nodes and Stmt nodes
@@ -183,20 +178,15 @@ node_st *RFIfor(node_st *node)
     node_st *newVarDeclNode = CCNcopy(ASTvardecl(NULL, NULL, NULL, FOR_VAR(node), CT_int));
     // Save the For assignment Expr before updating it with the new Var node in the below if statement
     node_st *newForLoopAssignNode = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
-    
-    // Save the assignment node in the hash table to insert in the Stmts nodes in the AST later
-    //HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNode);
-
-    // TODO: also create a new Vardecls node for the stop expression
+    // Do the same for the Stop expression of the For node
     node_st *newVarDeclNodeStopExpr = CCNcopy(ASTvardecl(NULL, NULL, NULL, STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString), CT_int));
     node_st *newAssignNodeStopExpr = CCNcopy(ASTassign(ASTvarlet(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString)), FOR_STOP(node)));
     // Create the Stmts nodes here and save it in the hash table, use FOR_VAR(node) as the identifier
     node_st *newStmtsNodeStartStopExpr = CCNcopy(ASTstmts(newForLoopAssignNode, ASTstmts(newAssignNodeStopExpr, NULL)));
-    HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newStmtsNodeStartStopExpr);
+    HTinsert(data->for_stmts_nodes_table, FOR_VAR(node), (void *) newStmtsNodeStartStopExpr);
 
     // Set the stop expression of the For node to the new Var of the new VarDecl
     FOR_STOP(node) = ASTvar(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString));
-    // TODO: the files that are failing are because it only appends the last vardecl node, so it does not work with more for loops
 
     // Set the next of the newVarDeclNode to the newVarDeclnode of the stop Expr (automatically will append the chain below)
     VARDECL_NEXT(newVarDeclNode) = newVarDeclNodeStopExpr;
@@ -205,9 +195,9 @@ node_st *RFIfor(node_st *node)
     if (lastVarDeclNode != NULL) {
         // Update the next vardecl to append the new VarDecl to the already existing VarDecl nodes
         VARDECL_NEXT(lastVarDeclNode) = newVarDeclNode;
-        // Update the last VarDecl with the new VarDecl to append the next For identifier to
+        // Update the last VarDecl with last the new VarDecl to append the next For identifier to
         // No need to copy here because it is a global pointer only used in this traversal file, not in the AST
-        lastVarDeclNode = newVarDeclNode;
+        lastVarDeclNode = newVarDeclNodeStopExpr;
         /*
         Update the For node start expr to have a Var node that can be linked with Symbol tables later
         Create a copy of the string to avoid pointing to the FOR_VAR(node) twice
@@ -218,8 +208,8 @@ node_st *RFIfor(node_st *node)
     } else {
         // Otherwise, set the new VarDecl as the first one to the current FunBody node
         FUNBODY_DECLS(lastFunBodyNode) = newVarDeclNode;
-        // Update the last VarDecl with the new VarDecl to append the next For identifier to
-        lastVarDeclNode = newVarDeclNode;
+        // Update the last VarDecl with the last new VarDecl to append the next For identifier to
+        lastVarDeclNode = newVarDeclNodeStopExpr;
         // Update the For node start expr to have a Var node that can be linked with Symbol tables later
         FOR_START_EXPR(node) = ASTvar(STRcpy(FOR_VAR(node)));
     }

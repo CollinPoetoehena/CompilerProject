@@ -63,7 +63,7 @@ void ACGinit() {
     } else {
         // File is NULL, so failed to get the file, give an error
         // Prints the error when it occurs, so in this line
-        CTI(CTI_ERROR, true, "global.output_file for assembly code generation not found");
+        CTI(CTI_ERROR, true, "global.output_file for assembly code generation not found (run the file with: -o <fileName>)");
         // Create error action, will stop the current compilation at the end of this Action
         CCNerrorAction();
     }

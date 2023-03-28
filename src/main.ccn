@@ -5,19 +5,19 @@ start phase RootPhase {
         // Then perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
         // Then convert variable initializations into regular assignments, after ContextAnalysis
-        // RegularAssignments;
-        // // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
-        // ConvertForToWhile;
-        // // Then perform TypeChecking
-        // TypeChecking;
-        // // Annotating useless cast expressions is done before Cast nodes are converted or used in another important way
-        // AnnotateUselessCastExpressions;
-        // // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
-        // CompilingBooleanDisjunctionAndConjunction;
-        // // Then compile boolean cast (type and result type) expressions with the TernaryOp node
-        // CompilingBooleanCastExpressions;
-        // // Then generate the assembly code with the AST from the previous traversals
-        // AssemblyCodeGeneration;
+        RegularAssignments;
+        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
+        ConvertForToWhile;
+        // Then perform TypeChecking
+        TypeChecking;
+        // Annotating useless cast expressions is done before Cast nodes are converted or used in another important way
+        AnnotateUselessCastExpressions;
+        // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
+        CompilingBooleanDisjunctionAndConjunction;
+        // Then compile boolean cast (type and result type) expressions with the TernaryOp node
+        CompilingBooleanCastExpressions;
+        // Then generate the assembly code with the AST from the previous traversals
+        AssemblyCodeGeneration;
         // Then print the output of the compiler
         print;
     }
@@ -86,58 +86,58 @@ phase ContextAnalysis {
             travdata {
                 // Hash tables are used to handle converting nested for loops
                 user htable_ptr for_identifiers_table,
-                user htable_ptr for_assignNodes_table
+                user htable_ptr for_stmts_nodes_table
             }
         };
 
-        // // Create Variable Symboltables, linking will be done in a separate traversal
-        // traversal CreateVariableSymbolTableEntries {
-        //     uid = CVS,
-        //     nodes = { 
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // FunDef to use for the linking to the first SteVar 
-        //         FunDef,
-        //         // FunBody to traverse the VarDecls and Stmts
-        //         FunBody, 
-        //         // These nodes are used to create new Symbol Table entries
-        //         // For node has already been converted, so nothing that needs to be done here now!
-        //         GlobDecl, GlobDef, VarDecl, Param,
-        //         // These nodes are used to update their link once they occur in a program
-        //         Var, Varlet,
-        //         // This node is just used to traverse the args child expression to find potential Var, VarLet links
-        //         FunCall
+        // Create Variable Symboltables, linking will be done in a separate traversal
+        traversal CreateVariableSymbolTableEntries {
+            uid = CVS,
+            nodes = { 
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for the linking to the first SteVar 
+                FunDef,
+                // FunBody to traverse the VarDecls and Stmts
+                FunBody, 
+                // These nodes are used to create new Symbol Table entries
+                // For node has already been converted, so nothing that needs to be done here now!
+                GlobDecl, GlobDef, VarDecl, Param,
+                // These nodes are used to update their link once they occur in a program
+                Var, Varlet,
+                // This node is just used to traverse the args child expression to find potential Var, VarLet links
+                FunCall
 
-        //     }
-        // };
+            }
+        };
         
-        // // Create Function Symboltables, linking will be done in a separate traversal
-        // traversal CreateFunctionSymbolTableEntries {
-        //     uid = CFS,
-        //     nodes = {
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // FunDef to use for creating a new SteFun 
-        //         FunDef,
-        //         // Param node (= LinkedList) to link the params of a FunDef
-        //         Param
-        //     }
-        // };
+        // Create Function Symboltables, linking will be done in a separate traversal
+        traversal CreateFunctionSymbolTableEntries {
+            uid = CFS,
+            nodes = {
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // FunDef to use for creating a new SteFun 
+                FunDef,
+                // Param node (= LinkedList) to link the params of a FunDef
+                Param
+            }
+        };
 
-        // /*
-        // This traversal function links FunCall nodes to their SteFun link.
-        // This is separated because the order of function definitions does not matter in Civic
-        // as explained in the CiviC manual on top of page 7.
-        // */
-        // traversal LinkFunCallsToSteFunNode {
-        //     uid = LFTSF,
-        //     nodes = {
-        //         // Program to link first symbol table entries of var and fun
-        //         Program,
-        //         // The FunCall node is used to update its link once it occurs in a program
-        //         FunCall
-        //     }
-        // };
+        /*
+        This traversal function links FunCall nodes to their SteFun link.
+        This is separated because the order of function definitions does not matter in Civic
+        as explained in the CiviC manual on top of page 7.
+        */
+        traversal LinkFunCallsToSteFunNode {
+            uid = LFTSF,
+            nodes = {
+                // Program to link first symbol table entries of var and fun
+                Program,
+                // The FunCall node is used to update its link once it occurs in a program
+                FunCall
+            }
+        };
     }
 };
 
