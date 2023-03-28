@@ -46,6 +46,9 @@ node_st *lastVarDeclNode = NULL;
 // This global helper variable is used to update the last FunBody with its VarDecl nodes
 node_st *lastFunBodyNode = NULL;
 
+// Global variable for the addition to the For stop vardecl
+char *forVarDeclStopExprAdditionString = NULL;
+
 void RFIinit() { 
     // initialize hash table, ensures there is a hash table
     htable_st *hash_table = HTnew_String(100);
@@ -55,6 +58,9 @@ void RFIinit() {
     struct data_rfi *data = DATA_RFI_GET();
     data->for_identifiers_table = hash_table;
     data->for_assignNodes_table = hash_table_assignNodes;
+
+    // Set the For stop expr addition variable
+    forVarDeclStopExprAdditionString = STRcat("", "_stop");
 
     return; 
 }
@@ -174,6 +180,17 @@ node_st *RFIfor(node_st *node)
     node_st *newForLoopAssignNode = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
     // Save the assignment node in the hash table to insert in the Stmts nodes in the AST later
     HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNode);
+
+    // TODO: also create a new Vardecls node for the stop expression
+    node_st *newVarDeclNodeStopExpr = CCNcopy(ASTvardecl(NULL, NULL, NULL, STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString), CT_int));
+    // node_st *newAssignNodeStopExpr = CCNcopy(ASTassign(ASTvarlet(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString)), FOR_STOP_EXPR(node)));
+    // // Create the Stmts nodes here and save it in the hash table
+    // node_st *stmtsForStartExpr = ASTstmts(newForLoopAssignNode, )
+    // node_st *newStmtsNodeStartStopExpr = ASTstmts();
+
+    // Set the next of the newVarDeclNode to the newVarDeclnode of the stop Expr (automatically will append the chain below)
+    VARDECL_NEXT(newVarDeclNode) = newVarDeclNodeStopExpr;
+
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
