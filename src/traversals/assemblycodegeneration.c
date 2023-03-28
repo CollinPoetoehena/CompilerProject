@@ -46,7 +46,7 @@ int tempFunCallArgsCount = 0;
 // Save the current fundef first SteVar to use for return instruction
 node_st *currentSteFunFunDef = NULL;
 
-// // This string is used to store all the pseudo instructions for functions in
+// This string is used to store all the pseudo instructions for functions in
 char *pseudoInstructionsString = NULL;
 
 // This function is performed at the start of the traversal
@@ -537,33 +537,20 @@ node_st *ACGifelse(node_st *node)
  */
 node_st *ACGwhile(node_st *node)
 {
-    // TODO: condition should only be evaluated once in the assembly instructions, this is done before. 
-    // See how the reference compiler does this. This is what is causing the issue from 
-    // ./civicc ../test/basic_added_tests/functional/cast.cvc -o test
-    // TODO: it is with the for loop evaluation, so therefore it is only with that part, so fix it, the final test!
-    // TODO: this is probably not the same for the do-while, but first fix it with the while, because it is probably
-    // with the for loop conversion, can be done in assembly.
-    // TODO: then finally look at the do-while to see if that is going correctly, compare with reference compiler.
-
-    // altijd dat doen, naar variabele, dus ook met niet funcalls!
-
-        // TODO: old implementation revert to this one if it does not work
-
-    struct data_acg *data = DATA_ACG_GET();
-    // First traverse the condition Expr for a while loop to only evaluate the expression once
-    TRAVcond(node);
-
-    // Then store it in a local variable and use that local variable in the while loop condition
-    int currentLocalVariableIndex = localParamVarDeclsIndex;
-    fprintf(data->assembly_output_file, "\n", currentLocalVariableIndex);
-    // Increment the local variables index for the next local variable
-    localParamVarDeclsIndex++;
+   // TODO: probably nothing to change here, it is only with the For node, but it is done in a traversal!
+    
+    
+    // TODO: old implementation revert to this one if it does not work
 
     // First create a label for the while loop
+    struct data_acg *data = DATA_ACG_GET();
     int currentLabelIndexWhile = labelIndex;
     fprintf(data->assembly_output_file, "%d_while:\n", currentLabelIndexWhile);
     // Increment the label after creating a label
     labelIndex++;
+
+    // Then first traverse the condition Expr for a while loop
+    TRAVcond(node);
     
     // Then create a conditional jump to the end of the while loop if the condition is false
     int currentLabelIndexEnd = labelIndex;
@@ -578,33 +565,6 @@ node_st *ACGwhile(node_st *node)
 
     // Create the end label at the end of the while loop, everything after will be in here
     fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
-    
-    
-    // // TODO: old implementation revert to this one if it does not work
-
-    // // First create a label for the while loop
-    // struct data_acg *data = DATA_ACG_GET();
-    // int currentLabelIndexWhile = labelIndex;
-    // fprintf(data->assembly_output_file, "%d_while:\n", currentLabelIndexWhile);
-    // // Increment the label after creating a label
-    // labelIndex++;
-
-    // // Then first traverse the condition Expr for a while loop
-    // TRAVcond(node);
-    
-    // // Then create a conditional jump to the end of the while loop if the condition is false
-    // int currentLabelIndexEnd = labelIndex;
-    // fprintf(data->assembly_output_file, "branch_f %d_end\n", currentLabelIndexEnd);
-    // // Increment the label after creating a label
-    // labelIndex++;
-
-    // // Then traverse the block
-    // TRAVblock(node);
-    // // Append a jump to the start of the while loop again at the end of the block
-    // fprintf(data->assembly_output_file, "jump %d_while\n", currentLabelIndexWhile);
-
-    // // Create the end label at the end of the while loop, everything after will be in here
-    // fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
 
     return node;
 }
@@ -743,9 +703,6 @@ node_st *ACGbinop(node_st *node)
             // Append a new line at the end of the instruction symbol string
             binopInstructionSymbol = STRcat(binopInstructionSymbol, "\n");
             fprintf(data->assembly_output_file, binopInstructionSymbol);
-
-            // Set the temp type to use in conditions of loop
-            currentTypeExpr = BINOP_OPERATOR_TYPE_SIGNATURE(node);
         }
     }
 
@@ -792,9 +749,6 @@ node_st *ACGmonop(node_st *node)
         // Append a new line at the end of the instruction symbol string
         monopInstructionSymbol = STRcat(monopInstructionSymbol, "\n");
         fprintf(data->assembly_output_file, monopInstructionSymbol);
-
-        // Set the temp type to use in conditions of loop
-        currentTypeExpr = MONOP_OPERATOR_TYPE_SIGNATURE(node);
     }
 
     return node;
@@ -834,9 +788,6 @@ node_st *ACGternaryop(node_st *node)
     // Create the end label at the end of the ternary op, everything after this node will be in here
     fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
 
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = MONOP_OPERATOR_TYPE_SIGNATURE(node);
-
     return node;
 }
 
@@ -854,11 +805,8 @@ node_st *ACGvarlet(node_st *node)
     // Get the index from the SteVar link (saved in VarDecl or GlobDecl earlier)
     int varletIndex = STEVAR_ASSEMBLY_INDEX(VARLET_STE_LINK(node));
 
-    // Save the VarLet into the assembly file. . First get the type
+    // Save the VarLet into the assembly file. First get the type
     char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VARLET_STE_LINK(node)));
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = getTypeForSignature(STEVAR_TYPE(VARLET_STE_LINK(node)));
-
     // Check if it is not NULL
     if (assemblyTypeString != NULL) {
         // Append the store assembly instruction to the type
@@ -908,9 +856,6 @@ node_st *ACGcast(node_st *node)
         }
     }
 
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = CAST_TYPE(node);
-
     return node;
 }
 
@@ -939,9 +884,6 @@ node_st *ACGfuncall(node_st *node)
         fprintf(data->assembly_output_file, "jsr %d %s\n", currentFuncallArgsCount, STEFUN_NAME(FUNCALL_STE_LINK(node)));
     }
 
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = getTypeForSignature(STEFUN_TYPE(FUNCALL_STE_LINK(node)));
-
     return node;
 }
 
@@ -969,8 +911,6 @@ node_st *ACGvar(node_st *node)
 
     // Save the Var into the assembly file. First get the type
     char *assemblyTypeString = getOperandTypeAssembly(STEVAR_TYPE(VAR_STE_LINK(node)));
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = getTypeForSignature(STEVAR_TYPE(VAR_STE_LINK(node)));
 
     // Check if it is not NULL
     if (assemblyTypeString != NULL) {
@@ -1043,9 +983,6 @@ node_st *ACGnum(node_st *node)
         constantIndex++;
     }
 
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = CT_int;
-
     return node;
 }
 
@@ -1086,9 +1023,6 @@ node_st *ACGfloat(node_st *node)
         constantIndex++;
     }
 
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = CT_float;
-
     return node;
 }
 
@@ -1110,9 +1044,6 @@ node_st *ACGbool(node_st *node)
         // Otherwise load the boolean constant false
         fprintf(data->assembly_output_file, "bloadc_f\n");
     }
-
-    // Set the temp type to use in conditions of loop
-    currentTypeExpr = CT_bool;
 
     return node;
 }

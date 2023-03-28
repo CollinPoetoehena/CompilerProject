@@ -46,6 +46,7 @@ start phase RootPhase {
 // TODO: tested everything with check errors and check success, everything works, now do the outputs checking!
 
 
+
 // TODO: for loop is going correct, except with a funcall, see /functional/for_loop_evaluation.cvc
 // this only needs to be evaluated once, but how to do that???
 // Reference compiler does that with a variable that it stores the condition in for example
@@ -53,7 +54,10 @@ start phase RootPhase {
 // And what to do with doWhile then, also convert it or???
 // TODO: dit moet voor allemaal, ook voor niet funcalls. 
 
-// TODO: vraag of het ook voor DoWhile moet
+// TODO: vraag of het ook voor DoWhile moet 
+// TODO: no, not for normal While and Dowhile loops!
+// It only needs to be done for a For loop, so do it the same with the stop expression as the start expression, such as __i_
+
 
 // TODO: ask about assignment 6, if it is correct and then especially the instructions itself and the
 // Byte code offsets computed and how to do that (6.1d)
