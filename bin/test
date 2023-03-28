@@ -1,24 +1,16 @@
-__init:
-    floadc 0
-    fstoreg 0
-    floadc 1
-    fstoreg 1
-    return
-
 main:
+    esr 2
+    iloadc 0
+    istore 0
+    iload_0
+    i2f
+    fstore 1
     isrg
-    floadg 0
-    jsre 0
-    isrg
-    floadg 1
+    fload_1
     jsre 0
     iloadc_0
     ireturn
 
-.const float 1e+64
-.const float 4.18936972237e+18
-.exportfun "__init" void __init
+.const int 10
 .exportfun "main" int main
-.global float
-.global float
 .importfun "printFloat" void float
