@@ -196,7 +196,7 @@ node_st *RFIfor(node_st *node)
 
     // Set the stop expression of the For node to the new Var of the new VarDecl
     FOR_STOP(node) = ASTvar(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString));
-    // TODO: above
+    // TODO: the files that are failing are because it only appends the last vardecl node, so it does not work with more for loops
 
     // Set the next of the newVarDeclNode to the newVarDeclnode of the stop Expr (automatically will append the chain below)
     VARDECL_NEXT(newVarDeclNode) = newVarDeclNodeStopExpr;
