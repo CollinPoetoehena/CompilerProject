@@ -536,12 +536,7 @@ node_st *ACGifelse(node_st *node)
  * @fn ACGwhile
  */
 node_st *ACGwhile(node_st *node)
-{
-   // TODO: probably nothing to change here, it is only with the For node, but it is done in a traversal!
-    
-    
-    // TODO: old implementation revert to this one if it does not work
-
+{    
     // First create a label for the while loop
     struct data_acg *data = DATA_ACG_GET();
     int currentLabelIndexWhile = labelIndex;

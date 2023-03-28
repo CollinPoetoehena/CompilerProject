@@ -1,5 +1,4 @@
 start phase RootPhase {
-    // TODO: Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
         // Then perform ContextAnalysis to create and link the Ste's
@@ -23,30 +22,7 @@ start phase RootPhase {
     }
 };
 
-//TODO: remove when done, these are common commands:
-// make
-// ./civicc ../test/basic/check_success/binops.cvc
-// yacc -Wcounterexamples parser.y
-// This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
-
 //**********************************************************************************************************************************************
-// TODO: implement the last milestones :) -> milestone 12 and 13 and test them very thorougly 
-//and make them perfect! I have untill the end of the period because milestone 14 and 15 can be skipped,
-// so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
-//for the exam and some less stress, etc :)!!!
-
-// TODO: see this repository: https://github.com/Derkades/nutcheck
-// this is a github repo for testing your compiler, particularly the 'cocosnoot' dir
-// You can run it with './nutcheck/test.sh'
-// You should remove the line you do not want to test in 'test.sh' in the nutcheck dir!
-// So if you only want to test cocosnoot, then do: ./run.bash "$CIVICC" cocosnoot 2>/dev/null
-// if you do not only make it one line, it will just only test the first one!
-// see in our compiler: 'test' dir, then 'nutCheckTestFilesOurCompiler' dir for all the test files that are there
-// these files can be copied into the nutcheck dir and then perform the checks!
-// TODO: tested everything with check errors and check success, everything works, now do the outputs checking!
-
-
-
 // TODO: for loop is going correct, except with a funcall, see /functional/for_loop_evaluation.cvc
 // this only needs to be evaluated once, but how to do that???
 // Reference compiler does that with a variable that it stores the condition in for example
@@ -148,7 +124,6 @@ traversal RegularAssignments {
     nodes = { Program, Decls, GlobDef, FunBody, VarDecl}
 };
 
-// TODO: everything still working with it now being before typechecking?? Probably yes because it only does something to For nodes
 // This traversal converts For nodes to While nodes with exactly the same semantics.
 // This is done before TypeChecking to update the new binops with their typesignatures
 traversal ConvertForToWhile {
@@ -245,52 +220,6 @@ traversal CompilingBooleanCastExpressions {
     nodes = { Cast, BinOp, MonOp, TernaryOp, FunCall, Var, Num, Float, Bool }
 };
 
-/*
-TODO: 
-    milestone 15 is helemaal optioneel en om de bonus punten te krijgen moet je heel veel optimalisatie
-    doen om een beetje punten te krijgen, dus die niet doen!
-    milestone 14 is een beetje optioneel, probeer die alleen te doen als je nog veel tijd over hebt
-    na milestones 12 en 13, 12 en 13 moet je echt sowieso goed krijgen!
-    
-    ***************************************************************************************************************************
-    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    DUS HET PLAN NU: 
-    MILESTONE 12 EN 13 MAKEN EN ZORG DAT DIE HELEMAAL GOED ZIJN EN PERFECT MET ALLE TESTS, SCHRIJF HIER OOK EXTRA TESTS VOOR ZELF!
-    FOCUS GEWOON DAAROP NU EN MILESTONE 14 EN 15 MOET JE GEWOON OVERSLAAN, DIE ZIJN TOCH OPTIONEEL EIGENLIJK!
-    DUS:
-    MILESTONE 12 EN 13 MAKEN TOT HET EIND
-    MILESTONE 14 EN 15 OVERSLAAN EN NIET DOEN WANT DAT IS DE TIJD NIET WAARD, ZORG DAT MILESTONE 12 EN 13 GEWOON PERFECT STAAN EN HEEL
-    GOED GETEST ZIJN! 14 EN 15 KRIJG JE AMPER TOT GEEN PUNTEN VOOR EN JE MOET ER HEEL VEEL VOOR DOEN, DUS SLA DIE NU OVER!
-    DUS MIILESTONE 12 EN 13 MAKEN EN DAN ALLES HEEEEEEL GOED TESTEN DE KOMENDE 2 WEKEN EN DAN VOOR DE REST FOCUSSEN OP PROGRAMMEERTALEN
-    LEREN VOOR HET TENTAMEN! DAN KOMT HET HELEMAAL GOED EN HEBBEN WE GEWOON ROND DE 7 VOOR HET COMPILER PROJECT EN DAT IS AL HEEL 
-    GOED, MET EEN VOLDOENDE IS HET AL HEEL GOED, KOMT GOED, DUS NU MILESTONE 12 EN 13 AFMAKEN :)!
-    ***************************************************************************************************************************
-
-    milestone 12 en 13 zijn super belangrijk, die moeten heel goed staan, test alles goed met de test suite
-    EN je eigen test files of die kloppen, test dit heel goed en grondig, dit moet goed zijn!
-
-    Uitleg milestones 12 en 13 voor assembly genereren:
-    assembly uitprinten, ipv code printen ga je assembly code printen naar de output file die meegegeven is
-    main.c: regel 66:
-            global.output_file = optarg;
-    Standaard C om de file aan te maken, maak de file aan, de assembly code is een tekst bestand dat je gaat aanmaken
-    milestone 12 en 13 zijn in 1 traversal die je uitbreidt op 1 file die je aanmaakt
-    gebruik de reference compiler om een voorbeeld te zien van assembly dat gegenereert wordt:
-    Zo kan je de reference compiler gebruiken: 
-    chmod +x ./civcc -> geeft permission voor alles
-    gebruik uit de /bin folder de reference compiler: civcc
-    run die compiler dan vervolgens op een .cvc file
-    hoeft niet 1 op 1 overeen te komen met jou compiler, zolang de output maar gelijk is. Zoals:
-    ./civcc ../test/assemblyGenerationTests/operators/logical.cvc -o test
-    Zo kan je ook zien welke assembly er door de reference compiler gemaakt wordt
-
-    Algemene tips:
-    functies zijn voornamelijk moeilijk, ruimte op de stack maken voor variabele
-    begin met de statements, dat is goed te doen, ga gewoon de milestones af.
-    Het is in principe minder tijd rovend dan de symbol tables, dat was het meeste tijd
-    Je kan een klein beetje kijken naar de print.c, sommige dingen zijn redelijk straight forward
-    zoals een BinOp is bijvoorbeeld in principe 2 dingen traversen en dan addition doen.
-*/
 // This traversal is used for assembly code generation
 traversal AssemblyCodeGeneration {
     uid = ACG,
@@ -299,46 +228,6 @@ traversal AssemblyCodeGeneration {
         user file_ptr assembly_output_file
     }
 };
-/*
-TODO: this is how you generate a file:
-./civicc ../test/basic/functional/for_to_while.cvc -o <fileName>
-The file will be made in the current directory, so you run this in the build-debug,
-so the file can then be found in that directory!
-
-You can run this command in the build-debug to see more information about civicc
-./civicc
-
-This is how you can then perform the output for a file using civas and civvm
-(You need to have the civas and civvm in your bin folder for this to work):
-    1. First go to the build-debug directory, then do:
-    2. ./civicc ../test/<testFilePath> -o <fileName>
-        This creates the assembly instructions for the test file provided
-    3. ../bin/civas <fileName> -o <fileName2>.as
-        This creates the output file with the CiviC assembler
-    4. ../bin/civvm <fileName2>.as
-    These are examples (use for copying and quick testing, open 2 terminals, one with your compiler and one with bin folder):
-    ./civicc ../test/<testFilePath> -o test
-    (Now you need to be in the bin folder, with the file that is made in build-debug copied to the bin folder:)
-    ../bin/civas test -o test.as
-    ../bin/civvm test.as
-
-You can also use: 'civrun' <file> 
-    to directly see the output of a file!
-    such as: ./civrun ../test/basic_added_tests/check_success/basic.cvc
-
-
-******************************************************************************************************************************************
-Debugging assembly:
-    - Comment smaller pieces everytime and see where the problem is occurring.
-    - Then look at the assembly to see if something is going wrong.
-    - Maybe also run that small part in the reference compiler and compare the assembly to see if
-        something is very off maybe that is causing the issue!
-    - Then look at the codes and see if you can fix it!
-
-TODO: cleanup later, but look at this for potential problems.
-Potential problems that can occur:
-    - Changed travesal CFS to ASTstefun instead of stevar, maybe it can cause a problem
-*/
 
 enum Type {
     // T_ collides with bison/flex generated stuff.
