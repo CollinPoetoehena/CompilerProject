@@ -1,0 +1,14 @@
+extern void printInt(int val);
+extern void printFloat(float val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+export int main() {
+    bool a = 60 < 50 || 30 > 10;
+    bool b = 5.3463 > 1.5235 && 5 > 6;
+
+    bool c = a + b;
+    bool d = a * b;
+
+    return 0;
+}

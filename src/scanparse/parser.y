@@ -179,14 +179,18 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
         {
           // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
-          $$ = ASTfundef(NULL, $5, $2, $3, true);
+          node_st *fundefNode = ASTfundef(NULL, $5, $2, $3, true);
+          FUNDEF_IS_FUNDECL(fundefNode) = true;
+          $$ = fundefNode;
           AddLocToNode($$, &@1, &@7);
         }
       | EXTERN type ID BRACKET_L BRACKET_R SEMICOLON
         {
           // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
-          $$ = ASTfundef(NULL, NULL, $2, $3, true);
+          node_st *fundefNode = ASTfundef(NULL, NULL, $2, $3, true);
+          FUNDEF_IS_FUNDECL(fundefNode) = true;
+          $$ = fundefNode;
           AddLocToNode($$, &@1, &@6);
         }
       // Rules with void type
@@ -216,14 +220,18 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
         {
           // Empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
-          $$ = ASTfundef(NULL, $5, CT_void, $3, true);
+          node_st *fundefNode = ASTfundef(NULL, $5, CT_void, $3, true);
+          FUNDEF_IS_FUNDECL(fundefNode) = true;
+          $$ = fundefNode;
           AddLocToNode($$, &@1, &@7);
         }
       | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R SEMICOLON
         {
           // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
           // No need to do anything with EXTERN for the FunDec because they are always external!
-          $$ = ASTfundef(NULL, NULL, CT_void, $3, true);
+          node_st *fundefNode = ASTfundef(NULL, NULL, CT_void, $3, true);
+          FUNDEF_IS_FUNDECL(fundefNode) = true;
+          $$ = fundefNode;
           AddLocToNode($$, &@1, &@6);
         }
       ;

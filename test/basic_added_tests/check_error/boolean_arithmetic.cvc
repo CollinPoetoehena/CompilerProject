@@ -1,0 +1,6 @@
+// Comparisons don't work on booleans, except for ==.
+
+export int main() {
+    if (true > false) {}
+    return 0;
+}

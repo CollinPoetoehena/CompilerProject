@@ -1,0 +1,10 @@
+extern void printInt(int val);
+
+export int main() {
+    if (false && !!!!true) {
+        printInt(1);
+    } else {
+        printInt(5);
+    }
+    return 0;
+}

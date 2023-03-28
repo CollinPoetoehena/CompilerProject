@@ -1,0 +1,21 @@
+extern void printFloat(float val);
+extern void printInt(int val);
+
+export int main() {
+    // Constants with a value in assembly instruction
+    int a = 1;
+    int b = 0;
+    float c = 1.0;
+    float d = 0.0;
+    bool e = true;
+    bool f = false;
+
+    // Constants from the constants table
+    int g = 5;
+    float h = 1.253; 
+
+    // Print the values
+    //printInt(a);
+
+	return 0;
+}

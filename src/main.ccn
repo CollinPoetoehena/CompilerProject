@@ -1,19 +1,20 @@
 start phase RootPhase {
-    // TODO: Comment unfinished actions because they might cause an error!
     actions {
         pass SPdoScanParse;
         // Then perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
         // Then convert variable initializations into regular assignments, after ContextAnalysis
         RegularAssignments;
+        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
+        ConvertForToWhile;
         // Then perform TypeChecking
         TypeChecking;
+        // Annotating useless cast expressions is done before Cast nodes are converted or used in another important way
+        AnnotateUselessCastExpressions;
         // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
         CompilingBooleanDisjunctionAndConjunction;
         // Then compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
-        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
-        ConvertForToWhile;
         // Then generate the assembly code with the AST from the previous traversals
         AssemblyCodeGeneration;
         // Then print the output of the compiler
@@ -21,47 +22,23 @@ start phase RootPhase {
     }
 };
 
-// TODO:
-
-//TODO: remove when done, these are common commands:
-// make
-// ./civicc ../test/basic/check_success/binops.cvc
-// yacc -Wcounterexamples parser.y
-// This is how you can print a memory address: printf("variable A is at address: %p\n", (void*)&FUNDEF_NAME(initFunDefNode));
-
 //**********************************************************************************************************************************************
-// TODO: implement the last milestones :) -> milestone 12 and 13 and test them very thorougly 
-//and make them perfect! I have untill the end of the period because milestone 14 and 15 can be skipped,
-// so focus on milestone 12 and 13 untill the end then i also have time for Programmeeratlen studying 
-//for the exam and some less stress, etc :)!!!
+// TODO: for loop is going correct, except with a funcall, see /functional/for_loop_evaluation.cvc
+// this only needs to be evaluated once, but how to do that???
+// Reference compiler does that with a variable that it stores the condition in for example
+// can you just do it with saving a boolean with funcall for example???
+// And what to do with doWhile then, also convert it or???
+// TODO: dit moet voor allemaal, ook voor niet funcalls. 
+
+// TODO: vraag of het ook voor DoWhile moet 
+// TODO: no, not for normal While and Dowhile loops!
+// It only needs to be done for a For loop, so do it the same with the stop expression as the start expression, such as __i_
 
 
 
-// TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
+// TODO: asked all questions, now fix the VarDecls bug and then test and cleanup everything, when that is done,
+// you can deliver it :)!
 
-
-//TODO: what to do with the output file, need to do something else with it or where do you need to 
-// save the output file, etc????
-
-// How do you test your compiler in output, like the performed functions????
-
-
-// TODO: now when I run my compiler without the flag "-o <fileName>"
-// it gives an error for output file not found, is that correct or????
-
-
-// TODO: when to check for integer and float out of range, etc???
-// at the end, but when, ask Simon, probably in the Num and Float node for Assembly generation right?
-
-
-
-
-
-// TODO: convert do-while loop into a while loop??? Only For, Do-While and While loop right?
-// Answer: makkelijker om het allebei apart te doen in assembly, het is een klein beetje anders, bij do- while
-// begin je met de body en daarna doe je de while condition. Dus gewoon apart allebei doen in assembly kan makkelijk.
-// Het kan dus allebei maar in assembly een do-while loop assembly genereren is goed te doen, net als while,
-// het enige verschil is dat bij do-while, eerst de executie van de body gedaan wordt en dan de conditie.
 
 
 // ************************************************************************************************************************************
@@ -85,7 +62,7 @@ phase ContextAnalysis {
             travdata {
                 // Hash tables are used to handle converting nested for loops
                 user htable_ptr for_identifiers_table,
-                user htable_ptr for_assignNodes_table
+                user htable_ptr for_stmts_nodes_table
             }
         };
 
@@ -147,6 +124,13 @@ traversal RegularAssignments {
     nodes = { Program, Decls, GlobDef, FunBody, VarDecl}
 };
 
+// This traversal converts For nodes to While nodes with exactly the same semantics.
+// This is done before TypeChecking to update the new binops with their typesignatures
+traversal ConvertForToWhile {
+    uid = CFTW,
+    nodes = { For }
+};
+
 // The TypeChecking phase is used to check all the types
 phase TypeChecking {
     actions {
@@ -204,6 +188,17 @@ phase TypeChecking {
 };
 
 /*
+This traversal annotates useless cast expressions before something is done with
+for code generation because it can cause unpredictable bugs and errors
+*/
+traversal AnnotateUselessCastExpressions {
+    uid = AUCE,
+    // It traverses all Cast expressions that have a boolean result or bool cast type
+    // This is done before TernaryOp nodes are present, so no need to use them
+    nodes = { Cast, BinOp, MonOp, FunCall, Var, Num, Float, Bool }
+};
+
+/*
 This traversal extends the intermediate representation of the compiler by conditional
 expressions as exemplified by the C ternary operator pred ?then :else and to systematically
 transform all Boolean operations in question into semantically equivalent conditional expressions.
@@ -222,59 +217,9 @@ traversal because a Cast can have a BinOp Expr child as well.
 traversal CompilingBooleanCastExpressions {
     uid = CBCE,
     // It traverses all Cast expressions that have a boolean result or bool cast type
-    nodes = { Cast, BinOp, FunCall, Bool }
+    nodes = { Cast, BinOp, MonOp, TernaryOp, FunCall, Var, Num, Float, Bool }
 };
 
-// This traversal converts For nodes to While nodes with exactly the same semantics.
-traversal ConvertForToWhile {
-    uid = CFTW,
-    nodes = { For }
-};
-
-/*
-TODO: 
-    milestone 15 is helemaal optioneel en om de bonus punten te krijgen moet je heel veel optimalisatie
-    doen om een beetje punten te krijgen, dus die niet doen!
-    milestone 14 is een beetje optioneel, probeer die alleen te doen als je nog veel tijd over hebt
-    na milestones 12 en 13, 12 en 13 moet je echt sowieso goed krijgen!
-    
-    ***************************************************************************************************************************
-    TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO TODO
-    DUS HET PLAN NU: 
-    MILESTONE 12 EN 13 MAKEN EN ZORG DAT DIE HELEMAAL GOED ZIJN EN PERFECT MET ALLE TESTS, SCHRIJF HIER OOK EXTRA TESTS VOOR ZELF!
-    FOCUS GEWOON DAAROP NU EN MILESTONE 14 EN 15 MOET JE GEWOON OVERSLAAN, DIE ZIJN TOCH OPTIONEEL EIGENLIJK!
-    DUS:
-    MILESTONE 12 EN 13 MAKEN TOT HET EIND
-    MILESTONE 14 EN 15 OVERSLAAN EN NIET DOEN WANT DAT IS DE TIJD NIET WAARD, ZORG DAT MILESTONE 12 EN 13 GEWOON PERFECT STAAN EN HEEL
-    GOED GETEST ZIJN! 14 EN 15 KRIJG JE AMPER TOT GEEN PUNTEN VOOR EN JE MOET ER HEEL VEEL VOOR DOEN, DUS SLA DIE NU OVER!
-    DUS MIILESTONE 12 EN 13 MAKEN EN DAN ALLES HEEEEEEL GOED TESTEN DE KOMENDE 2 WEKEN EN DAN VOOR DE REST FOCUSSEN OP PROGRAMMEERTALEN
-    LEREN VOOR HET TENTAMEN! DAN KOMT HET HELEMAAL GOED EN HEBBEN WE GEWOON ROND DE 7 VOOR HET COMPILER PROJECT EN DAT IS AL HEEL 
-    GOED, MET EEN VOLDOENDE IS HET AL HEEL GOED, KOMT GOED, DUS NU MILESTONE 12 EN 13 AFMAKEN :)!
-    ***************************************************************************************************************************
-
-    milestone 12 en 13 zijn super belangrijk, die moeten heel goed staan, test alles goed met de test suite
-    EN je eigen test files of die kloppen, test dit heel goed en grondig, dit moet goed zijn!
-
-    Uitleg milestones 12 en 13 voor assembly genereren:
-    assembly uitprinten, ipv code printen ga je assembly code printen naar de output file die meegegeven is
-    main.c: regel 66:
-            global.output_file = optarg;
-    Standaard C om de file aan te maken, maak de file aan, de assembly code is een tekst bestand dat je gaat aanmaken
-    milestone 12 en 13 zijn in 1 traversal die je uitbreidt op 1 file die je aanmaakt
-    gebruik de reference compiler om een voorbeeld te zien van assembly dat gegenereert wordt:
-    Zo kan je de reference compiler gebruiken: 
-    chmod +x ./civcc -> geeft permission voor alles
-    gebruik uit de /bin folder de reference compiler: civcc
-    run die compiler dan vervolgens op een .cvc file
-    hoeft niet 1 op 1 overeen te komen met jou compiler, zolang de output maar gelijk is.
-
-    Algemene tips:
-    functies zijn voornamelijk moeilijk, ruimte op de stack maken voor variabele
-    begin met de statements, dat is goed te doen, ga gewoon de milestones af.
-    Het is in principe minder tijd rovend dan de symbol tables, dat was het meeste tijd
-    Je kan een klein beetje kijken naar de print.c, sommige dingen zijn redelijk straight forward
-    zoals een BinOp is bijvoorbeeld in principe 2 dingen traversen en dan addition doen.
-*/
 // This traversal is used for assembly code generation
 traversal AssemblyCodeGeneration {
     uid = ACG,
@@ -283,22 +228,6 @@ traversal AssemblyCodeGeneration {
         user file_ptr assembly_output_file
     }
 };
-
-/*
-TODO: this is done during CodeGeneration, but when and how, etc???
-    Explanation about Strict logic disjunction and conjunction:
-        Strict logic disjunction and conjunction are logical operations that implement the logical OR 
-        and AND operations on Boolean operands. However, in the case of strict logic disjunction and 
-        conjunction, the operators are defined as arithmetic operators for addition and multiplication, respectively, 
-        and not as logical operators. This means that they operate on Boolean values as if they were integers, 
-        with the value true being treated as 1 and the value false being treated as 0.
-
-        In strict logic disjunction, the result is true if either or both operands are true, and false otherwise. 
-        It is implemented by the addition operator (+).
-
-        In strict logic conjunction, the result is true only if both operands are true, and false otherwise. 
-        It is implemented by the multiplication operator (*).
-*/
 
 enum Type {
     // T_ collides with bison/flex generated stuff.
@@ -360,67 +289,33 @@ node Decls {
     }
 };
 
-node Exprs {
+node GlobDecl {
     children {
-        Expr expr { constructor, mandatory },
-        Exprs next { constructor }
-    }
-};
-
-// This is for the array expression, which is extension 2 and 3
-node ArrExpr {
-    children {
-        Exprs exprs { constructor, mandatory }
-    }
-};
-
-// Ids are only used for array extensions (= arr[m,n] m and n are Ids), so not yet used
-node Ids {
-    children {
-        Ids next   
+        // Dimensions for array extension 3, leave for now
+        Ids dims
     },
+
     attributes {
-        string name
-    }
-};
-
-node ExprStmt {
-    children {
-        Expr expr { constructor, mandatory }
-    }
-};
-
-node Return {
-    children {
-        Expr expr { constructor }
-    }
-};
-
-// (= later on, same as Var and VarLet, such as void foo(){}; return foo();, foo in return is the FunCall)
-node FunCall {
-    children {
-        Exprs args { constructor }
-    },
-    attributes {
+        Type type { constructor },
         string name { constructor },
-        Link ste_link
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 
-node Cast {
+node GlobDef {
     children {
-        Expr expr {constructor, mandatory }
-    }, 
+        // Dimensions for array extension 3, leave for now
+        Exprs dims { constructor },
+        Expr init { constructor }
+    },
+
     attributes {
-        Type type {constructor }
-    }
-};
-
-// Used for first extension: nested functions
-node FunDefs {
-    children {
-        FunDef fundef { constructor, mandatory },
-        FunDefs next
+        Type type { constructor },
+        string name { constructor },
+        bool export { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
     }
 };
 
@@ -438,6 +333,7 @@ node FunDef {
         Type type { constructor },
         string name { constructor, mandatory },
         bool export { constructor },
+        bool is_funDecl,
         // Link to its own symbol table
         SteFun symbol_table,
         // Link to first symbol table of this functions scope
@@ -453,6 +349,57 @@ node FunBody {
         // local_fundefs is for the first extension, ignore for now
         FunDefs local_fundefs,
         Stmts stmts { constructor }
+    }
+};
+
+node Param {
+    children {
+        // Dimensions for array extension 3, leave for now
+        Ids dims { constructor },
+        Param next { constructor }
+    },
+
+    attributes {
+        string name { constructor, mandatory },
+        Type type { constructor },
+        // Link to its own symbol table, can be used in Assembly generation for example
+        SteVar symbol_table
+    }
+};
+
+node VarDecl {
+    children {
+        // Dimensions for array extension 3, leave for now
+        Exprs dims { constructor },
+        Expr init { constructor },
+        VarDecl next { constructor }
+    },
+
+    attributes {
+        string name { constructor },
+        Type type { constructor },
+        // Link to its own symbol table, can be used in RegularAssignments traversal for example
+        SteVar symbol_table
+    }
+};
+
+node Stmts {
+    children {
+        Stmt stmt { constructor, mandatory },
+        Stmts next { constructor }
+    }
+};
+
+node Assign {
+    children {
+        VarLet let { constructor },
+        Expr expr { constructor, mandatory }
+    }
+};
+
+node ExprStmt {
+    children {
+        Expr expr { constructor, mandatory }
     }
 };
 
@@ -491,74 +438,9 @@ node For {
     }
 };
 
-node GlobDecl {
+node Return {
     children {
-        // Dimensions for array extension 3, leave for now
-        Ids dims
-    },
-
-    attributes {
-        Type type { constructor },
-        string name { constructor }
-    }
-};
-
-node GlobDef {
-    children {
-        // Dimensions for array extension 3, leave for now
-        Exprs dims { constructor },
-        Expr init { constructor }
-    },
-
-    attributes {
-        Type type { constructor },
-        string name { constructor },
-        bool export { constructor },
-        // Link to its own symbol table, can be used in RegularAssignments traversal for example
-        SteVar symbol_table
-    }
-};
-
-node Param {
-    children {
-        // Dimensions for array extension 3, leave for now
-        Ids dims { constructor },
-        Param next { constructor }
-    },
-
-    attributes {
-        string name { constructor, mandatory },
-        Type type { constructor }
-    }
-};
-
-node VarDecl {
-    children {
-        // Dimensions for array extension 3, leave for now
-        Exprs dims { constructor },
-        Expr init { constructor },
-        VarDecl next { constructor }
-    },
-
-    attributes {
-        string name { constructor },
-        Type type { constructor },
-        // Link to its own symbol table, can be used in RegularAssignments traversal for example
-        SteVar symbol_table
-    }
-};
-
-node Stmts {
-    children {
-        Stmt stmt { constructor, mandatory },
-        Stmts next { constructor }
-    }
-};
-
-node Assign {
-    children {
-        VarLet let { constructor },
-        Expr expr { constructor, mandatory }
+        Expr expr { constructor }
     }
 };
 
@@ -571,7 +453,9 @@ node Binop {
     attributes {
         BinOpEnum op { constructor },
         // Save the infered operator type in typechecking in the node to use in code generation later
-        Type operator_type_signature
+        Type operator_type_signature,
+        // This is used to save the operand types of relational operators (necessary for assembly generation)
+        Type left_operand_type
     }
 };
 
@@ -614,6 +498,35 @@ node VarLet {
     }
 };
 
+node Cast {
+    children {
+        Expr expr {constructor, mandatory }
+    }, 
+    attributes {
+        Type type {constructor },
+        // This annotation is used to eliminate useless Cast expressions, such as a = (int) 1;
+        bool useless
+    }
+};
+
+// (= later on, same as Var and VarLet, such as void foo(){}; return foo();, foo in return is the FunCall)
+node FunCall {
+    children {
+        Exprs args { constructor }
+    },
+    attributes {
+        string name { constructor },
+        Link ste_link
+    }
+};
+
+node Exprs {
+    children {
+        Expr expr { constructor, mandatory },
+        Exprs next { constructor }
+    }
+};
+
 // Variable in an expression (= later on, such as int d = a * 5, a is the Var).
 node Var {
     children {
@@ -645,7 +558,6 @@ node Bool {
     }
 };
 
-
 // This is the node for a Symbol table chain for variables
 node SteVar {
     children {
@@ -658,7 +570,11 @@ node SteVar {
     attributes {
         string name { constructor },
         Type type { constructor },
-        int nesting_level { constructor }
+        int nesting_level { constructor },
+        // This is used for creating assembly instructions with the correct index
+        int assembly_index,
+        // This variable is used to check if the variable is an external variable
+        bool is_external
     }
 };
 
@@ -677,6 +593,37 @@ node SteFun {
         int nesting_level { constructor },
         // Params is the LinkedList from the FunDef, should contain the first value of 
         // the FunDef params. From the first value the LinkedList chain can be followed.
-        Param params { constructor }
+        Param params { constructor },
+        // This is used for creating assembly instructions with the correct index
+        int assembly_index,
+        // This variable is used to check if the FunDef is an external function
+        bool is_external
+    }
+};
+
+
+
+// Used for first extension: nested functions
+node FunDefs {
+    children {
+        FunDef fundef { constructor, mandatory },
+        FunDefs next
+    }
+};
+
+// This is for the array expression, which is extension 2 and 3
+node ArrExpr {
+    children {
+        Exprs exprs { constructor, mandatory }
+    }
+};
+
+// Ids are only used for array extensions (= arr[m,n] m and n are Ids), so not yet used
+node Ids {
+    children {
+        Ids next   
+    },
+    attributes {
+        string name
     }
 };

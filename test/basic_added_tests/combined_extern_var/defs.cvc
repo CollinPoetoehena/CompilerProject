@@ -1,0 +1,7 @@
+// This tests multiple variables globally defined
+export int foo = 222;
+export int faa = 2;
+export float fooFloat = 3.2532;
+export float faaFloat = 53463.636719;
+export bool fooBool = true;
+export bool faaBool = (bool) 0; // false

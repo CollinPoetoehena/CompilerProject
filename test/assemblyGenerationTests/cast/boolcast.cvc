@@ -1,0 +1,22 @@
+// This check is useful for milestone 9 and 10.
+bool foo()
+{
+    return true;
+}
+
+bool bar()
+{
+    return false;
+}
+
+export int main()
+{
+    if (foo() || bar()) return 1;
+    if (foo() && bar()) return 1;
+
+    if ((bool) 99.99) return 1;
+    if ((bool) 0) return 1;
+    if ((bool) (int) (bool) (float) bar()) return 1;
+
+    return (int) (bool) (float) bar();
+}

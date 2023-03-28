@@ -1,4 +1,4 @@
-void foo() {
+export int main() {
     int a=1;
     int b=2;
     int c=3;
@@ -32,11 +32,16 @@ void foo() {
     q = (bool)trueInt; // q = true
     z = (bool)falseFloat; // z = false
     z = (bool)trueFloat; // z = true
+    // variables with a bool type
+    falseInt = (int)q;
+    trueFloat = (float)z;
 
-    // // These should not be converted
+    // These should not be converted
     d = (int) 5;
     w = (float) 5.3;
     d = (int) intFun();
+
+    return 0;
 }
 
 bool boolFun() {

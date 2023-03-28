@@ -30,6 +30,9 @@ int currentFunCallIndex = 0;
 // This pointer variable is used to get something from the hash table
 int *currentFunCallIndexHashTablePointer = NULL;
 
+// Global helper variable to check if a fundef has a return statement
+bool currentFunHasReturnNode = false;
+
 void TMAFinit() { 
     // initialize hash table, ensures there is a hash table
     // Use Int hash tables to work with an index, this way we can support funcalls with the same name
@@ -38,7 +41,6 @@ void TMAFinit() {
 
     // Get the hash table from the travdata of the TMAF traversal
     struct data_tmaf *data = DATA_TMAF_GET();
-    //data->funcalls_id_stelink = hash_table;
     data->funcalls_funcallIndex_paramIndex = hash_table_paramIndex;
     data->funcalls_funcallIndex_node = hash_table_funCallCount;
 
@@ -227,11 +229,23 @@ bool checkConditionExpression(enum Type conditionType, char *statementType, node
  */
 node_st *TMAFfundef(node_st *node)
 {
-     // Save the fundef return type by using the Ste
+    // Reset temp variable for every fundef node
+    currentFunHasReturnNode = false;
+    
+    // Save the fundef return type by using the Ste
     tempFundefSteLink = FUNDEF_SYMBOL_TABLE(node);
 
     // Then, traverse into function body
     TRAVbody(node);
+
+    // Check if the body had a return statement, otherwise error (except for void functions)
+    if (!currentFunHasReturnNode && FUNDEF_TYPE(node) != CT_void && !FUNDEF_IS_FUNDECL(node)) {
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "Non void function does not have a return statement, at line %d, column %d",
+            NODE_BLINE(node), NODE_BCOL(node));
+        // Create error action, will stop the current compilation at the end of this Phase
+        CCNerrorPhase();
+    }
 
     // Reset global type helper variable for the FunDef type at the end
     tempFundefSteLink = NULL;
@@ -411,6 +425,9 @@ node_st *TMAFfor(node_st *node)
  */
 node_st *TMAFreturn(node_st *node)
 {
+    // Set the current fundef node return statement boolean to true if a return node is found
+    currentFunHasReturnNode = true;
+
     // If the expression is not NULL check for a type, otherwise use void (== return;)
     if (RETURN_EXPR(node) != NULL) {
         // Traverse the expr to also find potential type signatures for BinOps or MonOps
@@ -585,6 +602,8 @@ node_st *TMAFbinop(node_st *node)
         tempType = inferedTypeBinOp;
         // Update this operator node with the type signature just obtained to use later in code generation
         BINOP_OPERATOR_TYPE_SIGNATURE(node) = inferedTypeBinOp;
+        // Save the left operand type to use for relational operators in assembly
+        BINOP_LEFT_OPERAND_TYPE(node) = binopLeftExprType;
     } else {
         // If the function returned CT_NULL than it could not infer a type, so error!
         // Prints the error when it occurs, so in this line

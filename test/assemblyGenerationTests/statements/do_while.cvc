@@ -1,0 +1,14 @@
+extern void printInt(int val);
+extern void printSpaces(int num);
+extern void printNewlines(int num);
+
+export int main() {
+    int x = 0;
+    int y = 10;
+    do {
+        x = x + 1;
+        y = y - 1;
+    } while (x <= y);
+    
+    return 0;
+}

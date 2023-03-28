@@ -1,0 +1,6 @@
+// Should produce a parser error because the integer is too big.
+
+export int main() {
+    int a = 10000000000000000000;
+    return 0;
+}

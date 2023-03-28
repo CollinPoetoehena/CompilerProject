@@ -93,8 +93,15 @@ node_st *RAprogram(node_st *node)
     if (lastGlobDefDeclsNode != NULL && firstGlobdefStmts != NULL && currentGlobdefStmts != NULL) {
         // Init function will be put after the last GlobDef node 
         // (not the GlobDecls because GlobDecls) do not have an initialization
-        node_st *newDeclsNode = ASTdecls(ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
-            NULL, CT_void, "__init", false), DECLS_NEXT(lastGlobDefDeclsNode));
+        node_st *initFunDefNode = ASTfundef(ASTfunbody(NULL, firstGlobdefStmts), 
+            NULL, CT_void, "__init", false);
+        // Set the link of the fundef node (because this is done after CA phase)
+        node_st *initSteFunNode = ASTstefun(NULL, PROGRAM_FIRST_STE_FUNCTIONS(node), "__init", CT_void, 0, NULL);
+        FUNDEF_SYMBOL_TABLE(initFunDefNode) = initSteFunNode;
+        // Update the SteFun sequence of the program, making __init the new first SteFun node
+        PROGRAM_FIRST_STE_FUNCTIONS(node) = initSteFunNode;
+        // Insert the new Decls node
+        node_st *newDeclsNode = ASTdecls(initFunDefNode, DECLS_NEXT(lastGlobDefDeclsNode));
         // Create a copy of the created node because otherwise the node is lost after the traversal because it is cleaned 
         // after this traversal, so create a copy for it when you are updating the AST and not returning this node
         DECLS_NEXT(lastGlobDefDeclsNode) = CCNcopy(newDeclsNode);
