@@ -1,104 +1,62 @@
-main:
-esr 3
-iloadc_0
-istore 0
-iloadc_0
-istore 1
-iloadc_0
-istore 2
-1_while:
-iloadc 0
-iloadc_0
-igt
-branch_f 2_elseExpr
-iload 2
-iloadc 1
-ilt
-jump 3_end
-2_elseExpr:
-iload 2
-iloadc 2
-igt
-3_end:
-branch_f 4_end
-iload 0
-iload 2
-iadd
-istore 0
-iload 2
-iloadc 3
-iadd
-istore 2
-jump 1_while
-4_end:
-5_doWhile:
-iload 0
-iloadc 4
-iadd
-istore 0
-iload 0
-iloadc 5
-ilt
-branch_t 5_doWhile
-bloadc_t
-branch_f 6_else
-7_doWhile:
-iload 0
-iloadc 6
-iadd
-istore 0
-iload 0
-iloadc 7
-ilt
-branch_t 7_doWhile
-jump 8_end
-6_else:
-8_end:
-9_while:
-iload 0
-iload 0
-imul
-iloadc 8
-ilt
-branch_f 10_end
-11_while:
-iload 1
-iloadc 9
-ilt
-branch_f 12_end
-iload 1
-iloadc_1
-iadd
-istore 1
-jump 11_while
-12_end:
-iload 0
-iloadc 10
-imul
-istore 0
-jump 9_while
-10_end:
-isrg
-iload 0
-jsre 0
-isrg
-iloadc_1
-jsre 1
-iloadc_0
-ireturn
+__init:
+    iloadc_0
+    istoreg 0
+    return
 
+foo:
+    iloadg 0
+    iloadc_1
+    iadd
+    istoreg 0
+    iloadc 0
+    ireturn
+
+main:
+    esr 2
+    iloadc_0
+    istore 0
+    isrg
+    jsr 0 foo
+    istore 1
+2_while:
+    iload_0
+    iload_1
+    ilt
+    branch_f 3_end
+    isrg
+    iloadc_0
+    jsre 0
+    isrg
+    iloadc_1
+    jsre 1
+    iinc_1 0               ; add -> inc
+    jump 2_while
+3_end:
+    isrg
+    iloadg 0
+    jsre 0
+    isrg
+    iloadc_1
+    jsre 1
+    iloadg 0
+    iloadc_1
+    ine
+    branch_f 1_end
+    isrg
+    iloadg 0
+    jsre 0
+    isrg
+    iloadc_1
+    jsre 1
+    iloadc_1
+    ireturn
+1_end:
+    iloadc_0
+    ireturn
+
+.const int 5
+.exportfun "__init" void __init
+.exportfun "main" int main
+.global int
 .importfun "printInt" void int
 .importfun "printNewlines" void int
-.exportfun "main" int main
-.const int 2
-.const int 10
-.const int 10
-.const int 2
-.const int 7
-.const int 100
-.const int 7
-.const int 100
-.const int 20000
-.const int 5
-.const int 2
-

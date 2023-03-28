@@ -35,6 +35,8 @@
 // Include hash tables and memory from Palm
 #include "palm/hash_table.h"
 #include "palm/memory.h"
+// Include error functionality
+#include "palm/ctinfo.h"
 
 // Global counter for renaming the identifiers with a number of _
 int counter = 1;
@@ -246,10 +248,13 @@ node_st *RFIvarlet(node_st *node)
     // Get the value from the identifier from the hash table
     char *value = (char *) HTlookup(data->for_identifiers_table, VARLET_NAME(node));
 
-    // If the value is in the hash table, rename it
+    // If the value is in the hash table, it is an assignment to the induction variable, error!
     if (value != NULL) {
-        // Create a copy of the id to avoid pointing to the same id of the For node
-        VARLET_NAME(node) = STRcpy(value);
+        // Prints the error when it occurs, so in this line
+        CTI(CTI_ERROR, true, "cannot assign to induction variable, at line %d, column %d",
+            NODE_BLINE(node), NODE_BCOL(node));
+        // Create error action, will stop the current compilation at the end of this Action
+        CCNerrorPhase();
     }
 
     return node;
