@@ -559,30 +559,9 @@ node_st *ACGwhile(node_st *node)
     // with the for loop conversion, can be done in assembly.
     // TODO: then finally look at the do-while to see if that is going correctly, compare with reference compiler.
 
-    // // Then first traverse the condition Expr for a while loop
-    // TRAVcond(node);
-
-    // // First create a label for the while loop
-    // struct data_acg *data = DATA_ACG_GET();
-    // int currentLabelIndexWhile = labelIndex;
-    // fprintf(data->assembly_output_file, "%d_while:\n", currentLabelIndexWhile);
-    // // Increment the label after creating a label
-    // labelIndex++;
     
-    // // Then create a conditional jump to the end of the while loop if the condition is false
-    // int currentLabelIndexEnd = labelIndex;
-    // fprintf(data->assembly_output_file, "branch_f %d_end\n", currentLabelIndexEnd);
-    // // Increment the label after creating a label
-    // labelIndex++;
-
-    // // Then traverse the block
-    // TRAVblock(node);
-    // // Append a jump to the start of the while loop again at the end of the block
-    // fprintf(data->assembly_output_file, "jump %d_while\n", currentLabelIndexWhile);
-
-    // // Create the end label at the end of the while loop, everything after will be in here
-    // fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
-
+    
+    
     // TODO: old implementation revert to this one if it does not
 
     // First create a label for the while loop

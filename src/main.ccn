@@ -46,15 +46,15 @@ start phase RootPhase {
 // TODO: tested everything with check errors and check success, everything works, now do the outputs checking!
 
 
+// TODO: for loop is going correct, except with a funcall, see /functional/for_loop_evaluation.cvc
+// this only needs to be evaluated once, but how to do that???
+// Reference compiler does that with a variable that it stores the condition in for example
+// can you just do it with saving a boolean with funcall for example???
+// And what to do with doWhile then, also convert it or???
+
 
 
 // TODO: assembly, why do you need to do a isrg always in basic??? why not isr and what is the difference??
-
-// TODO: fix last tests, mostly with casts, see what that is about and fix it! Also some things with loops, investigate!
-
-
-// TODO: now when I run my compiler without the flag "-o <fileName>"
-// it gives an error for output file not found, is that correct or????
 
 
 // TODO: when to check for integer and float out of range, etc???
@@ -63,8 +63,9 @@ start phase RootPhase {
     // TODO: what is smallest and largest integer number??
 
 
+    // TODO: now when I run my compiler without the flag "-o <fileName>"
+// it gives an error for output file not found, is that correct or????
 
-// TODO: after assembly code generation, ask Simon or a good TA if it is done correctly???
 
 
 // ************************************************************************************************************************************
