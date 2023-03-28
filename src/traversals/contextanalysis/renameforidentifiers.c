@@ -124,12 +124,17 @@ node_st *RFIstmts(node_st *node)
             // Create the new Stmts node with the Assign node from the For node
             // Create a copy of the old Stmts node you want to prepend the new Assign node to
             node_st *oldStmtsNode = CCNcopy(node);
+
+            // Set the next of the last added statement of this For node to this node
+            STMTS_NEXT(STMTS_NEXT(value)) = node;
+
             // Replace the current node with the new Stmts node containing the new Assign node
             // and a next reference to the oldStmtsNode
-            node = ASTstmts(value, oldStmtsNode);
+            node = value;
 
             // Skip traversing this node again to avoid a loop, instead go to the next of the next node
-            TRAVnext(STMTS_NEXT(node));
+            TRAVnext(STMTS_NEXT(STMTS_NEXT(node)));
+            // TODO: probably next of next now with the new Stmts!
         }
     } else {
         // Otherwise, just traverse the other Stmts nodes and Stmt nodes
@@ -178,19 +183,23 @@ node_st *RFIfor(node_st *node)
     node_st *newVarDeclNode = CCNcopy(ASTvardecl(NULL, NULL, NULL, FOR_VAR(node), CT_int));
     // Save the For assignment Expr before updating it with the new Var node in the below if statement
     node_st *newForLoopAssignNode = CCNcopy(ASTassign(ASTvarlet(FOR_VAR(node)), FOR_START_EXPR(node)));
+    
     // Save the assignment node in the hash table to insert in the Stmts nodes in the AST later
-    HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNode);
+    //HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newForLoopAssignNode);
 
     // TODO: also create a new Vardecls node for the stop expression
     node_st *newVarDeclNodeStopExpr = CCNcopy(ASTvardecl(NULL, NULL, NULL, STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString), CT_int));
-    // node_st *newAssignNodeStopExpr = CCNcopy(ASTassign(ASTvarlet(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString)), FOR_STOP_EXPR(node)));
-    // // Create the Stmts nodes here and save it in the hash table
-    // node_st *stmtsForStartExpr = ASTstmts(newForLoopAssignNode, )
-    // node_st *newStmtsNodeStartStopExpr = ASTstmts();
+    node_st *newAssignNodeStopExpr = CCNcopy(ASTassign(ASTvarlet(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString)), FOR_STOP(node)));
+    // Create the Stmts nodes here and save it in the hash table, use FOR_VAR(node) as the identifier
+    node_st *newStmtsNodeStartStopExpr = CCNcopy(ASTstmts(newForLoopAssignNode, ASTstmts(newAssignNodeStopExpr, NULL)));
+    HTinsert(data->for_assignNodes_table, FOR_VAR(node), (void *) newStmtsNodeStartStopExpr);
+
+    // Set the stop expression of the For node to the new Var of the new VarDecl
+    FOR_STOP(node) = ASTvar(STRcat(FOR_VAR(node), forVarDeclStopExprAdditionString));
+    // TODO: above
 
     // Set the next of the newVarDeclNode to the newVarDeclnode of the stop Expr (automatically will append the chain below)
     VARDECL_NEXT(newVarDeclNode) = newVarDeclNodeStopExpr;
-
     
     // If there is an existing lastVarDeclNode, update it
     if (lastVarDeclNode != NULL) {
