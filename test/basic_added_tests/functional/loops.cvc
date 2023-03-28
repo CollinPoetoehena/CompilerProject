@@ -7,23 +7,35 @@ export int main() {
 
     for (int b = 0, 10, 2) {
         a = a + b;
+        printInt(b);
+        printNewlines(1);
+        printInt(a);
+        printNewlines(1);
     }
 
     do {
         a = a + 7;
+        printInt(a);
+        printNewlines(1);
     } while (a < 100);
 
     if (true) {
         do {
             a = a + 7;
+            printInt(a);
+            printNewlines(1);
         } while (a < 100);
     }
 
     while (a * a < 20000) {
         while (b < 5) {
             b = b + 1;
+            printInt(b);
+            printNewlines(1);
         }
         a = a * 2;
+        printInt(a);
+        printNewlines(1);
     }
 
     printInt(a);

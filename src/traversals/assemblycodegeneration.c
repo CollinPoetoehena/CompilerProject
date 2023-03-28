@@ -554,8 +554,9 @@ node_st *ACGwhile(node_st *node)
     // TODO: condition should only be evaluated once in the assembly instructions, this is done before. 
     // See how the reference compiler does this. This is what is causing the issue from 
     // ./civicc ../test/basic_added_tests/functional/cast.cvc -o test
-    // TODO: this is probably the same for the do-while, but first fix it with the while, because it is probably
-    // with the for loop conversion, can be done in assembly
+    // TODO: it is with the for loop evaluation, so therefore it is only with that part, so fix it, the final test!
+    // TODO: this is probably not the same for the do-while, but first fix it with the while, because it is probably
+    // with the for loop conversion, can be done in assembly.
     // TODO: then finally look at the do-while to see if that is going correctly, compare with reference compiler.
 
     // First create a label for the while loop
