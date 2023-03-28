@@ -8,7 +8,6 @@ export int main() {
     float b = 4.353;
     bool c = true;
 
-    // TODO: print when everything is finished:
     // printInt(a);
     // printFloat(b);
 

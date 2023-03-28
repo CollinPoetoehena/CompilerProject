@@ -41,7 +41,6 @@ void TMAFinit() {
 
     // Get the hash table from the travdata of the TMAF traversal
     struct data_tmaf *data = DATA_TMAF_GET();
-    //data->funcalls_id_stelink = hash_table;
     data->funcalls_funcallIndex_paramIndex = hash_table_paramIndex;
     data->funcalls_funcallIndex_node = hash_table_funCallCount;
 

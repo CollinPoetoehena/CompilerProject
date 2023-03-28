@@ -421,8 +421,6 @@ node_st *ACGfunbody(node_st *node)
  */
 node_st *ACGparam(node_st *node)
 {
-    // TODO: what to do here?? Probably nothing right
-
     // Get the SteVar of this Param and update it with the assembly index to use later
     STEVAR_ASSEMBLY_INDEX(PARAM_SYMBOL_TABLE(node)) = localParamVarDeclsIndex;
     // Increment the vardecls index for the next VarDecl
@@ -461,16 +459,6 @@ node_st *ACGvardecl(node_st *node)
  */
 node_st *ACGstmts(node_st *node)
 {
-    // TODO: remove after creating it
-    // In the slides it said traverse down to the last statement, but it meant the last statement in the line, so
-    // basically the last expression
-    // TODO:
-    // But in this traversal it can probably be easier because you are writing the file from top to bottom, so 
-    // the order is already correct, so you can just write the program into assembly in the file from top to 
-    // bottom most of the time as well!
-
-    // TODO: this is probably finished, so the above can be removed
-
     // Traverse the Stmt
     TRAVstmt(node);
 
@@ -541,8 +529,6 @@ node_st *ACGifelse(node_st *node)
     // Create the end label at the end of the ifelse node, everything after will be in here
     fprintf(data->assembly_output_file, "%d_end:\n", currentLabelIndexEnd);
 
-
-    // TODO: does something need to be done when there is no else or??? Test that if it still works!
     return node;
 }
 
@@ -622,9 +608,6 @@ node_st *ACGfor(node_st *node)
 {
     // For loops have been converted to While nodes, so nothing needs to be done here
     // because there are no For nodes left when this traversal is performed
-
-    // TODO: remove after testing and creation, this prints if there is a For node!
-    printf("For node found in ACG, this is not what you want!!!!\n");
 
     return node;
 }
@@ -728,9 +711,6 @@ node_st *ACGbinop(node_st *node)
             // Append a new line at the end of the instruction symbol string
             binopInstructionSymbol = STRcat(binopInstructionSymbol, "\n");
             fprintf(data->assembly_output_file, binopInstructionSymbol);
-
-            // TODO: remove after debugging
-            printf("printed binop instruction: %s\n", binopInstructionSymbol);
         }
     }
 
@@ -878,10 +858,8 @@ node_st *ACGcast(node_st *node)
         // Then check what type it is and perform the cast instruction
         struct data_acg *data = DATA_ACG_GET();
         if (CAST_TYPE(node) == CT_int) {
-            printf("getting here\n");
             fprintf(data->assembly_output_file, "f2i\n");
         } else if (CAST_TYPE(node) == CT_float) {
-            printf("getting here\n");
             fprintf(data->assembly_output_file, "i2f\n");
         }
     }

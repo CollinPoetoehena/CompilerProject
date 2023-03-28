@@ -236,9 +236,6 @@ node_st *RFIassign(node_st *node)
 /**
  * @fn RFIvarlet
  *
- * Also rename the occurrence of the for identifier in the For node
- * No need to check for other variables because the For node traversal function traverses that body
- * so only variables in that body will be changed that are also in the hash table
  */
 node_st *RFIvarlet(node_st *node)
 {

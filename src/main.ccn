@@ -52,6 +52,10 @@ start phase RootPhase {
 // can you just do it with saving a boolean with funcall for example???
 // And what to do with doWhile then, also convert it or???
 
+// TODO: ask about assignment 6, if it is correct and then especially the instructions itself and the
+// Byte code offsets computed and how to do that (6.1d)
+// TODO: then after that, then deliver assignment 6 to Canvas
+
 
 
 // TODO: assembly, why do you need to do a isrg always in basic??? why not isr and what is the difference??
@@ -65,6 +69,7 @@ start phase RootPhase {
 
     // TODO: now when I run my compiler without the flag "-o <fileName>"
 // it gives an error for output file not found, is that correct or????
+// Is this correct or does something else need to be done here??
 
 
 

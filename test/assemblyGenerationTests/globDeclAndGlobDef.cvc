@@ -22,7 +22,6 @@ export int main() {
     d = 10;
     e = 5.3453;
 
-    // TODO: print when everything is finished:
     // printInt(a);
     // printFloat(b);
 
