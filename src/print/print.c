@@ -211,8 +211,6 @@ node_st *PRTvarlet(node_st *node)
     //   printOneSteVar(VARLET_STE_LINK(node));
     // }
 
-    // This prints it with the locations
-    // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
     return node;
 }
 
@@ -229,9 +227,9 @@ node_st *PRTvar(node_st *node)
     This is left here with a purpose for teachers to if they would like to see the Ste's!
     */
     // Print the SteVar link to this Var node
-    if (VAR_STE_LINK(node) != NULL) {
-      printOneSteVar(VAR_STE_LINK(node));
-    }
+    // if (VAR_STE_LINK(node) != NULL) {
+    //   printOneSteVar(VAR_STE_LINK(node));
+    // }
 
     return node;
 }
@@ -703,9 +701,6 @@ node_st *PRTbinop(node_st *node)
     // End binop
     printf( " )");
 
-    // This prints it with the locations
-    // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
     return node;
 }
 
@@ -738,10 +733,7 @@ node_st *PRTmonop(node_st *node)
     TRAVoperand(node);
     
     // End monop
-    printf( " )");
-
-    // This prints it with the locations
-    // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));    
+    printf( " )");   
     
     return node;
 }
