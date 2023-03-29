@@ -1,0 +1,16 @@
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/CMakeFiles/civicc.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/CMakeFiles/dot.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/CMakeFiles/test.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/CMakeFiles/edit_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/CMakeFiles/rebuild_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/CMakeFiles/palm.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/CMakeFiles/palm_tests.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/CMakeFiles/test.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/CMakeFiles/edit_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/CMakeFiles/rebuild_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/src/CMakeFiles/test.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/src/CMakeFiles/edit_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/src/CMakeFiles/rebuild_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/include/palm/CMakeFiles/test.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/include/palm/CMakeFiles/edit_cache.dir
+/home/poetoec/CompilerConstruction/CompilerProject/CompilerProject/build-debug/palm/include/palm/CMakeFiles/rebuild_cache.dir
