@@ -1,57 +1,38 @@
 start phase RootPhase {
     actions {
         pass SPdoScanParse;
-        // Then perform ContextAnalysis to create and link the Ste's
+        // Perform ContextAnalysis to create and link the Ste's
         ContextAnalysis;
-        // Then convert variable initializations into regular assignments, after ContextAnalysis
+        // Convert variable initializations into regular assignments, after ContextAnalysis
         RegularAssignments;
-        // Then convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
+        // Convert For to While nodes for the Assembly Code Generation (VM does not support for loops)
         ConvertForToWhile;
-        // Then perform TypeChecking
+        // Perform TypeChecking
         TypeChecking;
         // Annotating useless cast expressions is done before Cast nodes are converted or used in another important way
         AnnotateUselessCastExpressions;
-        // Then compile boolean disjunction and conjunction by introducing the TernaryOp node
+        // Compile boolean disjunction and conjunction by introducing the TernaryOp node
         CompilingBooleanDisjunctionAndConjunction;
-        // Then compile boolean cast (type and result type) expressions with the TernaryOp node
+        // Compile boolean cast (type and result type) expressions with the TernaryOp node
         CompilingBooleanCastExpressions;
-        // Then generate the assembly code with the AST from the previous traversals
+        // Generate the assembly code with the AST from the previous traversals
         AssemblyCodeGeneration;
-        // Then print the output of the compiler
+        // Print the output of the compiler
         print;
     }
 };
-
-//**********************************************************************************************************************************************
-// TODO: for loop is going correct, except with a funcall, see /functional/for_loop_evaluation.cvc
-// this only needs to be evaluated once, but how to do that???
-// Reference compiler does that with a variable that it stores the condition in for example
-// can you just do it with saving a boolean with funcall for example???
-// And what to do with doWhile then, also convert it or???
-// TODO: dit moet voor allemaal, ook voor niet funcalls. 
-
-// TODO: vraag of het ook voor DoWhile moet 
-// TODO: no, not for normal While and Dowhile loops!
-// It only needs to be done for a For loop, so do it the same with the stop expression as the start expression, such as __i_
-
-
-
-// TODO: asked all questions, now fix the VarDecls bug and then test and cleanup everything, when that is done,
-// you can deliver it :)!
-
-
-
-// ************************************************************************************************************************************
 
 traversal Print {
     uid = PRT
 };
 
-// The ContextAnalysis phase is mainly used to create Symbol tables
+// The ContextAnalysis phase is mainly used to create Symbol tables and handle for loops
 phase ContextAnalysis {
     actions {
         /*
-        This traversal systematicly rename all the identifiers in for loops and save it to the node.
+        This traversal systematicly renames all the identifiers in for loops and saves it to the node.
+        It also separates the induction variable and the stop expression to comply to the for loop rules
+        of CiviC, such as only evaluating the stop expression once in a for loop.
         This is very handy in the creation of symbol tables because you can then just
         create symbol table entries for the identifiers in for loops without special operations.
         */
@@ -117,8 +98,7 @@ phase ContextAnalysis {
     }
 };
 
-// This traversal should transform Variable Initialisations into Regular Assignments. Should be 
-// performed before the ContextAnalysis because that phase can create Ste's for the transformed code
+// This traversal should transform Variable Initialisations into Regular Assignments.
 traversal RegularAssignments {
     uid = RA,
     nodes = { Program, Decls, GlobDef, FunBody, VarDecl}
@@ -189,7 +169,7 @@ phase TypeChecking {
 
 /*
 This traversal annotates useless cast expressions before something is done with
-for code generation because it can cause unpredictable bugs and errors
+code generation because it can cause unpredictable bugs and errors
 */
 traversal AnnotateUselessCastExpressions {
     uid = AUCE,
@@ -275,7 +255,7 @@ root node Program {
     },
 
     attributes {
-        // Contains first global symbol occuring (can be used for linking)
+        // Contains first global symbols occuring (can be used for linking)
         // No need for constructor because it is set only later on in ContextAnalysis
         SteVar first_ste_variables,
         SteFun first_ste_functions

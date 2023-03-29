@@ -57,9 +57,6 @@ FLOAT            ({DIGIT}+\.{DIGIT}*)?
   INITIAL and IN_COMMENT are states that you can be in.
   This structure also detects unterminated comments and throws 
   a syntax error if an unterminated comment is found.
-
-  This is tested and working. It can appear that it does not work because
-  not all grammar rules are finished yet so an empty program could result in a syntax error.
   */
 <INITIAL>{
 "/*"              BEGIN(IN_COMMENT);

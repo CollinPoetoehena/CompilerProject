@@ -211,8 +211,6 @@ node_st *PRTvarlet(node_st *node)
     //   printOneSteVar(VARLET_STE_LINK(node));
     // }
 
-    // This prints it with the locations
-    // printf("%s(%d:%d)", VARLET_NAME(node), NODE_BLINE(node), NODE_BCOL(node));
     return node;
 }
 
@@ -703,9 +701,6 @@ node_st *PRTbinop(node_st *node)
     // End binop
     printf( " )");
 
-    // This prints it with the locations
-    // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));
-
     return node;
 }
 
@@ -738,10 +733,7 @@ node_st *PRTmonop(node_st *node)
     TRAVoperand(node);
     
     // End monop
-    printf( " )");
-
-    // This prints it with the locations
-    // printf( ")(%d:%d-%d)", NODE_BLINE(node), NODE_BCOL(node), NODE_ECOL(node));    
+    printf( " )");   
     
     return node;
 }

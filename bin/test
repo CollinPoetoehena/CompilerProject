@@ -1,62 +1,34 @@
-__init:
-    iloadc_0
-    istoreg 0
-    return
-
-foo:
-    iloadg 0
+factorial:
+    esr 1
+    iload_0
     iloadc_1
-    iadd
-    istoreg 0
-    iloadc 0
+    ile
+    branch_f 1_else
+    iloadc_1
+    istore 1
+    jump 2_end
+1_else:
+    iload_0
+    isrg
+    iload_0
+    iloadc_1
+    isub
+    jsr 1 factorial
+    imul
+    istore 1
+2_end:
+    iload_1
     ireturn
 
 main:
-    esr 2
-    iloadc_0
-    istore 0
     isrg
-    jsr 0 foo
-    istore 1
-2_while:
-    iload_0
-    iload_1
-    ilt
-    branch_f 3_end
     isrg
-    iloadc_0
+    iloadc 0
+    jsr 1 factorial
     jsre 0
-    isrg
-    iloadc_1
-    jsre 1
-    iinc_1 0               ; add -> inc
-    jump 2_while
-3_end:
-    isrg
-    iloadg 0
-    jsre 0
-    isrg
-    iloadc_1
-    jsre 1
-    iloadg 0
-    iloadc_1
-    ine
-    branch_f 1_end
-    isrg
-    iloadg 0
-    jsre 0
-    isrg
-    iloadc_1
-    jsre 1
-    iloadc_1
-    ireturn
-1_end:
     iloadc_0
     ireturn
 
 .const int 5
-.exportfun "__init" void __init
 .exportfun "main" int main
-.global int
 .importfun "printInt" void int
-.importfun "printNewlines" void int

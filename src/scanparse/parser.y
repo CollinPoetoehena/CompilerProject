@@ -150,9 +150,7 @@ decl: fundef
         }
       ;
 
-// No FunHeader node in main.ccn because funHeader return type 
-// is encoded in the param, such as first param is return type
-// FunDec is also specified in FunDef node
+// No FunHeader node in main.ccn because funHeader is not necessary
 fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE_R
         {
           $$ = ASTfundef($8, $5, $2, $3, true);
@@ -178,7 +176,6 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
       | EXTERN type ID BRACKET_L param BRACKET_R SEMICOLON
         {
           // Empty funbody. FunDec always starts with extern and ends with a ;
-          // No need to do anything with EXTERN for the FunDec because they are always external!
           node_st *fundefNode = ASTfundef(NULL, $5, $2, $3, true);
           FUNDEF_IS_FUNDECL(fundefNode) = true;
           $$ = fundefNode;
@@ -187,7 +184,6 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
       | EXTERN type ID BRACKET_L BRACKET_R SEMICOLON
         {
           // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
-          // No need to do anything with EXTERN for the FunDec because they are always external!
           node_st *fundefNode = ASTfundef(NULL, NULL, $2, $3, true);
           FUNDEF_IS_FUNDECL(fundefNode) = true;
           $$ = fundefNode;
@@ -219,7 +215,6 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
       | EXTERN VOIDTYPE ID BRACKET_L param BRACKET_R SEMICOLON
         {
           // Empty funbody. FunDec always starts with extern and ends with a ;
-          // No need to do anything with EXTERN for the FunDec because they are always external!
           node_st *fundefNode = ASTfundef(NULL, $5, CT_void, $3, true);
           FUNDEF_IS_FUNDECL(fundefNode) = true;
           $$ = fundefNode;
@@ -228,7 +223,6 @@ fundef: EXPORT type ID BRACKET_L param BRACKET_R CURLYBRACE_L funbody CURLYBRACE
       | EXTERN VOIDTYPE ID BRACKET_L BRACKET_R SEMICOLON
         {
           // Empty param and empty funbody. FunDec always starts with extern and ends with a ;
-          // No need to do anything with EXTERN for the FunDec because they are always external!
           node_st *fundefNode = ASTfundef(NULL, NULL, CT_void, $3, true);
           FUNDEF_IS_FUNDECL(fundefNode) = true;
           $$ = fundefNode;
@@ -542,7 +536,7 @@ expr: BRACKET_L expr BRACKET_R
       }
     ;
 
-// exprs has one or an infinite amount of expr
+// exprs has one or an infinite amount of exprs
 exprs: expr
       {
         $$ = ASTexprs($1, NULL);

@@ -232,7 +232,6 @@ node_st *ACGprogram(node_st *node)
     // Print the pseudo instructions at the end of the file if they are not NULL
     struct data_acg *data = DATA_ACG_GET();
     if (pseudoInstructionsString != NULL) {
-        // First print the constants pseudo instructions
         fprintf(data->assembly_output_file, "%s\n", pseudoInstructionsString);
     }
 
